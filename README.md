@@ -16,7 +16,7 @@ For a noninteractive run, provide the rectangle as `x y width height`:
 /opt/anaconda3/bin/python redact.py data/demo.mp4 --box 28 68 94 94
 ```
 
-The current baseline tracks translation only. It does not handle large size changes, rotation, complete occlusion, or scene cuts.
+The tracker rejects inconsistent optical flow and keeps the mask at its last reliable position during a short occlusion. It still tracks translation only and does not handle large size changes, rotation, long occlusions with target movement, or scene cuts.
 
 ## Optional folders
 

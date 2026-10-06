@@ -26,7 +26,8 @@ def test_tracks_segmented_object():
     for step in range(1, 9):
         expected = (60 + 5 * step, 90 - 2 * step)
         frame = make_frame(*expected)
-        mask = track(previous, frame, mask)
+        mask, visible = track(previous, frame, mask)
+        assert visible
         previous = frame
     center = mask_center(mask)
     assert abs(center[0] - expected[0]) < 8
@@ -41,3 +42,12 @@ def test_redaction_only_changes_masked_region():
     redacted = blur(frame, mask)
     assert np.array_equal(redacted[0, 0], frame[0, 0])
     assert not np.array_equal(redacted[90, 60], frame[90, 60])
+
+
+def test_keeps_mask_when_object_is_occluded():
+    frame = make_frame(60, 90)
+    mask = segment(frame, (27, 57, 66, 66))
+    occluded = np.full_like(frame, 120)
+    moved_mask, visible = track(frame, occluded, mask)
+    assert not visible
+    assert np.array_equal(moved_mask, mask)
