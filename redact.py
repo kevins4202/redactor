@@ -45,22 +45,17 @@ def track(previous_frame, frame, mask):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     points = cv2.goodFeaturesToTrack(previous_gray, 100, 0.01, 5, mask=mask)
     if points is None:
-        return mask, False
+        return mask
 
     moved, status, _ = cv2.calcOpticalFlowPyrLK(previous_gray, gray, points, None)
-    returned, back_status, _ = cv2.calcOpticalFlowPyrLK(gray, previous_gray, moved, None)
-    error = np.linalg.norm(points - returned, axis=2).reshape(-1)
-    good = (status.reshape(-1) == 1) & (back_status.reshape(-1) == 1) & (error < 1.5)
-    if np.count_nonzero(good) < 3:
-        return mask, False
+    good = status.reshape(-1) == 1
+    if not np.any(good):
+        return mask
 
     dx, dy = np.median(moved[good] - points[good], axis=0).reshape(2)
-    if np.hypot(dx, dy) > 20:
-        return mask, False
     matrix = np.array([[1, 0, dx], [0, 1, dy]], dtype=np.float32)
     height, width = mask.shape
-    moved_mask = cv2.warpAffine(mask, matrix, (width, height), flags=cv2.INTER_NEAREST)
-    return moved_mask, True
+    return cv2.warpAffine(mask, matrix, (width, height), flags=cv2.INTER_NEAREST)
 
 
 def blur(frame, mask):
@@ -92,11 +87,9 @@ def run(input_path, box=None):
         ok, frame = capture.read()
         if not ok:
             break
-        moved_mask, visible = track(previous_frame, frame, mask)
-        if visible:
-            mask = moved_mask
-            previous_frame = frame
+        mask = track(previous_frame, frame, mask)
         writer.write(blur(frame, mask))
+        previous_frame = frame
         frame_count += 1
 
     capture.release()
