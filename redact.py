@@ -5,37 +5,76 @@ import cv2
 import numpy as np
 
 
-def segment(frame, box):
-    mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+def segment(frame, selection):
+    kernel = np.ones((9, 9), dtype=np.uint8)
+    expanded = cv2.dilate(selection, kernel)
+    distance = cv2.distanceTransform(selection, cv2.DIST_L2, 5)
+    mask = np.full(frame.shape[:2], cv2.GC_BGD, dtype=np.uint8)
+    mask[expanded > 0] = cv2.GC_PR_BGD
+    mask[selection > 0] = cv2.GC_PR_FGD
+    mask[distance > distance.max() * 0.35] = cv2.GC_FGD
     background = np.zeros((1, 65), dtype=np.float64)
     foreground = np.zeros((1, 65), dtype=np.float64)
-    cv2.grabCut(frame, mask, box, background, foreground, 2, cv2.GC_INIT_WITH_RECT)
+    cv2.grabCut(frame, mask, None, background, foreground, 2, cv2.GC_INIT_WITH_MASK)
     return np.where(
         (mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0
     ).astype(np.uint8)
 
 
-def choose_mask(frame):
-    while True:
-        box = cv2.selectROI(
-            "Draw a box around the object, then press Enter",
-            frame,
-            showCrosshair=True,
-            fromCenter=False,
-        )
-        cv2.destroyAllWindows()
-        if box[2] == 0 or box[3] == 0:
-            raise RuntimeError("no region selected")
+def draw_shape(frame):
+    title = "Hold left mouse to draw, Enter to finish, R to reset"
+    state = {"drawing": False, "points": [], "image": frame.copy()}
 
-        mask = segment(frame, box)
-        preview = frame.copy()
+    def mouse(event, x, y, flags, data):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            state["drawing"] = True
+            state["points"] = [(x, y)]
+            state["image"] = frame.copy()
+        elif event == cv2.EVENT_MOUSEMOVE and state["drawing"]:
+            previous = state["points"][-1]
+            state["points"].append((x, y))
+            cv2.line(state["image"], previous, (x, y), (0, 255, 0), 2)
+        elif event == cv2.EVENT_LBUTTONUP:
+            state["drawing"] = False
+            state["points"].append((x, y))
+            if len(state["points"]) > 2:
+                cv2.line(state["image"], state["points"][-1], state["points"][0], (0, 255, 0), 2)
+
+    cv2.namedWindow(title)
+    cv2.setMouseCallback(title, mouse)
+    while True:
+        cv2.imshow(title, state["image"])
+        key = cv2.waitKey(20) & 0xFF
+        if key in (10, 13) and len(state["points"]) > 2:
+            selection = np.zeros(frame.shape[:2], dtype=np.uint8)
+            cv2.fillPoly(selection, [np.array(state["points"], dtype=np.int32)], 255)
+            cv2.destroyAllWindows()
+            return selection
+        if key == ord("r"):
+            state["points"] = []
+            state["image"] = frame.copy()
+        if key == 27:
+            cv2.destroyAllWindows()
+            raise RuntimeError("selection cancelled")
+
+
+def choose_mask(frame):
+    height, width = frame.shape[:2]
+    scale = min(1.0, 1200 / width, 800 / height)
+    display = cv2.resize(frame, None, fx=scale, fy=scale)
+
+    while True:
+        selection = draw_shape(display)
+        mask = segment(display, selection)
+
+        preview = display.copy()
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cv2.drawContours(preview, contours, -1, (0, 255, 0), 2)
         cv2.imshow("Segmentation: Enter to accept, R to redraw", preview)
         key = cv2.waitKey(0) & 0xFF
         cv2.destroyAllWindows()
         if key in (10, 13):
-            return mask
+            return cv2.resize(mask, (width, height), interpolation=cv2.INTER_NEAREST)
         if key != ord("r"):
             raise RuntimeError("selection cancelled")
 
@@ -64,7 +103,7 @@ def blur(frame, mask):
     return np.where(mask[:, :, None] > 0, blurred, frame)
 
 
-def run(input_path, box=None):
+def run(input_path):
     output_path = str(Path("output") / Path(input_path).name)
     capture = cv2.VideoCapture(input_path)
     ok, frame = capture.read()
@@ -78,7 +117,7 @@ def run(input_path, box=None):
         output_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height)
     )
 
-    mask = segment(frame, box) if box else choose_mask(frame)
+    mask = choose_mask(frame)
     writer.write(blur(frame, mask))
     previous_frame = frame
     frame_count = 1
@@ -100,10 +139,9 @@ def run(input_path, box=None):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
-    parser.add_argument("--box", nargs=4, type=int, metavar=("X", "Y", "W", "H"))
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    run(args.input, tuple(args.box) if args.box else None)
+    run(args.input)

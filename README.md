@@ -1,6 +1,6 @@
 # Video Redactor Baseline
 
-This repository contains a minimal video-redaction prototype. You draw a rectangle around an object in the first frame, GrabCut snaps it to the object's boundary, Lucas-Kanade optical flow moves the resulting mask between frames, and Gaussian blur conceals the masked region.
+This repository contains a minimal video-redaction prototype. You draw a freehand shape around an object in the first frame, GrabCut snaps it to the object's boundary, Lucas-Kanade optical flow moves the resulting mask between frames, and Gaussian blur conceals the masked region.
 
 ## Run
 
@@ -8,13 +8,7 @@ This repository contains a minimal video-redaction prototype. You draw a rectang
 /opt/anaconda3/bin/python redact.py data/input.mp4
 ```
 
-Draw a rectangle around the object and press Enter. The green outline shows the refined GrabCut segmentation. Press Enter to accept it or `R` to draw the rectangle again. The result keeps the input filename and is written to `output/input.mp4`.
-
-For a noninteractive run, provide the rectangle as `x y width height`:
-
-```bash
-/opt/anaconda3/bin/python redact.py data/demo.mp4 --box 28 68 94 94
-```
+Hold the left mouse button and draw a circle or irregular closed shape slightly outside the object. Press Enter when the outline is complete. The green preview shows the refined GrabCut segmentation. Press Enter to accept it or `R` to draw again. The result keeps the input filename and is written to `output/input.mp4`.
 
 The current baseline tracks translation only. It does not handle large size changes, rotation, occlusion, or scene cuts.
 

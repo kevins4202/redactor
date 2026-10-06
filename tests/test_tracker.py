@@ -21,7 +21,9 @@ def mask_center(mask):
 
 def test_tracks_segmented_object():
     first = make_frame(60, 90)
-    mask = segment(first, (27, 57, 66, 66))
+    selection = np.zeros(first.shape[:2], dtype=np.uint8)
+    cv2.circle(selection, (60, 90), 34, 255, -1)
+    mask = segment(first, selection)
     previous = first
     for step in range(1, 9):
         expected = (60 + 5 * step, 90 - 2 * step)
