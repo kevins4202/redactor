@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from tracker import SegmentTracker, redact_frame
+from redact import blur, segment, track
 
 
 def make_frame(center_x, center_y, width=240, height=180):
@@ -21,10 +21,13 @@ def mask_center(mask):
 
 def test_tracks_segmented_object():
     first = make_frame(60, 90)
-    tracker = SegmentTracker(first, (27, 57, 66, 66))
+    mask = segment(first, (27, 57, 66, 66))
+    previous = first
     for step in range(1, 9):
         expected = (60 + 5 * step, 90 - 2 * step)
-        mask = tracker.update(make_frame(*expected))
+        frame = make_frame(*expected)
+        mask = track(previous, frame, mask)
+        previous = frame
     center = mask_center(mask)
     assert abs(center[0] - expected[0]) < 8
     assert abs(center[1] - expected[1]) < 8
@@ -35,7 +38,6 @@ def test_redaction_only_changes_masked_region():
     frame = make_frame(60, 90)
     mask = np.zeros(frame.shape[:2], dtype=np.uint8)
     cv2.circle(mask, (60, 90), 28, 255, -1)
-    redacted = redact_frame(frame, mask, dilation=1)
+    redacted = blur(frame, mask)
     assert np.array_equal(redacted[0, 0], frame[0, 0])
     assert not np.array_equal(redacted[90, 60], frame[90, 60])
-
