@@ -1,21 +1,26 @@
 # Video Redactor Baseline
 
-This repository contains a minimal video-redaction prototype. A hardcoded rectangle identifies the target in the first frame. GrabCut converts that rectangle into a pixel mask, Lucas-Kanade optical flow moves the mask between frames, and Gaussian blur conceals the masked region.
+This repository contains a minimal video-redaction prototype. You draw a rectangle around an object in the first frame, GrabCut snaps it to the object's boundary, Lucas-Kanade optical flow moves the resulting mask between frames, and Gaussian blur conceals the masked region.
 
-## Run the included demo
+## Run
 
 ```bash
-/opt/anaconda3/bin/python scripts/generate_demo.py
-/opt/anaconda3/bin/python redact.py
+/opt/anaconda3/bin/python redact.py data/input.mp4 output/redacted.mp4
 ```
 
-The result is written to `output/demo-redacted.mp4`.
+Draw a rectangle around the object and press Enter. The green outline shows the refined GrabCut segmentation. Press Enter to accept it or `R` to draw the rectangle again.
 
-## Run on another video
+For a noninteractive run, provide the rectangle as `x y width height`:
 
-Place the video in `data/`, then edit `INPUT`, `OUTPUT`, and `INITIAL_BOX` at the top of `redact.py`. The box uses `(x, y, width, height)` and should contain the complete target with a little surrounding background.
+```bash
+/opt/anaconda3/bin/python redact.py data/demo.mp4 output/demo-redacted.mp4 --box 28 68 94 94
+```
 
 The current baseline tracks translation only. It does not handle large size changes, rotation, complete occlusion, or scene cuts.
+
+## Optional folders
+
+`scripts/` only generates the synthetic demonstration video. `tests/` only checks the segmentation and tracking functions. Neither folder is needed to run `redact.py`, so both can be deleted. Keeping `tests/` is useful while modifying the project.
 
 ## Test
 

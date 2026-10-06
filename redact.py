@@ -1,12 +1,8 @@
+import argparse
 from pathlib import Path
 
 import cv2
 import numpy as np
-
-
-INPUT = "data/demo.mp4"
-OUTPUT = "output/demo-redacted.mp4"
-INITIAL_BOX = (28, 68, 94, 94)
 
 
 def segment(frame, box):
@@ -17,6 +13,31 @@ def segment(frame, box):
     return np.where(
         (mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0
     ).astype(np.uint8)
+
+
+def choose_mask(frame):
+    while True:
+        box = cv2.selectROI(
+            "Draw a box around the object, then press Enter",
+            frame,
+            showCrosshair=True,
+            fromCenter=False,
+        )
+        cv2.destroyAllWindows()
+        if box[2] == 0 or box[3] == 0:
+            raise RuntimeError("no region selected")
+
+        mask = segment(frame, box)
+        preview = frame.copy()
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(preview, contours, -1, (0, 255, 0), 2)
+        cv2.imshow("Segmentation: Enter to accept, R to redraw", preview)
+        key = cv2.waitKey(0) & 0xFF
+        cv2.destroyAllWindows()
+        if key in (10, 13):
+            return mask
+        if key != ord("r"):
+            raise RuntimeError("selection cancelled")
 
 
 def track(previous_frame, frame, mask):
@@ -43,20 +64,20 @@ def blur(frame, mask):
     return np.where(mask[:, :, None] > 0, blurred, frame)
 
 
-def run():
-    capture = cv2.VideoCapture(INPUT)
+def run(input_path, output_path, box=None):
+    capture = cv2.VideoCapture(input_path)
     ok, frame = capture.read()
     if not ok:
-        raise RuntimeError(f"could not read {INPUT}")
+        raise RuntimeError(f"could not read {input_path}")
 
     fps = capture.get(cv2.CAP_PROP_FPS) or 30
     height, width = frame.shape[:2]
-    Path(OUTPUT).parent.mkdir(parents=True, exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     writer = cv2.VideoWriter(
-        OUTPUT, cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height)
+        output_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (width, height)
     )
 
-    mask = segment(frame, INITIAL_BOX)
+    mask = segment(frame, box) if box else choose_mask(frame)
     writer.write(blur(frame, mask))
     previous_frame = frame
     frame_count = 1
@@ -72,9 +93,17 @@ def run():
 
     capture.release()
     writer.release()
-    print(f"wrote {frame_count} frames to {OUTPUT}")
+    print(f"wrote {frame_count} frames to {output_path}")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input")
+    parser.add_argument("output")
+    parser.add_argument("--box", nargs=4, type=int, metavar=("X", "Y", "W", "H"))
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    run()
-
+    args = parse_args()
+    run(args.input, args.output, tuple(args.box) if args.box else None)
