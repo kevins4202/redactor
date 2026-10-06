@@ -64,7 +64,8 @@ def blur(frame, mask):
     return np.where(mask[:, :, None] > 0, blurred, frame)
 
 
-def run(input_path, output_path, box=None):
+def run(input_path, box=None):
+    output_path = str(Path("output") / Path(input_path).name)
     capture = cv2.VideoCapture(input_path)
     ok, frame = capture.read()
     if not ok:
@@ -99,11 +100,10 @@ def run(input_path, output_path, box=None):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
-    parser.add_argument("output")
     parser.add_argument("--box", nargs=4, type=int, metavar=("X", "Y", "W", "H"))
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = parse_args()
-    run(args.input, args.output, tuple(args.box) if args.box else None)
+    run(args.input, tuple(args.box) if args.box else None)

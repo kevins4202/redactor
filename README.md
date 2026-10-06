@@ -5,15 +5,15 @@ This repository contains a minimal video-redaction prototype. You draw a rectang
 ## Run
 
 ```bash
-/opt/anaconda3/bin/python redact.py data/input.mp4 output/redacted.mp4
+/opt/anaconda3/bin/python redact.py data/input.mp4
 ```
 
-Draw a rectangle around the object and press Enter. The green outline shows the refined GrabCut segmentation. Press Enter to accept it or `R` to draw the rectangle again.
+Draw a rectangle around the object and press Enter. The green outline shows the refined GrabCut segmentation. Press Enter to accept it or `R` to draw the rectangle again. The result keeps the input filename and is written to `output/input.mp4`.
 
 For a noninteractive run, provide the rectangle as `x y width height`:
 
 ```bash
-/opt/anaconda3/bin/python redact.py data/demo.mp4 output/demo-redacted.mp4 --box 28 68 94 94
+/opt/anaconda3/bin/python redact.py data/demo.mp4 --box 28 68 94 94
 ```
 
 The current baseline tracks translation only. It does not handle large size changes, rotation, complete occlusion, or scene cuts.
