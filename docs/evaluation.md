@@ -17,12 +17,18 @@ exact visible-object masks. Initial prompts use 5, 9, and 13 pixels of slack.
 Only the initial prompt uses ground truth; propagation never sees later labels.
 
 The retained methods are box-initialized GrabCut, lasso-seeded GrabCut with median
-translation, and the historical forward/backward flow gate. Each run resets
+translation, and the historical forward/backward flow gate. `affine` adds
+scale-aware motion and refinement; `classical` adds appearance recovery.
+`--methods sam2` evaluates the optional SAM 2.1 backend with the same coarse
+prompt, using its own initial segmentation. Each run resets
 OpenCV's random seed and uses one OpenCV thread. JSON records per-frame masks'
 scores and summary statistics, parameters, source digest, commit, dependency
 versions, and timing. A sibling CSV contains one summary row per run. Timing
 includes segmentation and propagation but excludes fixture construction and
-video encoding; it is not end-to-end export speed.
+video encoding; it is not end-to-end export speed. Model loading and SAM 2 frame
+preparation are reported separately as `setup_seconds`. Raw predicted masks are
+scored even on uncertain frames; the full-frame export guard is not counted as
+successful tracking.
 
 ## Metrics
 

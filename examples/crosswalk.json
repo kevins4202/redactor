@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "prompts": [
+    {
+      "id": "woman-white-skirt",
+      "frame": 0,
+      "label": "woman in a white skirt",
+      "source": "manual",
+      "box": [208, 738, 345, 1078]
+    }
+  ]
+}

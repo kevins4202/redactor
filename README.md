@@ -22,6 +22,10 @@ use `--no-audio` to permit a video-only export without FFmpeg.
 python redact.py clip.mp4 --box 100 80 220 300 --style solid
 python redact.py clip.mp4 --prompts selections.json --mask-dir output/masks
 python redact.py clip.mp4 --backend baseline --on-failure predict
+python redact.py data/crosswalk-short.mp4 --backend sam2 --prompts examples/crosswalk.json
+python redact.py clip.mp4 --backend sam2 --text "the woman in a white skirt"
+python redact.py clip.mp4 --detect faces plates
+python redact.py clip.mp4 --detect faces --detector haar
 ```
 
 Boxes are exclusive `[x1, y1, x2, y2]` coordinates in the original video. Repeat
@@ -39,6 +43,13 @@ existing target at any frame:
 Masks can also be supplied as a `"mask": "relative/path.png"` entry. Existing
 outputs are protected unless `--overwrite` is supplied. Input and output must
 always be different files.
+
+SAM 2 and Grounding DINO require the optional [model setup](docs/models.md).
+Grounding DINO accepts descriptions or the face/license-plate presets; the Haar
+face option works with the base dependencies. Detection runs on every frame by
+default, assigns separate instance IDs, and picks up later arrivals. Increase
+`--detect-every` for speed at the cost of potentially missing new targets between
+detection frames. Detector failures and identity ambiguity still need review.
 
 ## Review and limitations
 

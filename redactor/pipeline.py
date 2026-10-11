@@ -1,7 +1,9 @@
 """Multi-instance processing with corrections, saved prompts, and review logs."""
 
 import json
+from contextlib import ExitStack
 from pathlib import Path
+import tempfile
 import time
 
 import cv2
@@ -33,8 +35,9 @@ class MultiTracker:
 
 def process_video(input_path, output_path, prompts, backend="classical", style="blur",
                   on_failure="cover", overwrite=False, audio=True, mask_dir=None,
-                  progress=None, detector=None, detect_every=1):
-    if backend not in ("classical", "baseline"):
+                  progress=None, detector=None, detect_every=1, checkpoint=None,
+                  model_config=None, device="auto"):
+    if backend not in ("classical", "baseline", "sam2"):
         raise ValueError(f"Unsupported streaming backend: {backend}")
     if detect_every < 1:
         raise ValueError("Detection interval must be positive")
@@ -55,11 +58,17 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
         if mask_dir.exists() and any(mask_dir.iterdir()) and not overwrite:
             raise FileExistsError(f"Mask directory is not empty: {mask_dir}")
         mask_dir.mkdir(parents=True, exist_ok=True)
-    with VideoReader(input_path) as reader:
+    with ExitStack() as resources, VideoReader(input_path) as reader:
         for prompt in prompt_list:
             prompt.selection((reader.height, reader.width))
             if reader.count and prompt.frame_index >= reader.count:
                 raise ValueError(f"Prompt frame {prompt.frame_index} is outside the video")
+        if backend == "sam2":
+            from .sam_backend import DEFAULT_CHECKPOINT, DEFAULT_CONFIG, Sam2Session, extract_frames
+            directory = resources.enter_context(tempfile.TemporaryDirectory(prefix="redactor-sam2-"))
+            extract_frames(input_path, directory)
+            pipeline = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device)
+            resources.callback(pipeline.close)
         with VideoWriter(output_path, input_path, reader.fps, (reader.width, reader.height), overwrite, audio) as writer:
             for index, frame in reader:
                 current_prompts = list(prompt_schedule.get(index, []))

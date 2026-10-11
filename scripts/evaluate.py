@@ -2,6 +2,7 @@
 
 import argparse
 import csv
+from contextlib import ExitStack
 import hashlib
 import json
 import platform
@@ -9,6 +10,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -30,22 +32,40 @@ def make_tracker(method):
     raise ValueError(f"Unknown method: {method}")
 
 
-def evaluate(sequence, method, slack=9):
-    tracker = make_tracker(method)
+def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, device="auto"):
     # A late appearing object is first prompted when it is actually visible.
     start = next(index for index, mask in enumerate(sequence.masks) if np.any(mask))
     selection = cv2.dilate(sequence.masks[start], np.ones((2 * slack + 1, 2 * slack + 1), np.uint8))
     prompt = TargetPrompt(str(sequence.object_id), start, mask=selection)
     rows = []
-    started = time.perf_counter()
-    for index in range(start, len(sequence.frames)):
-        frame = sequence.frames[index]
-        result = tracker.initialize(frame, prompt) if index == start else tracker.update(frame)
-        rows.append({"frame": index, "state": result.state, "confidence": result.confidence,
-                     **frame_metrics(result.mask, sequence.masks[index])})
-    elapsed = time.perf_counter() - started
+    setup_started = time.perf_counter()
+    with ExitStack() as resources:
+        if method == "sam2":
+            from redactor.sam_backend import DEFAULT_CHECKPOINT, DEFAULT_CONFIG, Sam2Session
+            directory = Path(resources.enter_context(tempfile.TemporaryDirectory(prefix="redactor-eval-")))
+            for index, frame in enumerate(sequence.frames):
+                if not cv2.imwrite(str(directory / f"{index:06d}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, 100]):
+                    raise OSError("Could not prepare SAM 2 evaluation input")
+            tracker = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device)
+            resources.callback(tracker.close)
+        else:
+            tracker = make_tracker(method)
+        setup_seconds = time.perf_counter() - setup_started
+        started = time.perf_counter()
+        for index in range(0 if method == "sam2" else start, len(sequence.frames)):
+            frame = sequence.frames[index]
+            if method == "sam2":
+                results = tracker.step(frame, [prompt] if index == start else [])
+                if index < start:
+                    continue
+                result = results[0]
+            else:
+                result = tracker.initialize(frame, prompt) if index == start else tracker.update(frame)
+            rows.append({"frame": index, "state": result.state, "confidence": result.confidence,
+                         **frame_metrics(result.mask, sequence.masks[index])})
+        elapsed = time.perf_counter() - started
     return {"sequence": sequence.name, "method": method, "slack": slack,
-            "prompt_frame": start, "seconds": elapsed, "fps": len(rows) / elapsed,
+            "prompt_frame": start, "setup_seconds": setup_seconds, "seconds": elapsed, "fps": len(rows) / elapsed,
             **summarize(rows, sequence.fps), "per_frame": rows}
 
 
@@ -66,7 +86,10 @@ def provenance():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("results/synthetic.json"))
-    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical"], default=["box", "lasso", "gate", "affine", "classical"])
+    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical", "sam2"], default=["box", "lasso", "gate", "affine", "classical"])
+    parser.add_argument("--checkpoint", type=Path)
+    parser.add_argument("--model-config")
+    parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--slack", type=int, nargs="+", default=[5, 9, 13])
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
     parser.add_argument("--davis", type=Path)
@@ -81,7 +104,7 @@ def main():
         for method in args.methods:
             for slack in args.slack:
                 cv2.setRNGSeed(581)
-                run = evaluate(sequence, method, slack)
+                run = evaluate(sequence, method, slack, args.checkpoint, args.model_config, args.device)
                 runs.append(run)
                 print(f"{sequence.name:20s} {method:10s} slack={slack:2d} IoU={run['mean_iou']:.3f} leak={run['mean_leak_rate']:.1%} {run['fps']:.1f} fps", flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)

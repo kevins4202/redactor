@@ -3,5 +3,8 @@ __pycache__/
 .venv/
 models/
 data/DAVIS/
+data/downloads/
+output/*
+!output/crosswalk-short.mp4
 *.egg-info/
 
