@@ -36,6 +36,8 @@ def summarize(rows, fps=30.0):
         longest = max(longest, streak)
     pixels = sum(row["visible_pixels"] for row in rows)
     leaks = sum(row["leaked_pixels"] for row in rows)
+    indices = [row.get("frame", index) for index, row in enumerate(rows)]
+    dense = all(second == first + 1 for first, second in zip(indices, indices[1:]))
     return {
         "frames": len(rows),
         "visible_frames": len(visible),
@@ -44,7 +46,8 @@ def summarize(rows, fps=30.0):
         "pixel_leak_rate": leaks / pixels if pixels else None,
         "worst_leak_rate": max((row["leak_rate"] for row in visible), default=None),
         "leaking_frame_fraction": sum(row["leaked_pixels"] > 0 for row in visible) / len(visible) if visible else None,
-        "longest_leak_frames": longest,
-        "longest_leak_seconds": longest / fps,
+        "temporal_metrics_available": dense,
+        "longest_leak_frames": longest if dense else None,
+        "longest_leak_seconds": longest / fps if dense else None,
         "mean_excess_frame_fraction": float(np.mean([row["excess_frame_fraction"] for row in rows])),
     }

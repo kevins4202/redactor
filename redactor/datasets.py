@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+import json
 
 import cv2
 import numpy as np
@@ -16,7 +17,7 @@ SYNTHETIC_VERSION = "person-v1"
 class Sequence:
     name: str
     frames: list[np.ndarray]
-    masks: list[np.ndarray]
+    masks: list[np.ndarray | None]
     fps: float = 30.0
     object_id: int = 1
 
@@ -101,3 +102,27 @@ def davis_sequences(root, names=None, split="val", resolution="480p"):
         for object_id in ids:
             masks = [np.where(label == object_id, 255, 0).astype(np.uint8) for label in labels]
             yield Sequence(f"{name}/{object_id}", frames, masks, object_id=object_id)
+
+
+def annotated_video(path):
+    """Load sparse source-frame annotations without inventing in-between labels."""
+    from .video import VideoReader
+    path = Path(path)
+    document = json.loads(path.read_text(encoding="utf-8"))
+    if document.get("version") != 1:
+        raise ValueError("Unsupported annotation format")
+    with VideoReader(path.parent / document["video"]) as reader:
+        frames = [frame for _, frame in reader]
+        shape = (reader.height, reader.width)
+        if shape != (document["height"], document["width"]):
+            raise ValueError("Annotation dimensions do not match the source video")
+        masks = [None] * len(frames)
+        for annotation in document["annotations"]:
+            index = annotation["frame"]
+            if index < 0 or index >= len(frames) or masks[index] is not None:
+                raise ValueError("Invalid or duplicate annotated frame")
+            mask = np.zeros(shape, np.uint8)
+            points = np.asarray(annotation["polygon"], np.int32)
+            cv2.fillPoly(mask, [points], 255)
+            masks[index] = mask
+        return Sequence(path.stem, frames, masks, fps=reader.fps)

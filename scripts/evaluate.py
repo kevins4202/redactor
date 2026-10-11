@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 from redactor.baseline import BaselineTracker
-from redactor.datasets import SCENARIOS, SYNTHETIC_VERSION, davis_sequences, synthetic_sequence
+from redactor.datasets import SCENARIOS, SYNTHETIC_VERSION, annotated_video, davis_sequences, synthetic_sequence
 from redactor.metrics import frame_metrics, summarize
 from redactor.types import TargetPrompt
 
@@ -34,11 +34,12 @@ def make_tracker(method):
 
 def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, device="auto"):
     # A late appearing object is first prompted when it is actually visible.
-    start = next(index for index, mask in enumerate(sequence.masks) if np.any(mask))
+    start = next(index for index, mask in enumerate(sequence.masks) if mask is not None and np.any(mask))
     selection = cv2.dilate(sequence.masks[start], np.ones((2 * slack + 1, 2 * slack + 1), np.uint8))
     prompt = TargetPrompt(str(sequence.object_id), start, mask=selection)
     rows = []
     setup_started = time.perf_counter()
+    model_metadata = None
     with ExitStack() as resources:
         if method == "sam2":
             from redactor.sam_backend import DEFAULT_CHECKPOINT, DEFAULT_CONFIG, Sam2Session
@@ -48,6 +49,7 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
                     raise OSError("Could not prepare SAM 2 evaluation input")
             tracker = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device)
             resources.callback(tracker.close)
+            model_metadata = tracker.metadata
         else:
             tracker = make_tracker(method)
         setup_seconds = time.perf_counter() - setup_started
@@ -61,11 +63,14 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
                 result = results[0]
             else:
                 result = tracker.initialize(frame, prompt) if index == start else tracker.update(frame)
-            rows.append({"frame": index, "state": result.state, "confidence": result.confidence,
-                         **frame_metrics(result.mask, sequence.masks[index])})
+            if sequence.masks[index] is not None:
+                rows.append({"frame": index, "state": result.state, "confidence": result.confidence,
+                             **frame_metrics(result.mask, sequence.masks[index])})
         elapsed = time.perf_counter() - started
     return {"sequence": sequence.name, "method": method, "slack": slack,
-            "prompt_frame": start, "setup_seconds": setup_seconds, "seconds": elapsed, "fps": len(rows) / elapsed,
+            "model": model_metadata,
+            "prompt_frame": start, "setup_seconds": setup_seconds, "seconds": elapsed,
+            "processed_frames": len(sequence.frames) - start, "fps": (len(sequence.frames) - start) / elapsed,
             **summarize(rows, sequence.fps), "per_frame": rows}
 
 
@@ -92,13 +97,15 @@ def main():
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--slack", type=int, nargs="+", default=[5, 9, 13])
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
-    parser.add_argument("--davis", type=Path)
+    data_source = parser.add_mutually_exclusive_group()
+    data_source.add_argument("--davis", type=Path)
+    data_source.add_argument("--annotations", type=Path, help="Sparse annotations of a local video")
     parser.add_argument("--sequences", nargs="+")
     args = parser.parse_args()
     if any(value < 0 for value in args.slack):
         parser.error("Slack must be nonnegative")
     cv2.setNumThreads(1)
-    sequences = davis_sequences(args.davis, args.sequences) if args.davis else (synthetic_sequence(name) for name in args.scenarios)
+    sequences = davis_sequences(args.davis, args.sequences) if args.davis else [annotated_video(args.annotations)] if args.annotations else (synthetic_sequence(name) for name in args.scenarios)
     runs = []
     for sequence in sequences:
         for method in args.methods:
@@ -108,8 +115,8 @@ def main():
                 runs.append(run)
                 print(f"{sequence.name:20s} {method:10s} slack={slack:2d} IoU={run['mean_iou']:.3f} leak={run['mean_leak_rate']:.1%} {run['fps']:.1f} fps", flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    report = {"dataset": str(args.davis.resolve()) if args.davis else SYNTHETIC_VERSION,
-              "notes": "Reconstructed benchmark; not the proposal's original fixtures. Metrics measure mask coverage, not anonymity.",
+    report = {"dataset": str(args.davis.resolve()) if args.davis else str(args.annotations) if args.annotations else SYNTHETIC_VERSION,
+              "notes": "Metrics measure mask coverage, not anonymity. Synthetic person-v1 reconstructs the experiment but is not the proposal's original fixture; crosswalk labels are approximate sparse polygons.",
               "environment": provenance(), "runs": runs}
     args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     summaries = [{key: value for key, value in run.items() if key != "per_frame"} for run in runs]

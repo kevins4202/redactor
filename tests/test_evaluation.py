@@ -40,3 +40,11 @@ def test_prompt_clips_boxes_and_rejects_empty_selection():
         TargetPrompt("person", 0, box=(50, 50, 60, 60)).selection((20, 20))
     with pytest.raises(ValueError):
         TargetPrompt("person", 0, mask=np.zeros((20, 20))).selection((20, 20))
+
+
+def test_sparse_annotations_do_not_claim_continuous_exposure_duration():
+    mask = np.full((10, 10), 255, np.uint8)
+    metric = frame_metrics(np.zeros_like(mask), mask)
+    result = summarize([{**metric, "frame": 0}, {**metric, "frame": 30}])
+    assert result["longest_leak_seconds"] is None
+    assert result["temporal_metrics_available"] is False

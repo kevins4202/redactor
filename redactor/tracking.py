@@ -25,6 +25,7 @@ class TrackerConfig:
     recovery_threshold: float = 0.90
     cut_threshold: float = 0.60
     search_every: int = 1
+    search_size: int = 480
 
 
 def scene_difference(previous, frame):
@@ -137,18 +138,21 @@ class ClassicalTracker:
         learned identity recognizer; large pose/viewpoint changes can defeat it.
         """
         height, width = frame.shape[:2]
+        search_scale = min(1.0, self.config.search_size / max(height, width))
+        search_frame = cv2.resize(frame, None, fx=search_scale, fy=search_scale) if search_scale < 1 else frame
+        search_height, search_width = search_frame.shape[:2]
         template_height, template_width = self.template.shape[:2]
         best = None
         candidates = []
         current_scale = np.sqrt(max(1, np.count_nonzero(self.mask)) / self.initial_area)
         scales = sorted(set([*np.linspace(0.40, 1.45, 15), float(current_scale), 1.0]))
         for scale in scales:
-            size = (max(5, round(template_width * scale)), max(5, round(template_height * scale)))
-            if size[0] > width or size[1] > height:
+            size = (max(5, round(template_width * scale * search_scale)), max(5, round(template_height * scale * search_scale)))
+            if size[0] > search_width or size[1] > search_height:
                 continue
             template = cv2.resize(self.template, size)
             mask = cv2.resize(self.template_mask, size, interpolation=cv2.INTER_NEAREST)
-            response = cv2.matchTemplate(frame, template, cv2.TM_SQDIFF_NORMED, mask=mask)
+            response = cv2.matchTemplate(search_frame, template, cv2.TM_SQDIFF_NORMED, mask=mask)
             response = np.nan_to_num(response, nan=2.0, posinf=2.0, neginf=2.0)
             minimum, _, location, _ = cv2.minMaxLoc(response)
             score = max(0.0, 1 - float(minimum))
@@ -171,8 +175,10 @@ class ClassicalTracker:
                                 oy + osize[1] / 2 - y - size[1] / 2)
             if distance > max(size) and other > score - 0.015:
                 return None, score
-        recovered = np.zeros(frame.shape[:2], np.uint8)
+        recovered = np.zeros(search_frame.shape[:2], np.uint8)
         recovered[y:y + size[1], x:x + size[0]] = mask
+        if search_scale < 1:
+            recovered = cv2.resize(recovered, (width, height), interpolation=cv2.INTER_NEAREST)
         if self.appearance(frame, recovered) < self.config.min_appearance:
             return None, score
         return self.refine(frame, recovered), score

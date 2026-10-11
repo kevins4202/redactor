@@ -61,3 +61,20 @@ names are omitted, `ImageSets/2017/val.txt`. Palette indices are preserved as
 instance IDs. Every frame must have an annotation. Each object is scored
 separately and receives its first prompt on its first visible frame. Missing or
 malformed annotations fail explicitly. The large dataset is not committed.
+
+## Crosswalk footage
+
+`data/crosswalk-annotations.json` contains six manually traced polygons (frames
+0, 30, 60, 90, 120, 149) for the woman in the white skirt. These are approximate
+development annotations, not expert-reviewed dense ground truth. They include
+visible clothing and the shoulder bag, and exclude the carried pink box where
+separable. No model-generated mask is used as a ground-truth annotation.
+
+```sh
+python scripts/evaluate.py --annotations data/crosswalk-annotations.json --methods lasso classical sam2 --slack 5 --output results/crosswalk.json
+```
+
+Tracking still runs through every source frame; only annotated frames receive a
+score. Continuous exposure duration is deliberately unavailable for sparse
+labels. `examples/crosswalk.json` is a separate, replayable initial box for the
+demo; evaluation initializes from the annotated silhouette plus the chosen slack.

@@ -1,6 +1,7 @@
 """Optional SAM 2.1 segmentation and video propagation through its public API."""
 
 from contextlib import nullcontext
+import hashlib
 from pathlib import Path
 
 import cv2
@@ -49,6 +50,12 @@ class Sam2Session:
             raise RuntimeError("CUDA was requested but is unavailable")
         self.predictor = build_sam2_video_predictor(config, str(checkpoint), device=self.device,
                                                    apply_postprocessing=False)
+        with Path(checkpoint).open("rb") as stream:
+            checksum = hashlib.file_digest(stream, "sha256").hexdigest()
+        self.metadata = {"checkpoint": str(checkpoint), "checkpoint_sha256": checksum,
+                         "config": config, "device": self.device, "torch": torch.__version__,
+                         "gpu": torch.cuda.get_device_name() if self.device == "cuda" else None,
+                         "postprocessing": False, "frame_input": "quality-100 JPEG"}
         self.context = lambda: torch.autocast("cuda", dtype=torch.bfloat16) if self.device == "cuda" else nullcontext()
         with torch.inference_mode(), self.context():
             self.state = self.predictor.init_state(str(frame_dir), offload_video_to_cpu=True,
