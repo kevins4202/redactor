@@ -53,7 +53,7 @@ class FaceDetector:
 
 class GroundingDetector:
     def __init__(self, text, device="auto", threshold=0.30,
-                 model_id="IDEA-Research/grounding-dino-tiny"):
+                 model_id="IDEA-Research/grounding-dino-tiny", required_labels=None):
         if not text.strip() or not 0 < threshold < 1:
             raise ValueError("Detection needs a description and a threshold between 0 and 1")
         try:
@@ -66,6 +66,7 @@ class GroundingDetector:
         self.text = text.strip().rstrip(".") + "."
         self.threshold = threshold
         self.model_id = model_id
+        self.required_labels = required_labels
         self.processor = AutoProcessor.from_pretrained(model_id)
         self.model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(self.device).eval()
 
@@ -81,15 +82,22 @@ class GroundingDetector:
         labels = result.get("text_labels", result.get("labels"))
         detections = [Detection(tuple(float(value) for value in box.tolist()), float(score.item()), str(label))
                       for box, score, label in zip(result["boxes"], result["scores"], labels)]
+        if self.required_labels:
+            detections = [item for item in detections if any(word in item.label.lower() for word in self.required_labels)]
         if "." not in self.text.rstrip("."):
             # A single referring expression can produce both the person and a
             # nested clothing box. Keep the enclosing higher-confidence instance.
             detections = [item for item in detections if not any(
-                other is not item and other.score > item.score and contains_box(other.box, item.box)
+                other is not item and other.score > item.score and (contains_box(other.box, item.box) or contains_box(item.box, other.box))
                 for other in detections)]
             for item in detections:
                 item.label = self.text.rstrip(".")
         return suppress_duplicates(detections)
+
+    def close(self):
+        del self.model
+        if self.device == "cuda":
+            self.torch.cuda.empty_cache()
 
 
 class DetectorSource:
@@ -124,3 +132,7 @@ class DetectorSource:
             prompt.selection(frame.shape[:2])
             prompts.append(prompt)
         return prompts
+
+    def close(self):
+        if hasattr(self.detector, "close"):
+            self.detector.close()

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redactor — keep the moment, protect the person</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2324684a'/%3E%3Ctext x='9' y='25' font-family='Arial' font-size='29' font-weight='bold' fill='white'%3Er%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Redactor home"><span class="brand-mark" aria-hidden="true">r</span>redactor<span class="badge">LOCAL STUDIO</span></a>
+    <span class="local-note"><span class="status-dot"></span> Your footage stays on this computer</span>
+    <label class="button secondary upload-button" for="upload"><span aria-hidden="true">＋</span> Open video<input id="upload" type="file" accept="video/*"></label>
+  </header>
+  <main>
+    <div class="page-heading"><div><p class="eyebrow">LESS EDITING. MORE PRIVACY.</p><h1>Keep the moment.<br><span>Protect the person.</span></h1></div><p class="intro">Outline what you want to hide.<br>We’ll follow it through the clip.<br><span>You stay in control of the final cut.</span></p></div>
+    <div class="workspace">
+      <section class="editor" aria-label="Video selection">
+        <div class="editor-toolbar"><div class="file-info"><span class="video-icon" aria-hidden="true">▣</span><div><strong id="video-name">Choose a video to begin</strong><span id="video-detail">MP4 and other locally supported video formats</span></div></div><span class="step-chip">01 / SELECT</span></div>
+        <div class="frame-stage" id="stage"><canvas id="canvas" aria-label="Video frame. Drag to outline or box a target." tabindex="0"></canvas><div id="empty-state">Open a video or try the crosswalk sample.</div><div class="canvas-help" id="canvas-help">Drag an outline around the object you want to hide</div></div>
+        <div class="timeline"><button class="icon-button" id="previous" aria-label="Previous frame">‹</button><input id="seek" type="range" min="0" max="0" value="0" aria-label="Video frame"><button class="icon-button" id="next" aria-label="Next frame">›</button><span id="timecode">00:00.00</span></div>
+        <div class="frame-footer"><span id="frame-label">Frame 0 of 0</span><span>← → step through frames <span class="separator">·</span> Escape cancels drawing</span></div>
+      </section>
+      <aside class="controls" aria-label="Redaction settings">
+        <div class="panel-heading"><span class="step-chip">02 / PROTECT</span><h2>What should stay private?</h2></div>
+        <div class="segmented" role="group" aria-label="Selection method"><button id="manual-mode" class="selected" aria-pressed="true">Draw a selection</button><button id="auto-mode" aria-pressed="false">Find automatically</button></div>
+        <div id="manual-settings">
+          <div class="tool-row"><label>Selection tool<select id="tool"><option value="lasso">Freehand outline</option><option value="box">Rectangle</option></select></label><button class="button secondary compact" id="new-target">＋ New target</button></div>
+          <label>Active target<select id="target"><option value="target-1">Target 1</option></select></label>
+          <p class="hint">Draw again on a later frame to correct this target. Choose “New target” to hide another object.</p>
+          <div id="selections" class="selection-list"><p class="empty-hint">Your selections will appear here.</p></div>
+        </div>
+        <div id="auto-settings" hidden><label>Find<select id="find"><option value="text">An object I describe</option><option value="faces">Faces</option><option value="plates">License plates</option></select></label><label id="description-label">Description<input id="description" type="text" placeholder="The woman in a white skirt" maxlength="200"></label><p class="hint">New objects are checked for throughout the clip. Automatic detections still need your review.</p></div>
+        <div class="divider"></div>
+        <label>Tracking<select id="backend"><option value="classical">Classical · works on CPU</option><option value="sam2">SAM 2 · recommended for real footage</option></select></label>
+        <label>Redaction style<select id="style"><option value="blur">Soft blur</option><option value="solid">Solid cover</option><option value="pixelate">Pixelation</option></select></label>
+        <p class="hint" id="style-hint">Solid cover completely hides detail inside the mask. Blur and pixelation may leave recognizable detail.</p>
+        <label class="checkbox"><input type="checkbox" id="audio" checked> Keep original audio</label>
+        <button class="button primary" id="export" disabled>Redact video <span aria-hidden="true">↗</span></button>
+        <p class="export-note">Uncertain frames are covered and marked for review.</p>
+      </aside>
+    </div>
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+    <section id="job-panel" class="job-panel" hidden aria-label="Export progress"><div class="job-top"><div><p class="eyebrow">YOUR EXPORT</p><h2 id="job-title">Preparing your video…</h2></div><button class="button secondary compact" id="cancel">Cancel export</button></div><progress id="progress" max="100" value="0"></progress><p id="job-detail">Models may take a moment to load.</p></section>
+    <section id="result" class="result" hidden aria-label="Review export"><div class="result-heading"><div><p class="eyebrow">03 / REVIEW</p><h2>Your redacted video</h2><p id="review-summary"></p></div><a class="button primary" id="download" download="redacted.mp4">Download video ↓</a></div><video id="result-video" controls playsinline></video><div class="result-actions"><button class="button secondary" id="review-next">Go to next flagged frame</button><a id="report-link" download="review.json">Review log ↗</a><a id="prompts-link" download="prompts.json">Saved selections ↗</a></div><p class="hint">Review the entire clip before sharing. A lack of flagged frames does not guarantee that every target stayed covered.</p></section>
+    <footer><span>Built for footage worth sharing.</span><span>One selection. Frame-by-frame care.</span></footer>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>

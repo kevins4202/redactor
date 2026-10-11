@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "video-redactor"
+version = "0.2.0"
+description = "Select-once video redaction with classical and SAM 2 tracking"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26,<3", "opencv-python>=4.8,<6", "Pillow>=10"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+models = ["torch>=2.5.1", "torchvision>=0.20.1", "transformers>=4.51,<6", "huggingface-hub>=0.26", "hydra-core>=1.3.2", "iopath>=0.1.10", "tqdm>=4.66.1"]
+plots = ["matplotlib>=3.8"]
+ui = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1", "python-multipart>=0.0.18"]
+
+[project.scripts]
+redact = "redactor.cli:main"
+redactor-ui = "redactor.server:main"
+
+[tool.setuptools.packages.find]
+include = ["redactor*"]
+
+[tool.setuptools.package-data]
+redactor = ["web/*.html", "web/*.css", "web/*.js"]

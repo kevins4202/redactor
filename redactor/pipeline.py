@@ -1,6 +1,7 @@
 """Multi-instance processing with corrections, saved prompts, and review logs."""
 
 import json
+import hashlib
 from contextlib import ExitStack
 from pathlib import Path
 import tempfile
@@ -36,7 +37,7 @@ class MultiTracker:
 def process_video(input_path, output_path, prompts, backend="classical", style="blur",
                   on_failure="cover", overwrite=False, audio=True, mask_dir=None,
                   progress=None, detector=None, detect_every=1, checkpoint=None,
-                  model_config=None, device="auto"):
+                  model_config=None, device="auto", cancelled=None):
     if backend not in ("classical", "baseline", "sam2"):
         raise ValueError(f"Unsupported streaming backend: {backend}")
     if detect_every < 1:
@@ -71,6 +72,8 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
             resources.callback(pipeline.close)
         with VideoWriter(output_path, input_path, reader.fps, (reader.width, reader.height), overwrite, audio) as writer:
             for index, frame in reader:
+                if cancelled and cancelled():
+                    raise RuntimeError("Export cancelled")
                 current_prompts = list(prompt_schedule.get(index, []))
                 if detector is not None and index % detect_every == 0:
                     detected = detector.prompts(frame, index, pipeline.trackers)
@@ -89,7 +92,10 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
             if not pipeline.trackers:
                 raise ValueError("No targets were selected or detected; no redacted video was exported")
         seconds = time.perf_counter() - started
-        report = {"version": 1, "input": str(Path(input_path).resolve()), "output": str(Path(output_path).resolve()),
+        with Path(input_path).open("rb") as stream:
+            input_hash = hashlib.file_digest(stream, "sha256").hexdigest()
+        report = {"version": 1, "input": str(Path(input_path).resolve()), "input_sha256": input_hash,
+                  "output": str(Path(output_path).resolve()), "model": getattr(pipeline, "metadata", None),
                   "backend": backend, "style": style, "failure_policy": on_failure, "fps": reader.fps,
                   "frames": len(records), "seconds": seconds, "processing_fps": len(records) / seconds,
                   "review_frames": sum(row["covered_for_review"] for row in records),

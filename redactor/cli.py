@@ -47,7 +47,8 @@ def main(argv=None):
                 detector = DetectorSource(FaceDetector())
             else:
                 description = args.text or ". ".join("a human face" if label == "faces" else "a vehicle license plate" for label in args.detect)
-                detector = DetectorSource(GroundingDetector(description, args.device, args.threshold))
+                required = ["face" if name == "faces" else "plate" for name in args.detect] if args.detect else None
+                detector = DetectorSource(GroundingDetector(description, args.device, args.threshold, required_labels=required))
         with VideoReader(args.input) as reader:
             if args.prompts:
                 prompts = load_prompts(args.prompts, (reader.height, reader.width))

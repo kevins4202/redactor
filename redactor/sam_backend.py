@@ -114,6 +114,9 @@ class Sam2Session:
         self.predictor.reset_state(self.state)
         self.state.clear()
         self.trackers.clear()
+        del self.predictor
+        if self.device == "cuda":
+            self.torch.cuda.empty_cache()
 
 
 def extract_frames(input_path, destination):

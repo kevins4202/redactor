@@ -7,6 +7,22 @@ translation-only tracker remains available for comparison.
 
 ## Run
 
+Use Python 3.11 or newer. For the local browser interface:
+
+```sh
+python -m pip install -r requirements.txt -r requirements-ui.txt
+python app.py
+```
+
+Open **http://127.0.0.1:8765**. Draw a freehand outline or rectangle, add targets,
+seek to a later frame to correct a selection, and export. The app shows processing
+progress, plays the result, and links flagged frames back to the selection view.
+All processing stays on this machine. Uploaded videos and exports are saved in
+`output/studio`; app sessions are in memory, so restart the app only after an
+export finishes. Existing files remain on disk after restarting.
+
+For the command line:
+
 ```bash
 python -m pip install -r requirements.txt
 python redact.py data/crosswalk-short.mp4

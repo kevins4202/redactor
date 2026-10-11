@@ -1,4 +1,6 @@
 import json
+import shutil
+import subprocess
 
 import cv2
 import numpy as np
@@ -71,3 +73,21 @@ def test_failed_export_does_not_replace_existing_output(tmp_path):
             raise RuntimeError("failure")
     assert output.read_bytes() == b"keep this"
     assert not list(tmp_path.glob(".redactor-*"))
+
+
+@pytest.mark.skipif(not shutil.which("ffmpeg") or not shutil.which("ffprobe"), reason="FFmpeg is not installed")
+def test_audio_is_preserved_and_input_cannot_be_overwritten(tmp_path):
+    source = tmp_path / "with-audio.mp4"
+    subprocess.run([shutil.which("ffmpeg"), "-v", "error", "-f", "lavfi", "-i", "color=c=blue:s=80x60:r=10:d=0.4",
+                    "-f", "lavfi", "-i", "sine=frequency=440:duration=0.4", "-c:v", "libx264", "-c:a", "aac",
+                    "-shortest", str(source)], check=True, capture_output=True)
+    output = tmp_path / "redacted.mp4"
+    with VideoWriter(output, source, 10, (80, 60), audio=True) as writer:
+        for _ in range(4):
+            writer.write(np.zeros((60, 80, 3), np.uint8))
+    info = subprocess.run([shutil.which("ffprobe"), "-v", "error", "-show_streams", "-of", "json", str(output)],
+                          check=True, capture_output=True, text=True)
+    types = {stream["codec_type"] for stream in json.loads(info.stdout)["streams"]}
+    assert types == {"audio", "video"}
+    with pytest.raises(ValueError, match="must differ"):
+        VideoWriter(source, source, 10, (80, 60), overwrite=True)
