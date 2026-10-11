@@ -15,10 +15,17 @@ class TargetPrompt:
     box: tuple[float, float, float, float] | None = None
     label: str = "object"
     source: str = "manual"
+    action: Literal["select", "end"] = "select"
 
     def selection(self, shape: tuple[int, int]) -> np.ndarray:
         if not self.instance_id or self.frame_index < 0:
             raise ValueError("Prompts need an instance id and a nonnegative frame index")
+        if self.action not in ("select", "end"):
+            raise ValueError("Prompt action must be select or end")
+        if self.action == "end":
+            if self.mask is not None or self.box is not None:
+                raise ValueError("An end prompt must not include selection geometry")
+            return np.zeros(shape, np.uint8)
         if (self.mask is None) == (self.box is None):
             raise ValueError("Provide exactly one of mask or box")
         height, width = shape

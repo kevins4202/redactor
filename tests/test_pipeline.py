@@ -37,6 +37,10 @@ def test_prompt_roundtrip_and_midclip_correction(tmp_path):
     assert len(pipeline.step(frame, [prompts[1]])) == 2
     correction = TargetPrompt("one", 6, box=(8, 8, 33, 43))
     assert len(pipeline.step(frame, [correction])) == 2
+    end = TargetPrompt("one", 7, action="end")
+    assert [result.instance_id for result in pipeline.step(frame, [end])] == ["two"]
+    save_prompts(path, [first, second, end])
+    assert load_prompts(path, frame.shape[:2])[-1].action == "end"
 
 
 def test_video_export_preserves_frame_count_and_writes_replay_metadata(tmp_path):

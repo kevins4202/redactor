@@ -25,6 +25,11 @@ class MultiTracker:
     def step(self, frame, prompts=()):
         results = {}
         for prompt in prompts:
+            if prompt.action == "end":
+                if prompt.instance_id not in self.trackers:
+                    raise ValueError(f"Cannot end inactive target {prompt.instance_id}")
+                del self.trackers[prompt.instance_id]
+                continue
             tracker = self.factory()
             results[prompt.instance_id] = tracker.initialize(frame, prompt)
             self.trackers[prompt.instance_id] = tracker
@@ -48,6 +53,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
         prompt_schedule.setdefault(prompt.frame_index, []).append(prompt)
     pipeline = MultiTracker(ClassicalTracker if backend == "classical" else BaselineTracker)
     records = []
+    had_targets = False
     started = time.perf_counter()
     report_path = Path(output_path).with_suffix(".json")
     prompt_path = Path(output_path).with_suffix(".prompts.json")
@@ -80,6 +86,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
                     current_prompts.extend(detected)
                     prompt_list.extend(detected)
                 results = pipeline.step(frame, current_prompts)
+                had_targets = had_targets or bool(results)
                 union, covered = coverage_mask(results, frame.shape[:2], on_failure)
                 writer.write(redact_frame(frame, union, "solid" if covered else style))
                 if mask_dir and not cv2.imwrite(str(mask_dir / f"{index:06d}.png"), union):
@@ -89,7 +96,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
                      "reason": result.reason, "box": list(mask_box(result.mask))} for result in results]})
                 if progress:
                     progress(index + 1, reader.count)
-            if not pipeline.trackers:
+            if not had_targets:
                 raise ValueError("No targets were selected or detected; no redacted video was exported")
         seconds = time.perf_counter() - started
         with Path(input_path).open("rb") as stream:

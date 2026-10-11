@@ -79,6 +79,11 @@ class Sam2Session:
                 for prompt in prompts:
                     if prompt.frame_index != index:
                         raise ValueError("SAM 2 prompts must be applied on their specified frame")
+                    if prompt.action == "end":
+                        self.predictor.remove_object(self.state, prompt.instance_id, strict=True, need_output=False)
+                        self.trackers.pop(prompt.instance_id, None)
+                        self.review_ids.discard(prompt.instance_id)
+                        continue
                     box, points, labels = prompt_geometry(prompt, frame.shape[:2])
                     self.predictor.add_new_points_or_box(self.state, index, prompt.instance_id,
                                                          box=box, points=points, labels=labels)

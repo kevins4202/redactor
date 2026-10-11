@@ -52,6 +52,7 @@ existing target at any frame:
 {"version": 1, "prompts": [
   {"id": "person", "frame": 0, "box": [100, 80, 220, 300]},
   {"id": "person", "frame": 60, "box": [160, 90, 260, 290]},
+  {"id": "person", "frame": 100, "action": "end"},
   {"id": "second", "frame": 40, "polygon": [[10, 20], [80, 20], [80, 150], [10, 150]]}
 ]}
 ```
@@ -59,6 +60,10 @@ existing target at any frame:
 Masks can also be supplied as a `"mask": "relative/path.png"` entry. Existing
 outputs are protected unless `--overwrite` is supplied. Input and output must
 always be different files.
+
+Use an `"action": "end"` prompt, or **End this target here** in the browser, when
+review confirms that the target has left. This stops redacting that instance
+from the specified frame onward. A later selection can introduce it again.
 
 SAM 2 and Grounding DINO require the optional [model setup](docs/models.md).
 Grounding DINO accepts descriptions or the face/license-plate presets; the Haar

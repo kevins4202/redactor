@@ -18,7 +18,8 @@ def load_prompts(path, shape):
     seen = set()
     for entry in document.get("prompts", []):
         fields = [key for key in ("box", "polygon", "mask") if key in entry]
-        if len(fields) != 1:
+        action = entry.get("action", "select")
+        if (action == "end" and fields) or (action != "end" and len(fields) != 1):
             raise ValueError("Each prompt needs exactly one box, polygon, or mask")
         mask = None
         if "mask" in entry:
@@ -39,7 +40,7 @@ def load_prompts(path, shape):
             raise ValueError("Prompt id must be a nonempty string")
         prompt = TargetPrompt(instance_id, frame_index, mask=mask,
                               box=tuple(entry["box"]) if "box" in entry else None,
-                              label=entry.get("label", "object"), source=entry.get("source", "manual"))
+                              label=entry.get("label", "object"), source=entry.get("source", "manual"), action=action)
         prompt.selection(shape)
         key = (prompt.instance_id, prompt.frame_index)
         if key in seen:
@@ -48,7 +49,16 @@ def load_prompts(path, shape):
         prompts.append(prompt)
     if not prompts:
         raise ValueError("Prompt file contains no targets")
-    return sorted(prompts, key=lambda prompt: prompt.frame_index)
+    prompts.sort(key=lambda prompt: prompt.frame_index)
+    active = set()
+    for prompt in prompts:
+        if prompt.action == "end":
+            if prompt.instance_id not in active:
+                raise ValueError(f"Cannot end inactive target {prompt.instance_id}")
+            active.remove(prompt.instance_id)
+        else:
+            active.add(prompt.instance_id)
+    return prompts
 
 
 def save_prompts(path, prompts):
@@ -57,7 +67,9 @@ def save_prompts(path, prompts):
     entries = []
     for index, prompt in enumerate(prompts):
         entry = {"id": prompt.instance_id, "frame": prompt.frame_index, "label": prompt.label, "source": prompt.source}
-        if prompt.mask is not None:
+        if prompt.action == "end":
+            entry["action"] = "end"
+        elif prompt.mask is not None:
             mask_path = path.with_name(f"{path.stem}-{index:03d}.png")
             if not cv2.imwrite(str(mask_path), prompt.mask):
                 raise OSError(f"Cannot write {mask_path}")

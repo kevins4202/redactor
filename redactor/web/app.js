@@ -1,6 +1,6 @@
 "use strict";
 const $ = (id) => document.getElementById(id);
-const state = { video: null, frame: 0, image: null, prompts: [], mode: "manual", target: "target-1", targetCount: 1, drawing: null, imageRequest: 0, job: null, busy: false, reviewFrames: [], reviewTargets: {}, reviewIndex: 0, exportMode: "manual" };
+const state = { video: null, frame: 0, image: null, imageFrame: -1, prompts: [], mode: "manual", target: "target-1", targetCount: 1, drawing: null, imageRequest: 0, job: null, busy: false, reviewFrames: [], reviewTargets: {}, reviewIndex: 0, exportMode: "manual" };
 const canvas = $("canvas"), context = canvas.getContext("2d");
 
 async function api(url, options = {}) {
@@ -35,7 +35,7 @@ function geometry(prompt) { if (prompt.polygon) return prompt.polygon; const [x1
 function render() {
   context.clearRect(0, 0, canvas.width, canvas.height);
   if (state.image) context.drawImage(state.image, 0, 0, canvas.width, canvas.height);
-  if (state.mode === "manual") state.prompts.filter((prompt) => prompt.frame === state.frame).forEach((prompt) => drawPolygon(geometry(prompt), prompt.id === state.target ? "#359566" : "#e7a64a", targetLabel(prompt.id)));
+  if (state.mode === "manual") state.prompts.filter((prompt) => prompt.frame === state.frame && prompt.action !== "end").forEach((prompt) => drawPolygon(geometry(prompt), prompt.id === state.target ? "#359566" : "#e7a64a", targetLabel(prompt.id)));
   if (state.drawing) drawPolygon(state.drawing.points, "#359566");
 }
 async function seek(frame) {
@@ -49,7 +49,7 @@ async function seek(frame) {
     const image = new Image();
     await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("Could not load this frame.")); image.src = `/api/videos/${encodeURIComponent(state.video.id)}/frames/${frame}`; });
     if (request !== state.imageRequest) return;
-    state.image = image; render();
+    state.image = image; state.imageFrame = frame; render();
   } catch (error) { message(error.message); }
 }
 function selectionList() {
@@ -57,7 +57,7 @@ function selectionList() {
   if (!state.prompts.length) { const empty = document.createElement("p"); empty.className = "empty-hint"; empty.textContent = "Your selections will appear here."; list.append(empty); }
   state.prompts.slice().sort((a,b) => a.frame - b.frame).forEach((prompt) => {
     const row = document.createElement("div"); row.className = "selection-item";
-    const jump = document.createElement("button"); jump.className = "jump"; jump.textContent = `${targetLabel(prompt.id)} · frame ${prompt.frame + 1}`;
+    const jump = document.createElement("button"); jump.className = "jump"; jump.textContent = `${targetLabel(prompt.id)}${prompt.action === "end" ? " ends" : ""} · frame ${prompt.frame + 1}`;
     jump.onclick = () => { state.target = prompt.id; $("target").value = prompt.id; seek(prompt.frame); };
     const remove = document.createElement("button"); remove.className = "remove"; remove.textContent = "×"; remove.setAttribute("aria-label", `Remove ${targetLabel(prompt.id)} selection at frame ${prompt.frame + 1}`);
     remove.onclick = () => { state.prompts = state.prompts.filter((item) => item !== prompt); selectionList(); render(); };
@@ -79,7 +79,7 @@ function point(event) {
   return [Math.max(0, Math.min(canvas.width - 1, (event.clientX - rect.left) * canvas.width / rect.width)), Math.max(0, Math.min(canvas.height - 1, (event.clientY - rect.top) * canvas.height / rect.height))].map(Math.round);
 }
 canvas.addEventListener("pointerdown", (event) => {
-  if (!state.video || state.mode !== "manual" || state.busy || event.button !== 0) return;
+  if (!state.video || state.imageFrame !== state.frame || state.mode !== "manual" || state.busy || event.button !== 0) return;
   canvas.setPointerCapture(event.pointerId); canvas.focus();
   const start = point(event); state.drawing = { start, points: [start], tool: $("tool").value };
   message(); render();
@@ -112,6 +112,13 @@ document.addEventListener("keydown", (event) => {
 });
 $("new-target").onclick = () => { state.target = `target-${++state.targetCount}`; $("target").add(new Option(targetLabel(state.target), state.target)); $("target").value = state.target; render(); };
 $("target").onchange = (event) => { state.target = event.target.value; render(); };
+$("end-target").onclick = () => {
+  if (!state.video || state.busy) return;
+  const earlier = state.prompts.filter((p) => p.id === state.target && p.frame < state.frame).sort((a,b) => a.frame - b.frame);
+  if (!earlier.length || earlier[earlier.length - 1].action === "end") { message("Choose a frame after this target was selected to end its redaction."); return; }
+  state.prompts = state.prompts.filter((p) => !(p.id === state.target && p.frame >= state.frame));
+  state.prompts.push({id:state.target, frame:state.frame, action:"end", source:"manual"}); selectionList(); render();
+};
 function mode(value) {
   state.mode = value; $("manual-settings").hidden = value !== "manual"; $("auto-settings").hidden = value === "manual";
   for (const name of ["manual","auto"]) { const active = name === value; $(name + "-mode").classList.toggle("selected", active); $(name + "-mode").setAttribute("aria-pressed", String(active)); }

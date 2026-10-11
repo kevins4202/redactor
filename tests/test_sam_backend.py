@@ -33,8 +33,10 @@ def test_sam2_tracks_and_adds_midclip_instance(tmp_path):
             prompts = []
             if index in (0, 6):
                 prompts = [TargetPrompt("one" if index == 0 else "two", index, box=mask_box(sequence.masks[index]))]
+            if index == 10:
+                prompts = [TargetPrompt("two", index, action="end")]
             results = session.step(frame, prompts)
-            assert len(results) == (1 if index < 6 else 2)
+            assert len(results) == (2 if 6 <= index < 10 else 1)
             assert frame_metrics(results[0].mask, sequence.masks[index])["iou"] > 0.60
     finally:
         session.close()
