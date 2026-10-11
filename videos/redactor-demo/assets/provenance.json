@@ -23,28 +23,38 @@
   "style": "solid",
   "crop": [
     0,
-    0,
+    540,
     1200,
-    1080
+    540
   ],
   "resized": [
-    800,
-    720
+    1680,
+    756
   ],
-  "playback_rate": 0.5,
+  "playback_rate": 1,
   "assets": {
     "gsap.min.js": "8f41acd30db5898fd367e848d5640f814aac2fcdd54738e4b3650ebe0e941f74",
-    "original.mp4": "f4a5355b645c310ccc8ffdae5676b006af401f8284d00afce894bd04295c665b",
+    "original.mp4": "16218e9e0acc536f361008183993a3796d34b9db04531cc168bbbd38d2927934",
     "prompts.json": "776f01fa4d33fd2d4387fef12715548abcbfbf71b83e33f64d45faf63d4a4129",
-    "redacted.mp4": "e74db4ec6d03d5fec551d56d44d400738497dadf789a19985218485e0fe16f88",
-    "source-sans-license.txt": "37f1d07d235509973aeaff5d6f22378d8d812eb998a14d321d6562e5a4cb6a89",
-    "source-sans.ttf": "042fe2cc0b933e328410d7acbd0aa6a1873dca5aef81875f4bc214b08825c7b9",
-    "source-serif-license.txt": "12efb6321787a2b8e4a30d2b6077efede0167e6f0282f9fb9717b7aff4f1be0c",
-    "source-serif.ttf": "97b2d4da6e3cb494b5a1e66ae176914d852ccabef49e0c02c0df25f3e39aca0b",
-    "studio.jpg": "f257ea9c87617f8b1cfd53c59f4f7412a370c256f092e6a2a75f7bf843223337"
+    "redacted.mp4": "0f84355b04cffe4e8a80e92fa78dcbf388b5b73f878da480016e600ec6e7f17f",
+    "syne-license.txt": "94650b1fbb238865739b0e4c3bfdfd906a8092dec05da148d69ea3501744a07f",
+    "syne.ttf": "ce5ac77142a65cab2248a1a2ebb740b1d4d9c20b52488877d3ff664d1356104a"
   },
   "fonts": {
-    "source-serif.ttf": "https://github.com/google/fonts/tree/main/ofl/sourceserif4",
-    "source-sans.ttf": "https://github.com/google/fonts/tree/main/ofl/sourcesans3"
+    "syne.ttf": "https://github.com/google/fonts/tree/main/ofl/syne"
+  },
+  "timing": {
+    "original": [
+      0,
+      5
+    ],
+    "redacted": [
+      5,
+      10
+    ],
+    "closing": [
+      10,
+      12
+    ]
   }
 }

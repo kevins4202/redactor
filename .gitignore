@@ -7,4 +7,5 @@ data/downloads/
 output/*
 !output/crosswalk-short.mp4
 *.egg-info/
+.agents/
 

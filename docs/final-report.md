@@ -180,7 +180,7 @@ slower recovery search; they should not be mixed into the final aggregates.
 | Real and synthetic benchmark | Reconstructed 72-run synthetic suite, 36-run DAVIS subset, sparse crosswalk annotations |
 | Polished selection and review UI | Local browser studio, lasso/box, corrections, target ending, progress, cancellation, video/replay/log downloads |
 | Iteration record | [Three development iterations](iterations.md), source history, preserved exploratory results |
-| Final report and demo | This report, [30-second MP4](../videos/redactor-demo/redactor-demo.mp4), and editable HyperFrames source |
+| Final report and demo | This report, [12-second MP4](../videos/redactor-demo/redactor-demo.mp4), and editable HyperFrames source |
 
 The test suite covers geometric bounds, metrics, sparse-label semantics,
 recovery, prompt replay, late targets, target ending, default cover/stop policies,
@@ -221,9 +221,10 @@ Follow [README](../README.md), [model installation](models.md), and
 [evaluation commands](evaluation.md). Run `python scripts/summarize_results.py`
 to regenerate all report tables and the figure from checked JSON.
 
-The demo uses actual source footage and a real solid-cover SAM 2 export. Both
-views use the same crop and 0.5× playback. The source capture is shown as a
-capture, not simulated interaction. See its [reproduction notes](../videos/redactor-demo/README.md).
+The demo uses actual source footage and a real solid-cover SAM 2 export. It shows
+the original five seconds, then the matching result, with the same crop at native
+speed. Large Syne typography replaces the original UI screenshot and small labels.
+See its [reproduction notes](../videos/redactor-demo/README.md).
 
 ## References
 

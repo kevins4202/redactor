@@ -1,25 +1,37 @@
-# Redactor technical demo
-
-## Frame 1
-status: animated
-src: index.html#select-scene
-duration: 8
-motion: spring-pop-entrance, stat-bars-and-fills
-Beat: one coarse selection, local processing, corrections for the same ID.
-Show an actual browser capture with the woman selected.
-
-## Frame 2
-status: animated
-src: index.html#compare-scene
-duration: 10
-motion: stat-bars-and-fills
-Beat: synchronized original and real SAM 2 solid-cover export.
-Identical left-side crops, 0.5x playback, no cosmetic grading.
-
-## Frame 3
-status: animated
-src: index.html#review-scene
+---
 duration: 12
-motion: spring-pop-entrance, stat-bars-and-fills
-Beat: review the result, correct errors, export video plus replay and review log.
-State confidence limits and the lack of a universal no-leak guarantee.
+format: landscape
+music: none
+---
+
+# Redactor
+
+## Frame 1 - Before
+
+status: animated
+src: index.html#original
+duration: 5
+asset_candidates: assets/original.mp4
+
+Show the original five-second walk at 1x. Large Redactor wordmark and Before
+label share a quiet header. The footage fills the remaining frame. Hard cut.
+
+## Frame 2 - After
+
+status: animated
+src: index.html#redacted
+duration: 5
+asset_candidates: assets/redacted.mp4
+
+Replay those five seconds from the real SAM 2 solid-cover export. Identical
+crop, size, color, and playback rate. Only the label changes to After.
+
+## Frame 3 - Close
+
+status: animated
+src: index.html#closing-title
+duration: 2
+asset_candidates: assets/syne.ttf
+
+Large Redactor wordmark. One closing line: Select. Track. Review.
+Static, no fade or letter animation. No screenshot, fine print, or extra marks.

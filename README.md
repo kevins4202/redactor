@@ -6,7 +6,7 @@ segmentation, appearance monitoring, and multiscale re-detection. The original
 translation-only tracker remains available for comparison.
 
 The completed research prototype includes a [final report](docs/final-report.md),
-[measured results](docs/results.md), and a [30-second demo](videos/redactor-demo/redactor-demo.mp4).
+[measured results](docs/results.md), and a [12-second demo](videos/redactor-demo/redactor-demo.mp4).
 On the evaluated DAVIS subset, SAM 2 reaches 0.835 mean IoU and 2.21% mean
 visible-pixel leakage. This is not a guarantee of leak-free redaction.
 

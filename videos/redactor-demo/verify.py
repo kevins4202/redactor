@@ -1,4 +1,4 @@
-"""Verify the encoded demo and compare its video panels with source frames."""
+"""Check the encoded demo against every source frame and its static typography."""
 
 import hashlib
 import json
@@ -15,28 +15,41 @@ report = {"frames": int(capture.get(cv2.CAP_PROP_FRAME_COUNT)),
           "fps": capture.get(cv2.CAP_PROP_FPS),
           "width": int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
           "height": int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)), "checks": []}
-assert (report["frames"], report["fps"], report["width"], report["height"]) == (900, 30, 1920, 1080)
-for time in (8.2, 10.5, 13, 17.5):
-    capture.set(cv2.CAP_PROP_POS_FRAMES, round(time * 30))
-    ok, image = capture.read()
-    assert ok
-    for name, left in (("original", 135), ("redacted", 1035)):
-        source = cv2.VideoCapture(str(ROOT / "assets" / f"{name}.mp4"))
-        source.set(cv2.CAP_PROP_POS_FRAMES, int((time - 8) * .5 * 30 + 1e-6))
-        ok, frame = source.read()
-        source.release()
-        assert ok
-        expected = cv2.resize(frame, (750, 675))[15:-15, 15:-15]
-        observed = image[284:959, left:left + 750][15:-15, 15:-15]
-        error = float(np.mean(np.abs(expected.astype(float) - observed)))
-        report["checks"].append({"time": time, "panel": name, "mean_absolute_pixel_error": error})
-        assert error < 12, (time, name, error)
+assert (report["frames"], report["fps"], report["width"], report["height"]) == (360, 30, 1920, 1080)
 shots = []
-for time in (4, 13, 24):
-    capture.set(cv2.CAP_PROP_POS_FRAMES, time * 30)
+for name in ("original", "redacted"):
+    source = cv2.VideoCapture(str(ROOT / "assets" / f"{name}.mp4"))
+    errors, title_errors = [], []
+    reference_title = None
+    for index in range(150):
+        ok, image = capture.read()
+        source_ok, expected = source.read()
+        assert ok and source_ok, (name, index)
+        observed = image[240:996, 120:1800]
+        error = float(np.mean(cv2.absdiff(expected, observed)))
+        errors.append(error)
+        assert error < 8, (name, index, error)
+        title = image[40:220, 100:1820]
+        if reference_title is None:
+            reference_title = title.copy()
+        title_error = float(np.mean(cv2.absdiff(reference_title, title)))
+        title_errors.append(title_error)
+        assert title_error < 1.5, ("unstable title", name, index, title_error)
+        if index == 75:
+            shots.append(cv2.resize(image, (640, 360)))
+    source.release()
+    report["checks"].append({"panel": name, "frames_checked": len(errors),
+        "mean_absolute_pixel_error": float(np.mean(errors)),
+        "max_frame_pixel_error": max(errors), "max_title_pixel_change": max(title_errors)})
+closing = None
+for index in range(60):
     ok, frame = capture.read()
     assert ok
-    shots.append(cv2.resize(frame, (640, 360)))
+    if closing is None:
+        closing = frame.copy()
+    assert float(np.mean(cv2.absdiff(closing, frame))) < 1.5, ("unstable closing", index)
+    if index == 30:
+        shots.append(cv2.resize(frame, (640, 360)))
 capture.release()
 cv2.imwrite(str(ROOT.parents[1] / "docs/images/demo-encoded.jpg"), np.concatenate(shots, axis=0))
 report["sha256"] = hashlib.sha256((ROOT / "redactor-demo.mp4").read_bytes()).hexdigest()

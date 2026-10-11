@@ -1,3 +1,2 @@
-{"id":"video_001","type":"video","path":"assets/original.mp4","source":"existing","description":"original","duration":5,"width":800,"height":720,"provenance":{"provider":"local","adopted":true}}
-{"id":"video_002","type":"video","path":"assets/redacted.mp4","source":"existing","description":"redacted","duration":5,"width":800,"height":720,"provenance":{"provider":"local","adopted":true}}
-{"id":"image_001","type":"image","path":"assets/studio.jpg","source":"existing","description":"studio","width":1425,"height":1069,"provenance":{"provider":"local","adopted":true}}
+{"id":"video_001","type":"video","path":"assets/original.mp4","source":"existing","description":"original","duration":5,"width":1680,"height":756,"provenance":{"provider":"local","adopted":true,"crop":[0,540,1200,540]}}
+{"id":"video_002","type":"video","path":"assets/redacted.mp4","source":"existing","description":"redacted","duration":5,"width":1680,"height":756,"provenance":{"provider":"local","adopted":true,"crop":[0,540,1200,540]}}

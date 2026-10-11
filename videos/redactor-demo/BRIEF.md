@@ -1,35 +1,28 @@
 ---
-workflow: general-video
+workflow: product-launch-video
 flow: automation
 storyboard: no
-message: "Select once, track locally, and review the redaction before sharing."
+message: "Select once, track locally, review the result."
 audience: "Computer vision course project reviewers"
 destination: "Local MP4 demo accompanying the final report"
 aspect: "16:9"
 language: "English"
-length: "30 seconds"
+length: "12 seconds"
 ---
 
-## Intent
+## Revision brief
 
-The user asked to complete the project described in 581proposal.pdf, including its
-final demo. Build an evidence-based technical comparison using the existing
-crosswalk clip, real exported masks, and the project's measured results.
+The user requested a simpler demo with a unique font and no text artifacts,
+using the product-launch-video skill from heygen-com/hyperframes. This is an
+edit of the completed demo, with rendering included in the existing scope.
 
-## Decisions
+Replace the text-heavy walkthrough with large native typography and actual
+before/after footage. Use Syne as the single typeface. Remove the UI screenshot,
+small captions, paragraphs, numbered steps, and progress bar. Keep silence.
 
-Autonomous production follows the user's instruction to complete the project.
-The duration, landscape format, quiet presentation, and sage editorial design
-are implementation choices. No narration or music is needed for the classroom
-walkthrough; explanatory on-screen copy carries the story.
+## Evidence
 
-## Assets
-
-Repository crosswalk footage, actual SAM 2 output, and real local studio capture.
-Do not simulate an algorithmic result. Keep source and output aligned in time.
-
-## Notes
-
-Show manual selection, synchronized original/output playback, and the review
-workflow. Close with the measured limitations: no guarantee of zero leakage,
-and confidence does not detect every mistake. Use local assets and rendering.
+Use the repository crosswalk clip and its real SAM 2 solid-cover output, cropped
+identically and replayed at native speed. Preserve prompt and source provenance.
+Do not simulate segmentation or make universal privacy claims. Limitations
+remain in the linked project report; the closing line emphasizes review.

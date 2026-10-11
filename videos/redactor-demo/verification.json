@@ -1,49 +1,23 @@
 {
-  "frames": 900,
+  "frames": 360,
   "fps": 30.0,
   "width": 1920,
   "height": 1080,
   "checks": [
     {
-      "time": 8.2,
       "panel": "original",
-      "mean_absolute_pixel_error": 2.64526270456503
+      "frames_checked": 150,
+      "mean_absolute_pixel_error": 2.311858787547941,
+      "max_frame_pixel_error": 2.4485612454858487,
+      "max_title_pixel_change": 0.026317829457364342
     },
     {
-      "time": 8.2,
       "panel": "redacted",
-      "mean_absolute_pixel_error": 2.549424346827448
-    },
-    {
-      "time": 10.5,
-      "panel": "original",
-      "mean_absolute_pixel_error": 2.7535450760838356
-    },
-    {
-      "time": 10.5,
-      "panel": "redacted",
-      "mean_absolute_pixel_error": 2.6512037037037035
-    },
-    {
-      "time": 13,
-      "panel": "original",
-      "mean_absolute_pixel_error": 2.7163171116853286
-    },
-    {
-      "time": 13,
-      "panel": "redacted",
-      "mean_absolute_pixel_error": 2.6271748492678726
-    },
-    {
-      "time": 17.5,
-      "panel": "original",
-      "mean_absolute_pixel_error": 2.75716551823141
-    },
-    {
-      "time": 17.5,
-      "panel": "redacted",
-      "mean_absolute_pixel_error": 2.698692219351134
+      "frames_checked": 150,
+      "mean_absolute_pixel_error": 2.211148223384004,
+      "max_frame_pixel_error": 2.3651168955236415,
+      "max_title_pixel_change": 0.008699397071490094
     }
   ],
-  "sha256": "2ce26fecb2d91a0a8f289ebe10b5f3ce6101b0a2deb017f63be6fbb4c0a959b9"
+  "sha256": "37e38359be476030c46e4b91e620dad85957d4f2755c2eb75d91e950d1751702"
 }
