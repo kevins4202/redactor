@@ -37,7 +37,7 @@ def test_server_validates_origins_and_prompt_file_access(client):
 
 def test_browser_export_produces_download_and_review_log(client):
     request = {"video_id": "demo", "backend": "classical", "style": "solid", "audio": False,
-               "prompts": [{"id": "one", "frame": 0, "box": [10, 8, 35, 48]}]}
+               "prompts": [{"id": "one", "frame": 0, "polygon": [[10, 8], [35, 8], [35, 48], [10, 48]]}]}
     response = client.post("/api/exports", json=request)
     assert response.status_code == 202
     job_id = response.json()["id"]
@@ -50,4 +50,5 @@ def test_browser_export_produces_download_and_review_log(client):
     assert status["status"] == "complete", status
     assert client.get(f"/api/exports/{job_id}/file/video").status_code == 200
     assert client.get(f"/api/exports/{job_id}/file/report").json()["frames"] == 4
-    assert client.get(f"/api/exports/{job_id}/file/prompts").json()["prompts"][0]["id"] == "one"
+    saved = client.get(f"/api/exports/{job_id}/file/prompts").json()["prompts"][0]
+    assert saved == request["prompts"][0]  # no inaccessible PNG sidecar

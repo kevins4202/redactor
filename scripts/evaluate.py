@@ -38,6 +38,8 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
     selection = cv2.dilate(sequence.masks[start], np.ones((2 * slack + 1, 2 * slack + 1), np.uint8))
     prompt = TargetPrompt(str(sequence.object_id), start, mask=selection)
     rows = []
+    guarded_rows = []
+    review_frames = 0
     setup_started = time.perf_counter()
     model_metadata = None
     with ExitStack() as resources:
@@ -63,14 +65,20 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
                 result = results[0]
             else:
                 result = tracker.initialize(frame, prompt) if index == start else tracker.update(frame)
+            guarded = result.state in ("uncertain", "lost")
+            review_frames += int(guarded)
             if sequence.masks[index] is not None:
                 rows.append({"frame": index, "state": result.state, "confidence": result.confidence,
                              **frame_metrics(result.mask, sequence.masks[index])})
+                guarded_rows.append({"frame": index, **frame_metrics(
+                    np.full_like(result.mask, 255) if guarded else result.mask, sequence.masks[index])})
         elapsed = time.perf_counter() - started
     return {"sequence": sequence.name, "method": method, "slack": slack,
             "model": model_metadata,
             "prompt_frame": start, "setup_seconds": setup_seconds, "seconds": elapsed,
             "processed_frames": len(sequence.frames) - start, "fps": (len(sequence.frames) - start) / elapsed,
+            "review_frames": review_frames, "review_frame_fraction": review_frames / (len(sequence.frames) - start),
+            "guarded_output": summarize(guarded_rows, sequence.fps),
             **summarize(rows, sequence.fps), "per_frame": rows}
 
 
@@ -107,24 +115,30 @@ def main():
     cv2.setNumThreads(1)
     sequences = davis_sequences(args.davis, args.sequences) if args.davis else [annotated_video(args.annotations)] if args.annotations else (synthetic_sequence(name) for name in args.scenarios)
     runs = []
+    report = {"dataset": str(args.davis.resolve()) if args.davis else str(args.annotations) if args.annotations else SYNTHETIC_VERSION,
+              "notes": "Top-level metrics score raw tracking masks. guarded_output separately scores full-frame coverage on uncertain/lost states; it can hide most of a frame and is not a tracking accuracy improvement. Metrics measure mask coverage, not anonymity. Synthetic person-v1 reconstructs the experiment but is not the proposal's original fixture; crosswalk labels are approximate sparse polygons.",
+              "environment": provenance(), "complete": False, "runs": runs}
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    def save():
+        temporary = args.output.with_suffix(".tmp")
+        temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
+        temporary.replace(args.output)
+        summaries = [{key: value for key, value in run.items() if key not in ("per_frame", "model", "guarded_output")} for run in runs]
+        if summaries:
+            with args.output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as stream:
+                writer = csv.DictWriter(stream, fieldnames=list(summaries[0]))
+                writer.writeheader()
+                writer.writerows(summaries)
     for sequence in sequences:
         for method in args.methods:
             for slack in args.slack:
                 cv2.setRNGSeed(581)
                 run = evaluate(sequence, method, slack, args.checkpoint, args.model_config, args.device)
                 runs.append(run)
+                save()
                 print(f"{sequence.name:20s} {method:10s} slack={slack:2d} IoU={run['mean_iou']:.3f} leak={run['mean_leak_rate']:.1%} {run['fps']:.1f} fps", flush=True)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    report = {"dataset": str(args.davis.resolve()) if args.davis else str(args.annotations) if args.annotations else SYNTHETIC_VERSION,
-              "notes": "Metrics measure mask coverage, not anonymity. Synthetic person-v1 reconstructs the experiment but is not the proposal's original fixture; crosswalk labels are approximate sparse polygons.",
-              "environment": provenance(), "runs": runs}
-    args.output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
-    summaries = [{key: value for key, value in run.items() if key != "per_frame"} for run in runs]
-    if summaries:
-        with args.output.with_suffix(".csv").open("w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(summaries[0]))
-            writer.writeheader()
-            writer.writerows(summaries)
+    report["complete"] = True
+    save()
 
 
 if __name__ == "__main__":

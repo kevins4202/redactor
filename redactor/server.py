@@ -184,7 +184,8 @@ def create_app(storage=None, demo=None):
             except (ValueError, TypeError, KeyError) as error:
                 raise HTTPException(400, str(error)) from error
             job = {"id": job_id, "status": "queued", "done": 0, "total": entry["frames"],
-                   "cancel": threading.Event(), "output": directory / "redacted.mp4", "review_frames": []}
+                   "cancel": threading.Event(), "output": directory / "redacted.mp4", "review_frames": [],
+                   "mode": options.mode}
             jobs[job_id] = job
             executor.submit(run_job, job_id, options, prompts)
         return {"id": job_id}
@@ -206,6 +207,10 @@ def create_app(storage=None, demo=None):
             raise HTTPException(409, "Export is not ready")
         output = job["output"]
         path = output if kind == "video" else output.with_suffix(".json" if kind == "report" else ".prompts.json")
+        if kind == "prompts" and job["mode"] == "manual":
+            # Keep original polygon geometry so this download is self-contained.
+            # The pipeline's local replay also supports PNG sidecars.
+            path = output.parent / "selection.json"
         return FileResponse(path, media_type="video/mp4" if kind == "video" else "application/json")
 
     app.mount("/", StaticFiles(directory=Path(__file__).parent / "web", html=True), name="web")
