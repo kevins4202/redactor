@@ -35,6 +35,16 @@ def test_server_validates_origins_and_prompt_file_access(client):
     assert client.post("/api/exports", json=malicious).status_code == 400
 
 
+def test_upload_rejects_invalid_media_and_registers_valid_video(client, tmp_path):
+    assert client.post("/api/videos", files={"file": ("bad.mp4", b"not a video", "video/mp4")}).status_code == 400
+    source = tmp_path / "demo.mp4"
+    response = client.post("/api/videos", files={"file": ("clip.mp4", source.read_bytes(), "video/mp4")})
+    assert response.status_code == 200
+    entry = response.json()
+    assert entry["frames"] == 4 and "path" not in entry
+    assert client.get(f"/api/videos/{entry['id']}/frames/3").status_code == 200
+
+
 def test_browser_export_produces_download_and_review_log(client):
     request = {"video_id": "demo", "backend": "classical", "style": "solid", "audio": False,
                "prompts": [{"id": "one", "frame": 0, "polygon": [[10, 8], [35, 8], [35, 48], [10, 48]]}]}

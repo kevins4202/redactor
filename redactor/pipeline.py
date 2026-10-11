@@ -103,6 +103,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
             input_hash = hashlib.file_digest(stream, "sha256").hexdigest()
         report = {"version": 1, "input": str(Path(input_path).resolve()), "input_sha256": input_hash,
                   "output": str(Path(output_path).resolve()), "model": getattr(pipeline, "metadata", None),
+                  "detector": getattr(getattr(detector, "detector", None), "metadata", None),
                   "backend": backend, "style": style, "failure_policy": on_failure, "fps": reader.fps,
                   "frames": len(records), "seconds": seconds, "processing_fps": len(records) / seconds,
                   "review_frames": sum(row["covered_for_review"] for row in records),

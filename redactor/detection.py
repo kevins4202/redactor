@@ -53,7 +53,8 @@ class FaceDetector:
 
 class GroundingDetector:
     def __init__(self, text, device="auto", threshold=0.30,
-                 model_id="IDEA-Research/grounding-dino-tiny", required_labels=None):
+                 model_id="IDEA-Research/grounding-dino-tiny", required_labels=None,
+                 revision="a2bb814dd30d776dcf7e30523b00659f4f141c71"):
         if not text.strip() or not 0 < threshold < 1:
             raise ValueError("Detection needs a description and a threshold between 0 and 1")
         try:
@@ -67,8 +68,10 @@ class GroundingDetector:
         self.threshold = threshold
         self.model_id = model_id
         self.required_labels = required_labels
-        self.processor = AutoProcessor.from_pretrained(model_id)
-        self.model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(self.device).eval()
+        self.processor = AutoProcessor.from_pretrained(model_id, revision=revision)
+        self.model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id, revision=revision).to(self.device).eval()
+        self.metadata = {"model_id": model_id, "revision": revision, "text": self.text,
+                         "threshold": threshold, "device": self.device, "required_labels": required_labels}
 
     def detect(self, frame):
         from PIL import Image
