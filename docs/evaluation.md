@@ -30,6 +30,11 @@ preparation are reported separately as `setup_seconds`. Raw predicted masks are
 scored even on uncertain frames; the full-frame export guard is not counted as
 successful tracking.
 
+Final reports also include `guarded_output` scores and the fraction of processed
+frames flagged for review. Those scores account for full-frame covering and its
+large excess-redaction cost. JSON is checkpointed after every run; `complete`
+must be true before summarizing a report.
+
 ## Metrics
 
 - **IoU:** intersection over union before safety dilation. Mean IoU is calculated
@@ -78,3 +83,21 @@ Tracking still runs through every source frame; only annotated frames receive a
 score. Continuous exposure duration is deliberately unavailable for sparse
 labels. `examples/crosswalk.json` is a separate, replayable initial box for the
 demo; evaluation initializes from the annotated silhouette plus the chosen slack.
+
+## Reproduce the final comparison
+
+```sh
+python scripts/download_davis.py --help
+python scripts/evaluate.py --methods box lasso gate affine classical sam2 --output results/final-synthetic.json
+python scripts/evaluate.py --davis data/DAVIS --sequences blackswan bmx-trees breakdance car-roundabout drift-chicane libby horsejump-high soapbox --methods lasso classical sam2 --slack 5 --output results/final-davis.json
+python scripts/evaluate.py --annotations data/crosswalk-annotations.json --methods lasso classical sam2 --slack 5 --output results/final-crosswalk.json
+python -m pip install "matplotlib>=3.8"
+python scripts/summarize_results.py
+```
+
+See [the final report](final-report.md) for subset selection, aggregation,
+development-set limitations, runtime interpretation, and failure cases. The
+synthetic and real-video runs have different source digests because detector
+provenance was added between them; the measured tracking algorithms did not
+change. Dirty flags can reflect untracked result and documentation artifacts;
+the recorded source digest identifies the exact Python files used.

@@ -5,12 +5,19 @@ copy. The CPU backend uses GrabCut, RANSAC similarity transforms, periodic
 segmentation, appearance monitoring, and multiscale re-detection. The original
 translation-only tracker remains available for comparison.
 
+The completed research prototype includes a [final report](docs/final-report.md),
+[measured results](docs/results.md), and a [30-second demo](videos/redactor-demo/redactor-demo.mp4).
+On the evaluated DAVIS subset, SAM 2 reaches 0.835 mean IoU and 2.21% mean
+visible-pixel leakage. This is not a guarantee of leak-free redaction.
+
+![Local review studio](docs/images/studio-desktop.jpg)
+
 ## Run
 
-Use Python 3.11 or newer. For the local browser interface:
+Use Python 3.11 (tested) or newer. For the local browser interface:
 
 ```sh
-python -m pip install -r requirements.txt -r requirements-ui.txt
+python -m pip install -r requirements-lock.txt
 python app.py
 ```
 
@@ -61,6 +68,9 @@ Masks can also be supplied as a `"mask": "relative/path.png"` entry. Existing
 outputs are protected unless `--overwrite` is supplied. Input and output must
 always be different files.
 
+CLI mask prompts save PNG sidecars next to their JSON; keep those files together
+when moving a replay. Browser selections download as self-contained geometry.
+
 Use an `"action": "end"` prompt, or **End this target here** in the browser, when
 review confirms that the target has left. This stops redacting that instance
 from the specified frame onward. A later selection can introduce it again.
@@ -99,3 +109,9 @@ python scripts/evaluate.py --output results/comparison.json
 ```bash
 python -m pytest -q
 ```
+
+Set `REDACTOR_MODEL_TESTS=1` to include the installed SAM 2 integration test.
+`python scripts/check_models.py` also checks three known Grounding DINO examples
+after downloading the crosswalk and DAVIS assets described in the evaluation
+guide. The pinned base/UI/test environment is `requirements-lock.txt`; optional
+model versions used for the reported results are in `results/environment.json`.

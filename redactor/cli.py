@@ -72,3 +72,6 @@ def main(argv=None):
     except (ValueError, RuntimeError, OSError, StopIteration) as error:
         print(f"Redactor: {error}", file=sys.stderr)
         return 1
+    finally:
+        if detector is not None:
+            detector.close()

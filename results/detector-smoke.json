@@ -1,0 +1,108 @@
+{
+  "notes": "Three known examples, approximate expected regions; this demonstrates execution only and does not measure dataset-level precision or recall.",
+  "checks": [
+    {
+      "case": "description",
+      "source": "data/crosswalk-short.mp4",
+      "source_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e",
+      "model": {
+        "model_id": "IDEA-Research/grounding-dino-tiny",
+        "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+        "text": "the woman in a white skirt.",
+        "threshold": 0.3,
+        "device": "cuda",
+        "required_labels": null
+      },
+      "expected_region": [
+        210,
+        740,
+        343,
+        1078
+      ],
+      "best_overlap": 0.9745934268986062,
+      "passed": true,
+      "detections": [
+        {
+          "box": [
+            210.68673706054688,
+            740.0619506835938,
+            342.0745849609375,
+            1073.5164794921875
+          ],
+          "score": 0.8035964965820312,
+          "label": "the woman in a white skirt"
+        }
+      ]
+    },
+    {
+      "case": "faces",
+      "source": "data/crosswalk-short.mp4",
+      "source_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e",
+      "model": {
+        "model_id": "IDEA-Research/grounding-dino-tiny",
+        "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+        "text": "a human face.",
+        "threshold": 0.3,
+        "device": "cuda",
+        "required_labels": [
+          "face"
+        ]
+      },
+      "expected_region": [
+        238,
+        759,
+        274,
+        802
+      ],
+      "best_overlap": 0.896702522618903,
+      "passed": true,
+      "detections": [
+        {
+          "box": [
+            238.04148864746094,
+            759.6128540039062,
+            272.6804504394531,
+            799.6860961914062
+          ],
+          "score": 0.36853745579719543,
+          "label": "a human face"
+        }
+      ]
+    },
+    {
+      "case": "plates",
+      "source": "data/DAVIS/JPEGImages/480p/car-roundabout/00000.jpg",
+      "source_sha256": "fee22e5cbf368f7b24d89217ef792cb2d3810dd8654d445009fa672074a9426f",
+      "model": {
+        "model_id": "IDEA-Research/grounding-dino-tiny",
+        "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+        "text": "a vehicle license plate.",
+        "threshold": 0.3,
+        "device": "cuda",
+        "required_labels": [
+          "plate"
+        ]
+      },
+      "expected_region": [
+        668,
+        288,
+        690,
+        310
+      ],
+      "best_overlap": 0.7226948778737675,
+      "passed": true,
+      "detections": [
+        {
+          "box": [
+            668.8002319335938,
+            288.70477294921875,
+            687.9481811523438,
+            306.97222900390625
+          ],
+          "score": 0.6476236581802368,
+          "label": "a vehicle license plate"
+        }
+      ]
+    }
+  ]
+}
