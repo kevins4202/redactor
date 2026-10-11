@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "prompts": [
+    {
+      "id": "target-1",
+      "frame": 0,
+      "label": "Target 1",
+      "source": "manual",
+      "box": [
+        201,
+        724,
+        346,
+        1066
+      ]
+    }
+  ]
+}

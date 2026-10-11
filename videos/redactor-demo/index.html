@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redactor · project demo</title>
+  <script src="assets/gsap.min.js"></script>
+  <style>
+@font-face {font-family:"Redactor Serif";src:url("assets/source-serif.ttf");font-weight:200 900;}
+@font-face {font-family:"Redactor Sans";src:url("assets/source-sans.ttf");font-weight:200 900;}
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f6f7f4; color: #182326; font-family: "Redactor Sans", sans-serif; }
+    #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    .clip { position: absolute; inset: 0; }
+    .scene { padding: 76px 80px; height: 100%; }
+    .kicker { color: #24684a; font-size: 25px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 30px; }
+    h1, h2 { font-family: "Redactor Serif", serif; font-weight: 500; letter-spacing: -3px; line-height: 1.06; margin: 0; }
+    h1 { font-size: 110px; }
+    h2 { font-size: 82px; }
+    p { font-size: 34px; line-height: 1.4; margin: 32px 0 0; }
+    .muted { color: #53665b; }
+    .split { display: grid; grid-template-columns: 600px 1fr; gap: 70px; align-items: center; height: 820px; }
+    .photo { width: 1060px; height: 795px; object-fit: contain; border: 2px solid #dce1dc; border-radius: 18px; background: #f6f7f4; }
+    .fine { font-size: 25px; color: #53665b; }
+    .brand { position: absolute; bottom: 42px; left: 80px; font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+    .page { position: absolute; bottom: 42px; right: 80px; font-size: 24px; color: #53665b; }
+    .compare-heading { display: flex; justify-content: space-between; align-items: end; }
+    .compare-heading h2 { font-size: 64px; }
+    .compare-labels { display: grid; grid-template-columns: 800px 800px; gap: 100px; margin: 30px 30px 0; font-size: 27px; font-weight: 700; }
+    .footage { position: absolute; top: 284px; width: 750px; height: 675px; object-fit: contain; border-radius: 10px; }
+    #original { left: 135px; }
+    #redacted { left: 1035px; }
+    #compare-note { position: absolute; left: 110px; top: 969px; margin: 0; font-size: 24px; color: #53665b; }
+    .review-grid { display: grid; grid-template-columns: 690px 1fr; gap: 100px; align-items: center; height: 800px; }
+    .steps { border-top: 3px solid #24684a; }
+    .step { display: grid; grid-template-columns: 68px 1fr; gap: 20px; padding: 30px 0; border-bottom: 2px solid #dce1dc; }
+    .number { color: #24684a; font-size: 34px; }
+    .step h3 { font-size: 37px; margin: 0; font-weight: 650; }
+    .step p { font-size: 28px; margin-top: 10px; color: #53665b; }
+    #progress { position: absolute; bottom: 0; height: 8px; width: 100%; background: #24684a; transform-origin: left; }
+  </style>
+</head>
+<body>
+<div data-hf-id="hf-8ksb" id="root" data-composition-id="main" data-width="1920" data-height="1080" data-duration="30">
+  <div data-hf-id="hf-9b3l" id="select-scene" class="clip" data-composition-id="select-scene" data-composition-src="compositions/select-scene.html" data-start="0" data-duration="8" data-track-index="0" data-width="1920" data-height="1080"></div>
+  <div data-hf-id="hf-ul4v" id="compare-scene" class="clip" data-composition-id="compare-scene" data-composition-src="compositions/compare-scene.html" data-start="8" data-duration="10" data-track-index="0" data-width="1920" data-height="1080"></div>
+  <video data-hf-id="hf-1er7" id="original" class="clip footage" src="assets/original.mp4" muted playsinline data-start="8" data-duration="10" data-playback-rate="0.5" data-track-index="1"></video>
+  <video data-hf-id="hf-6tos" id="redacted" class="clip footage" src="assets/redacted.mp4" muted playsinline data-start="8" data-duration="10" data-playback-rate="0.5" data-track-index="2"></video>
+  <div data-hf-id="hf-arg5" id="review-scene" class="clip" data-composition-id="review-scene" data-composition-src="compositions/review-scene.html" data-start="18" data-duration="12" data-track-index="0" data-width="1920" data-height="1080"></div>
+  <div data-hf-id="hf-o6ww" id="progress"></div>
+</div>
+<script>
+  const tl = gsap.timeline({paused:true});
+  tl.fromTo('#progress', {scaleX:0}, {scaleX:1,duration:30,ease:'none'}, 0);
+  window.__timelines['main'] = tl;
+</script>
+</body>
+</html>

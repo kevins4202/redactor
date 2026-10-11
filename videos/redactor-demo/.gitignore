@@ -1,0 +1,6 @@
+.hyperframes/
+node_modules/
+render.log
+*.tmp
+.thumbnails/
+snapshots/

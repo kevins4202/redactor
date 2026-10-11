@@ -87,7 +87,7 @@ demo; evaluation initializes from the annotated silhouette plus the chosen slack
 ## Reproduce the final comparison
 
 ```sh
-python scripts/download_davis.py --help
+python scripts/download_davis.py --sequences blackswan bmx-trees breakdance car-roundabout drift-chicane libby horsejump-high soapbox
 python scripts/evaluate.py --methods box lasso gate affine classical sam2 --output results/final-synthetic.json
 python scripts/evaluate.py --davis data/DAVIS --sequences blackswan bmx-trees breakdance car-roundabout drift-chicane libby horsejump-high soapbox --methods lasso classical sam2 --slack 5 --output results/final-davis.json
 python scripts/evaluate.py --annotations data/crosswalk-annotations.json --methods lasso classical sam2 --slack 5 --output results/final-crosswalk.json

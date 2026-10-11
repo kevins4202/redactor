@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"></head><body><template><style>
+@font-face {font-family:"Redactor Serif";src:url("../assets/source-serif.ttf");font-weight:200 900;}
+@font-face {font-family:"Redactor Sans";src:url("../assets/source-sans.ttf");font-weight:200 900;}
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f6f7f4; color: #182326; font-family: "Redactor Sans", sans-serif; }
+    #root { position: relative; width: 100%; height: 100%; overflow: hidden; }
+    .clip { position: absolute; inset: 0; }
+    .scene { padding: 76px 80px; height: 100%; }
+    .kicker { color: #24684a; font-size: 25px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin: 0 0 30px; }
+    h1, h2 { font-family: "Redactor Serif", serif; font-weight: 500; letter-spacing: -3px; line-height: 1.06; margin: 0; }
+    h1 { font-size: 110px; }
+    h2 { font-size: 82px; }
+    p { font-size: 34px; line-height: 1.4; margin: 32px 0 0; }
+    .muted { color: #53665b; }
+    .split { display: grid; grid-template-columns: 600px 1fr; gap: 70px; align-items: center; height: 820px; }
+    .photo { width: 1060px; height: 795px; object-fit: contain; border: 2px solid #dce1dc; border-radius: 18px; background: #f6f7f4; }
+    .fine { font-size: 25px; color: #53665b; }
+    .brand { position: absolute; bottom: 42px; left: 80px; font-size: 26px; font-weight: 700; letter-spacing: -1px; }
+    .page { position: absolute; bottom: 42px; right: 80px; font-size: 24px; color: #53665b; }
+    .compare-heading { display: flex; justify-content: space-between; align-items: end; }
+    .compare-heading h2 { font-size: 64px; }
+    .compare-labels { display: grid; grid-template-columns: 800px 800px; gap: 100px; margin: 30px 30px 0; font-size: 27px; font-weight: 700; }
+    .footage { position: absolute; top: 284px; width: 750px; height: 675px; object-fit: contain; border-radius: 10px; }
+    #original { left: 135px; }
+    #redacted { left: 1035px; }
+    #compare-note { position: absolute; left: 110px; top: 969px; margin: 0; font-size: 24px; color: #53665b; }
+    .review-grid { display: grid; grid-template-columns: 690px 1fr; gap: 100px; align-items: center; height: 800px; }
+    .steps { border-top: 3px solid #24684a; }
+    .step { display: grid; grid-template-columns: 68px 1fr; gap: 20px; padding: 30px 0; border-bottom: 2px solid #dce1dc; }
+    .number { color: #24684a; font-size: 34px; }
+    .step h3 { font-size: 37px; margin: 0; font-weight: 650; }
+    .step p { font-size: 28px; margin-top: 10px; color: #53665b; }
+    #progress { position: absolute; bottom: 0; height: 8px; width: 100%; background: #24684a; transform-origin: left; }
+
+#root {position:absolute;inset:0;padding:76px 80px;height:100%;width:100%;}</style><div data-hf-id="hf-2anr" id="root" data-composition-id="review-scene" data-width="1920" data-height="1080" data-duration="12">
+    <p data-hf-id="hf-kj6k" class="kicker">03 / Review</p>
+    <div data-hf-id="hf-wvmd" class="review-grid">
+      <div data-hf-id="hf-19vt" id="review-copy"><h1 data-hf-id="hf-ljxi">Review every frame.</h1><p data-hf-id="hf-8nsh">Confidence can miss errors. Automatic redaction cannot guarantee zero leakage.</p><p data-hf-id="hf-1evu" class="muted">The final decision stays with you.</p></div>
+      <div data-hf-id="hf-70xd" class="steps">
+        <div data-hf-id="hf-uqbq" class="step"><div data-hf-id="hf-dye0" class="number">01</div><div data-hf-id="hf-yeow"><h3 data-hf-id="hf-aut1">Check the whole result</h3><p data-hf-id="hf-oifa">Uncertain frames receive a full cover and a review flag.</p></div></div>
+        <div data-hf-id="hf-jlje" class="step"><div data-hf-id="hf-crgx" class="number">02</div><div data-hf-id="hf-y7yw"><h3 data-hf-id="hf-y3pa">Correct or end a target</h3><p data-hf-id="hf-v4pm">Draw again at the error. End tracking only when the target has left.</p></div></div>
+        <div data-hf-id="hf-jzuf" class="step"><div data-hf-id="hf-d5ry" class="number">03</div><div data-hf-id="hf-x11t"><h3 data-hf-id="hf-af3e">Keep a replayable record</h3><p data-hf-id="hf-acff">Export the video, saved selections, and per-frame review log.</p></div></div>
+      </div>
+    </div>
+    <div data-hf-id="hf-uizb" class="brand">redactor</div><div data-hf-id="hf-ocxq" class="page">Code, benchmarks, and limitations in the final report</div>
+  </div><script>const tl=gsap.timeline({paused:true});tl.fromTo('#review-copy', {scale:0.94,opacity:0}, {scale:1,opacity:1,duration:0.5,ease:'power3.out'}, 0); tl.fromTo('.step', {scale:0.94,opacity:0}, {scale:1,opacity:1,duration:0.5,stagger:0.12,ease:'power3.out'}, 0.2);window.__timelines["review-scene"] = tl;</script></template></body></html>
