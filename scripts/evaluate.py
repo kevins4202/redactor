@@ -24,6 +24,9 @@ from redactor.types import TargetPrompt
 def make_tracker(method):
     if method in ("box", "lasso", "gate"):
         return BaselineTracker("box" if method == "box" else "lasso", gate=method == "gate")
+    if method in ("affine", "classical"):
+        from redactor.tracking import ClassicalTracker
+        return ClassicalTracker(recover=method == "classical")
     raise ValueError(f"Unknown method: {method}")
 
 
@@ -63,7 +66,7 @@ def provenance():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("results/synthetic.json"))
-    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate"], default=["box", "lasso", "gate"])
+    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical"], default=["box", "lasso", "gate", "affine", "classical"])
     parser.add_argument("--slack", type=int, nargs="+", default=[5, 9, 13])
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
     parser.add_argument("--davis", type=Path)
