@@ -9,6 +9,14 @@ text prompts feed interchangeable classical and SAM 2 trackers; multiple targets
 can enter, receive corrections, and end at different frames; the local review
 interface exports video, replayable selections, and a per-frame review log.
 
+The [proposal follow-up](proposal-followup.md) adds the previously missing
+learned-appearance recovery experiment, crowded-frame box/lasso ablation, and
+browser segmentation preview. It also measures configurable coverage margins.
+The learned recovery variant is a negative result on the DAVIS subset and is
+explicitly experimental. A [midterm draft](midterm-report.md) and
+[presentation runbook](demo-runbook.md) are prepared; neither is a claim that a
+meeting, presentation, or submission has happened.
+
 The central research objective—reliably covering every visible target pixel
 while keeping the mask tight—is **not universally solved**. On the evaluated
 DAVIS subset, SAM 2.1 Tiny improves mean mask IoU from 0.298 to 0.835 and reduces
@@ -175,10 +183,11 @@ slower recovery search; they should not be mixed into the final aggregates.
 | Shared manual / class / text target interface | `types.py`, `prompts.py`, `detection.py`; real known-example detector smoke checks |
 | Multiple objects and late arrival | Independent classical trackers and SAM 2 object IDs; integration tests add and end a second instance |
 | Scale-aware motion and refinement | Similarity RANSAC, forward/backward checking, periodic GrabCut; synthetic scale ablation |
-| Confidence, cuts, and recovery | Appearance checks, cut monitoring, frozen-template recovery, explicit review states |
+| Confidence, cuts, and recovery | Appearance checks, cut monitoring, frozen-template recovery, optional frozen learned features, explicit review states; reliability remains limited |
 | SAM 2 comparison | Official installed model tested on all synthetic scenarios, DAVIS subset, and crosswalk |
 | Real and synthetic benchmark | Reconstructed 72-run synthetic suite, 36-run DAVIS subset, sparse crosswalk annotations |
-| Polished selection and review UI | Local browser studio, lasso/box, corrections, target ending, progress, cancellation, video/replay/log downloads |
+| Polished selection and review UI | Local browser studio, lasso/box, actual segmentation preview, coverage margins, corrections, target ending, progress, cancellation, video/replay/log downloads |
+| Crowded real-frame box/lasso comparison | Paired 54-segmentation crosswalk ablation with an initialization control; six approximate labels |
 | Iteration record | [Three development iterations](iterations.md), source history, preserved exploratory results |
 | Final report and demo | This report, [12-second MP4](../videos/redactor-demo/redactor-demo.mp4), and editable HyperFrames source |
 
@@ -195,7 +204,10 @@ export was played and inspected. Target ending and cancellation were exercised.
 Automated file selection was blocked by the browser extension's file permission;
 the multipart upload endpoint was validated through an integration test.
 [UI review notes](ui-review.md) record that boundary. A Windows/Linux CI matrix
-is configured; remote CI has not been run because changes have not been pushed.
+is configured. The prior pushed revision `ab4a9e8` passed its remote test run.
+The follow-up local suite passed all 26 tests with installed model tests enabled;
+the latest remote run should be checked on GitHub rather than inferred from
+this historical result.
 
 ## Practical limits and further research
 
@@ -214,6 +226,13 @@ calibrated uncertainty, robust identity recovery, and measured annotation effort
 for correction workflows. Their absence limits the research conclusions; it is
 not hidden behind the completed software deliverables. Course presentations,
 TA feedback, and submission are human activities and have not been claimed.
+
+The added margin experiment reduces mean DAVIS leakage to 0.74% at 16 pixels per
+side, versus 2.21% at the historical 4-pixel default, while excess frame coverage
+rises from 1.27% to 4.32%. Worst-frame leakage is still 25.15%. The original
+tables above retain their original coverage kernel; they are not silently
+replaced by the wider-margin results. See the follow-up for all margins and
+the learned-recovery comparison.
 
 ## Reproduce and demonstrate
 

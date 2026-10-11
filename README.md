@@ -5,7 +5,7 @@ copy. The CPU backend uses GrabCut, RANSAC similarity transforms, periodic
 segmentation, appearance monitoring, and multiscale re-detection. The original
 translation-only tracker remains available for comparison.
 
-The completed research prototype includes a [final report](docs/final-report.md),
+The research prototype includes a [final report](docs/final-report.md),
 [measured results](docs/results.md), and a [12-second demo](videos/redactor-demo/redactor-demo.mp4).
 On the evaluated DAVIS subset, SAM 2 reaches 0.835 mean IoU and 2.21% mean
 visible-pixel leakage. This is not a guarantee of leak-free redaction.
@@ -28,6 +28,13 @@ All processing stays on this machine. Uploaded videos and exports are saved in
 `output/studio`; app sessions are in memory, so restart the app only after an
 export finishes. Existing files remain on disk after restarting.
 
+Use **Preview mask** to inspect segmentation before processing the clip. Green
+shows the selected backend's initial mask; the faint edge shows the configured
+extra coverage. Preview works for selections on the displayed frame and for
+automatic detections. It is a fresh segmentation of that frame, not a replay of
+earlier tracking memory. Changing the frame, prompt, backend, or margin clears
+the old preview. Preview and export share the model worker and cannot overlap.
+
 For the command line:
 
 ```bash
@@ -49,6 +56,7 @@ python redact.py data/crosswalk-short.mp4 --backend sam2 --prompts examples/cros
 python redact.py clip.mp4 --backend sam2 --text "the woman in a white skirt"
 python redact.py clip.mp4 --detect faces plates
 python redact.py clip.mp4 --detect faces --detector haar
+python redact.py clip.mp4 --backend learned --box 100 80 220 300 --style solid --margin 8
 ```
 
 Boxes are exclusive `[x1, y1, x2, y2]` coordinates in the original video. Repeat
@@ -94,6 +102,19 @@ Classical appearance recovery is limited by pose changes, similar-looking
 objects, and partial occlusion. A Gaussian blur is not a guarantee of anonymity;
 use `--style solid` when identifying detail must be completely covered, and
 review the entire output before sharing.
+
+**Extra coverage** in the studio, or `--margin N` in the CLI, expands coverage
+by N source pixels on each side. The default remains 4 (the proposal's 9×9
+dilation). Wider margins cover more surrounding detail and can reduce boundary
+leaks, but cannot fix a lost or undetected target. Reports record the margin.
+
+The optional `learned` backend replaces classical recovery with frozen ResNet-18
+features. It is experimental: our paired real-video evaluation found worse
+average DAVIS tracking than the classical recovery method. SAM 2 remains the
+recommended real-footage backend. See the [proposal follow-up](docs/proposal-followup.md)
+for the learned-recovery comparison, crowded-frame prompt ablation, and coverage
+trade-off measurements. A [midterm report draft](docs/midterm-report.md) is also
+available; it is not a record of a course submission.
 
 ## Evaluation
 

@@ -54,14 +54,17 @@ def test_video_export_preserves_frame_count_and_writes_replay_metadata(tmp_path)
         writer.write(frame)
     writer.release()
     output = tmp_path / "result.mp4"
-    report = process_video(source, output, [TargetPrompt("one", 0, box=(8, 8, 33, 43))], style="solid", audio=False)
+    report = process_video(source, output, [TargetPrompt("one", 0, box=(8, 8, 33, 43))], style="solid", audio=False, margin=8)
     assert report["frames"] == 12
+    assert report["margin_pixels"] == 8
     capture = cv2.VideoCapture(str(output))
     assert capture.get(cv2.CAP_PROP_FRAME_COUNT) == 12
     assert capture.get(cv2.CAP_PROP_FPS) == 12
     ok, frame = capture.read()
     capture.release()
     assert ok and int(frame[25, 20].max()) < 10
+    assert int(frame[25, 5].max()) < 10  # Within the configured eight-pixel margin.
+    assert int(frame[25, 65].min()) > 15  # Distant background remains visible.
     assert len(load_prompts(output.with_suffix(".prompts.json"), (60, 80))) == 1
     assert len(json.loads(output.with_suffix(".json").read_text())["per_frame"]) == 12
     with pytest.raises(FileExistsError):

@@ -1,4 +1,5 @@
 import importlib.util
+import base64
 import time
 
 import cv2
@@ -62,3 +63,60 @@ def test_browser_export_produces_download_and_review_log(client):
     assert client.get(f"/api/exports/{job_id}/file/report").json()["frames"] == 4
     saved = client.get(f"/api/exports/{job_id}/file/prompts").json()["prompts"][0]
     assert saved == request["prompts"][0]  # no inaccessible PNG sidecar
+
+
+def test_preview_segments_displayed_frame_without_creating_export(client, tmp_path):
+    from redactor.baseline import segment
+    from redactor.types import TargetPrompt
+    body = {"video_id": "demo", "frame": 2, "backend": "classical", "margin": 0,
+            "prompts": [{"id": "one", "frame": 2, "box": [10, 8, 35, 48]}]}
+    response = client.post("/api/previews", json=body)
+    assert response.status_code == 200, response.text
+    overlay = cv2.imdecode(np.frombuffer(base64.b64decode(response.json()["mask"].split(",")[1]), np.uint8), cv2.IMREAD_UNCHANGED)
+    capture = cv2.VideoCapture(str(tmp_path / "demo.mp4"))
+    capture.set(cv2.CAP_PROP_POS_FRAMES, 2)
+    ok, frame = capture.read()
+    capture.release()
+    assert ok
+    truth = segment(frame, TargetPrompt("one", 2, box=(10, 8, 35, 48)).selection((60, 80)))
+    assert overlay.shape == (60, 80, 4)
+    assert np.array_equal(overlay[:, :, 3], truth)
+    assert 0 < np.count_nonzero(truth) < 27 * 40  # A model mask, not the input rectangle.
+    assert not list((tmp_path / "studio").rglob("redacted.mp4"))
+    body["margin"] = 8
+    expanded = client.post("/api/previews", json=body).json()
+    expanded = cv2.imdecode(np.frombuffer(base64.b64decode(expanded["mask"].split(",")[1]), np.uint8), cv2.IMREAD_UNCHANGED)
+    assert np.array_equal(expanded[:, :, 3] == 255, truth > 0)
+    assert np.array_equal(expanded[:, :, 3] > 0, cv2.dilate(truth, np.ones((17, 17), np.uint8)) > 0)
+    body["margin"] = -1
+    assert client.post("/api/previews", json=body).status_code == 422
+    body["margin"] = 4
+    body["frame"] = 1
+    assert client.post("/api/previews", json=body).status_code == 400
+    body["frame"] = 99
+    assert client.post("/api/previews", json=body).status_code == 400
+    body["frame"] = 2
+    body["prompts"] = [{"id": "one", "frame": 2, "mask": "../../private.png"}]
+    assert client.post("/api/previews", json=body).status_code == 400
+
+
+def test_preview_excludes_concurrent_exports_and_releases_after_failure(client, monkeypatch):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    entered, finish = threading.Event(), threading.Event()
+    def blocking_preview(*args):
+        entered.set()
+        assert finish.wait(5)
+        raise ValueError("Redraw this selection")
+    monkeypatch.setattr("redactor.preview.preview_mask", blocking_preview)
+    body = {"video_id": "demo", "frame": 0, "audio": False,
+            "prompts": [{"id": "one", "frame": 0, "box": [10, 8, 35, 48]}]}
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        pending = executor.submit(client.post, "/api/previews", json=body)
+        try:
+            assert entered.wait(5)
+            assert client.post("/api/exports", json=body).status_code == 409
+        finally:
+            finish.set()
+        assert pending.result().status_code == 400
+    assert client.post("/api/exports", json=body).status_code == 202

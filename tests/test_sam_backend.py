@@ -40,3 +40,21 @@ def test_sam2_tracks_and_adds_midclip_instance(tmp_path):
             assert frame_metrics(results[0].mask, sequence.masks[index])["iou"] > 0.60
     finally:
         session.close()
+
+
+@pytest.mark.model
+@pytest.mark.skipif(os.environ.get("REDACTOR_MODEL_TESTS") != "1", reason="Requires installed SAM 2 weights")
+def test_sam2_single_frame_preview_matches_first_export_mask(tmp_path):
+    from redactor.preview import preview_mask
+    sequence = synthetic_sequence("translation", count=2)
+    frame = sequence.frames[0]
+    prompt = TargetPrompt("one", 0, box=mask_box(sequence.masks[0]))
+    preview = preview_mask(frame, [prompt], "sam2")
+    for index, image in enumerate(sequence.frames):
+        assert cv2.imwrite(str(tmp_path / f"{index:06d}.jpg"), image, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    session = Sam2Session(tmp_path)
+    try:
+        actual = session.step(frame, [prompt])[0].mask
+        assert np.array_equal(preview, actual)
+    finally:
+        session.close()

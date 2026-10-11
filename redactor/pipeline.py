@@ -42,11 +42,13 @@ class MultiTracker:
 def process_video(input_path, output_path, prompts, backend="classical", style="blur",
                   on_failure="cover", overwrite=False, audio=True, mask_dir=None,
                   progress=None, detector=None, detect_every=1, checkpoint=None,
-                  model_config=None, device="auto", cancelled=None):
-    if backend not in ("classical", "baseline", "sam2"):
+                  model_config=None, device="auto", cancelled=None, margin=4):
+    if backend not in ("classical", "baseline", "sam2", "learned"):
         raise ValueError(f"Unsupported streaming backend: {backend}")
     if detect_every < 1:
         raise ValueError("Detection interval must be positive")
+    if not isinstance(margin, int) or isinstance(margin, bool) or not 0 <= margin <= 128:
+        raise ValueError("Coverage margin must be an integer from 0 to 128 pixels")
     prompt_list = list(prompts)
     prompt_schedule = {}
     for prompt in prompt_list:
@@ -66,6 +68,12 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
             raise FileExistsError(f"Mask directory is not empty: {mask_dir}")
         mask_dir.mkdir(parents=True, exist_ok=True)
     with ExitStack() as resources, VideoReader(input_path) as reader:
+        if backend == "learned":
+            from .appearance import AppearanceEncoder, LearnedRecoveryTracker
+            encoder = AppearanceEncoder(device)
+            resources.callback(encoder.close)
+            pipeline = MultiTracker(lambda: LearnedRecoveryTracker(encoder))
+            pipeline.metadata = encoder.metadata
         for prompt in prompt_list:
             prompt.selection((reader.height, reader.width))
             if reader.count and prompt.frame_index >= reader.count:
@@ -88,7 +96,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
                 results = pipeline.step(frame, current_prompts)
                 had_targets = had_targets or bool(results)
                 union, covered = coverage_mask(results, frame.shape[:2], on_failure)
-                writer.write(redact_frame(frame, union, "solid" if covered else style))
+                writer.write(redact_frame(frame, union, "solid" if covered else style, dilation=2 * margin + 1))
                 if mask_dir and not cv2.imwrite(str(mask_dir / f"{index:06d}.png"), union):
                     raise OSError(f"Cannot save mask at frame {index}")
                 records.append({"frame": index, "covered_for_review": covered, "targets": [
@@ -104,7 +112,7 @@ def process_video(input_path, output_path, prompts, backend="classical", style="
         report = {"version": 1, "input": str(Path(input_path).resolve()), "input_sha256": input_hash,
                   "output": str(Path(output_path).resolve()), "model": getattr(pipeline, "metadata", None),
                   "detector": getattr(getattr(detector, "detector", None), "metadata", None),
-                  "backend": backend, "style": style, "failure_policy": on_failure, "fps": reader.fps,
+                  "backend": backend, "style": style, "margin_pixels": margin, "failure_policy": on_failure, "fps": reader.fps,
                   "frames": len(records), "seconds": seconds, "processing_fps": len(records) / seconds,
                   "review_frames": sum(row["covered_for_review"] for row in records),
                   "warnings": ["Unflagged tracking errors remain possible. Review the entire output before sharing."],

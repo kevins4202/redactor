@@ -1,0 +1,3 @@
+sequence,method,slack,prompt_frame,setup_seconds,seconds,processed_frames,fps,review_frames,review_frame_fraction,frames,visible_frames,mean_iou,mean_leak_rate,pixel_leak_rate,worst_leak_rate,leaking_frame_fraction,temporal_metrics_available,longest_leak_frames,longest_leak_seconds,mean_excess_frame_fraction
+crosswalk-annotations,classical,5,0,0.0013693999499082565,20.841364599997178,150,7.197225463826889,80,0.5333333333333333,6,6,0.24645634130292926,0.7095873536117878,0.6069319419758041,1.0,1.0,False,,,0.0024171189868028944
+crosswalk-annotations,learned,5,0,2.534171799896285,6.289987900061533,150,23.84742266333018,124,0.8266666666666667,6,6,0.2626906090658469,0.6896441157564621,0.5548993750358351,1.0,1.0,False,,,0.0086007343550447

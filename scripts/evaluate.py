@@ -32,13 +32,14 @@ def make_tracker(method):
     raise ValueError(f"Unknown method: {method}")
 
 
-def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, device="auto"):
+def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, device="auto", coverage_dilations=()):
     # A late appearing object is first prompted when it is actually visible.
     start = next(index for index, mask in enumerate(sequence.masks) if mask is not None and np.any(mask))
     selection = cv2.dilate(sequence.masks[start], np.ones((2 * slack + 1, 2 * slack + 1), np.uint8))
     prompt = TargetPrompt(str(sequence.object_id), start, mask=selection)
     rows = []
     guarded_rows = []
+    coverage_rows = {str(size): [] for size in coverage_dilations}
     review_frames = 0
     setup_started = time.perf_counter()
     model_metadata = None
@@ -52,6 +53,12 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
             tracker = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device)
             resources.callback(tracker.close)
             model_metadata = tracker.metadata
+        elif method == "learned":
+            from redactor.appearance import AppearanceEncoder, LearnedRecoveryTracker
+            encoder = AppearanceEncoder(device)
+            resources.callback(encoder.close)
+            tracker = LearnedRecoveryTracker(encoder)
+            model_metadata = encoder.metadata
         else:
             tracker = make_tracker(method)
         setup_seconds = time.perf_counter() - setup_started
@@ -72,23 +79,27 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
                              **frame_metrics(result.mask, sequence.masks[index])})
                 guarded_rows.append({"frame": index, **frame_metrics(
                     np.full_like(result.mask, 255) if guarded else result.mask, sequence.masks[index])})
+                for size, scores in coverage_rows.items():
+                    scores.append({"frame": index, **frame_metrics(result.mask, sequence.masks[index], dilation=int(size))})
         elapsed = time.perf_counter() - started
     return {"sequence": sequence.name, "method": method, "slack": slack,
             "model": model_metadata,
             "prompt_frame": start, "setup_seconds": setup_seconds, "seconds": elapsed,
             "processed_frames": len(sequence.frames) - start, "fps": (len(sequence.frames) - start) / elapsed,
             "review_frames": review_frames, "review_frame_fraction": review_frames / (len(sequence.frames) - start),
+            **({"coverage_sweep": {size: {**summarize(scores, sequence.fps), "per_frame": scores}
+                                   for size, scores in coverage_rows.items()}} if coverage_rows else {}),
             "guarded_output": summarize(guarded_rows, sequence.fps),
             **summarize(rows, sequence.fps), "per_frame": rows}
 
 
-def provenance():
+def provenance(extra_sources=()):
     root = Path(__file__).resolve().parents[1]
     def git(*args):
         result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True)
         return result.stdout.strip() if result.returncode == 0 else "unknown"
     digest = hashlib.sha256()
-    for path in sorted([*root.glob("redactor/*.py"), Path(__file__).resolve()]):
+    for path in sorted({*root.glob("redactor/*.py"), Path(__file__).resolve(), *map(Path, extra_sources)}):
         digest.update(path.name.encode())
         digest.update(path.read_bytes())
     return {"commit": git("rev-parse", "HEAD"), "dirty": bool(git("status", "--porcelain")),
@@ -99,11 +110,12 @@ def provenance():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("results/synthetic.json"))
-    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical", "sam2"], default=["box", "lasso", "gate", "affine", "classical"])
+    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical", "sam2", "learned"], default=["box", "lasso", "gate", "affine", "classical"])
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--model-config")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
     parser.add_argument("--slack", type=int, nargs="+", default=[5, 9, 13])
+    parser.add_argument("--coverage-dilations", type=int, nargs="+", default=[], help="Score additional odd coverage kernels on identical raw masks")
     parser.add_argument("--scenarios", nargs="+", choices=SCENARIOS, default=list(SCENARIOS))
     data_source = parser.add_mutually_exclusive_group()
     data_source.add_argument("--davis", type=Path)
@@ -112,6 +124,8 @@ def main():
     args = parser.parse_args()
     if any(value < 0 for value in args.slack):
         parser.error("Slack must be nonnegative")
+    if any(value < 1 or value % 2 == 0 for value in args.coverage_dilations):
+        parser.error("Coverage dilations must be positive odd integers")
     cv2.setNumThreads(1)
     sequences = davis_sequences(args.davis, args.sequences) if args.davis else [annotated_video(args.annotations)] if args.annotations else (synthetic_sequence(name) for name in args.scenarios)
     runs = []
@@ -123,7 +137,7 @@ def main():
         temporary = args.output.with_suffix(".tmp")
         temporary.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n", encoding="utf-8")
         temporary.replace(args.output)
-        summaries = [{key: value for key, value in run.items() if key not in ("per_frame", "model", "guarded_output")} for run in runs]
+        summaries = [{key: value for key, value in run.items() if key not in ("per_frame", "model", "guarded_output", "coverage_sweep")} for run in runs]
         if summaries:
             with args.output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as stream:
                 writer = csv.DictWriter(stream, fieldnames=list(summaries[0]))
@@ -133,7 +147,7 @@ def main():
         for method in args.methods:
             for slack in args.slack:
                 cv2.setRNGSeed(581)
-                run = evaluate(sequence, method, slack, args.checkpoint, args.model_config, args.device)
+                run = evaluate(sequence, method, slack, args.checkpoint, args.model_config, args.device, args.coverage_dilations)
                 runs.append(run)
                 save()
                 print(f"{sequence.name:20s} {method:10s} slack={slack:2d} IoU={run['mean_iou']:.3f} leak={run['mean_leak_rate']:.1%} {run['fps']:.1f} fps", flush=True)

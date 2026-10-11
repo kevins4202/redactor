@@ -1,0 +1,408 @@
+{
+  "dataset": "data\\crosswalk-annotations.json",
+  "notes": "Top-level metrics score raw tracking masks. guarded_output separately scores full-frame coverage on uncertain/lost states; it can hide most of a frame and is not a tracking accuracy improvement. Metrics measure mask coverage, not anonymity. Synthetic person-v1 reconstructs the experiment but is not the proposal's original fixture; crosswalk labels are approximate sparse polygons.",
+  "environment": {
+    "commit": "ab4a9e8acaf1a64a06e4f8ad283a4e50a511cc0b",
+    "dirty": true,
+    "source_sha256": "43bd01aa4e2eaabb056499c9d396650eacea51e452b81db8226b0cbd9d875e5b",
+    "python": "3.11.16",
+    "opencv": "5.0.0",
+    "numpy": "2.4.6",
+    "platform": "Windows-10-10.0.26200-SP0"
+  },
+  "complete": true,
+  "runs": [
+    {
+      "sequence": "crosswalk-annotations",
+      "method": "sam2",
+      "slack": 5,
+      "model": {
+        "checkpoint": "models/sam2.1_hiera_tiny.pt",
+        "checkpoint_sha256": "7402e0d864fa82708a20fbd15bc84245c2f26dff0eb43a4b5b93452deb34be69",
+        "config": "configs/sam2.1/sam2.1_hiera_t.yaml",
+        "device": "cuda",
+        "torch": "2.11.0+cu128",
+        "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+        "postprocessing": false,
+        "frame_input": "quality-100 JPEG"
+      },
+      "prompt_frame": 0,
+      "setup_seconds": 34.48357359995134,
+      "seconds": 26.785484600113705,
+      "processed_frames": 150,
+      "fps": 5.600048020014663,
+      "review_frames": 0,
+      "review_frame_fraction": 0.0,
+      "coverage_sweep": {
+        "9": {
+          "frames": 6,
+          "visible_frames": 6,
+          "mean_iou": 0.7792176116632756,
+          "mean_leak_rate": 0.019783164159698934,
+          "pixel_leak_rate": 0.01736330103396212,
+          "worst_leak_rate": 0.04545871980898154,
+          "leaking_frame_fraction": 1.0,
+          "temporal_metrics_available": false,
+          "longest_leak_frames": null,
+          "longest_leak_seconds": null,
+          "mean_excess_frame_fraction": 0.002273507343550447,
+          "per_frame": [
+            {
+              "frame": 0,
+              "iou": 0.7542645442331962,
+              "visible_pixels": 22999,
+              "leaked_pixels": 865,
+              "leak_rate": 0.03761033088395148,
+              "excess_pixels": 4460,
+              "excess_frame_fraction": 0.0017800127713920818
+            },
+            {
+              "frame": 30,
+              "iou": 0.8908857075168376,
+              "visible_pixels": 27348,
+              "leaked_pixels": 15,
+              "leak_rate": 0.0005484861781483107,
+              "excess_pixels": 5481,
+              "excess_frame_fraction": 0.0021875
+            },
+            {
+              "frame": 60,
+              "iou": 0.8350287866326133,
+              "visible_pixels": 19690,
+              "leaked_pixels": 54,
+              "leak_rate": 0.0027425088877602844,
+              "excess_pixels": 7187,
+              "excess_frame_fraction": 0.002868374840357599
+            },
+            {
+              "frame": 90,
+              "iou": 0.7770159399906236,
+              "visible_pixels": 13905,
+              "leaked_pixels": 240,
+              "leak_rate": 0.017259978425026967,
+              "excess_pixels": 6162,
+              "excess_frame_fraction": 0.0024592911877394635
+            },
+            {
+              "frame": 120,
+              "iou": 0.6305882352941177,
+              "visible_pixels": 9815,
+              "leaked_pixels": 148,
+              "leak_rate": 0.015078960774325013,
+              "excess_pixels": 7535,
+              "excess_frame_fraction": 0.003007263729246488
+            },
+            {
+              "frame": 149,
+              "iou": 0.7875224563122653,
+              "visible_pixels": 10889,
+              "leaked_pixels": 495,
+              "leak_rate": 0.04545871980898154,
+              "excess_pixels": 3354,
+              "excess_frame_fraction": 0.0013386015325670497
+            }
+          ]
+        },
+        "17": {
+          "frames": 6,
+          "visible_frames": 6,
+          "mean_iou": 0.7792176116632756,
+          "mean_leak_rate": 0.005391142109094346,
+          "pixel_leak_rate": 0.0047684574661238845,
+          "worst_leak_rate": 0.012765175865552392,
+          "leaking_frame_fraction": 0.6666666666666666,
+          "temporal_metrics_available": false,
+          "longest_leak_frames": null,
+          "longest_leak_seconds": null,
+          "mean_excess_frame_fraction": 0.0036607998084291185,
+          "per_frame": [
+            {
+              "frame": 0,
+              "iou": 0.7542645442331962,
+              "visible_pixels": 22999,
+              "leaked_pixels": 225,
+              "leak_rate": 0.009783034044958476,
+              "excess_pixels": 7923,
+              "excess_frame_fraction": 0.003162116858237548
+            },
+            {
+              "frame": 30,
+              "iou": 0.8908857075168376,
+              "visible_pixels": 27348,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 9690,
+              "excess_frame_fraction": 0.003867337164750958
+            },
+            {
+              "frame": 60,
+              "iou": 0.8350287866326133,
+              "visible_pixels": 19690,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 11249,
+              "excess_frame_fraction": 0.004489543422733078
+            },
+            {
+              "frame": 90,
+              "iou": 0.7770159399906236,
+              "visible_pixels": 13905,
+              "leaked_pixels": 132,
+              "leak_rate": 0.009492988133764833,
+              "excess_pixels": 9529,
+              "excess_frame_fraction": 0.003803081098339719
+            },
+            {
+              "frame": 120,
+              "iou": 0.6305882352941177,
+              "visible_pixels": 9815,
+              "leaked_pixels": 3,
+              "leak_rate": 0.0003056546102903719,
+              "excess_pixels": 10829,
+              "excess_frame_fraction": 0.004321918901660281
+            },
+            {
+              "frame": 149,
+              "iou": 0.7875224563122653,
+              "visible_pixels": 10889,
+              "leaked_pixels": 139,
+              "leak_rate": 0.012765175865552392,
+              "excess_pixels": 5815,
+              "excess_frame_fraction": 0.002320801404853129
+            }
+          ]
+        },
+        "33": {
+          "frames": 6,
+          "visible_frames": 6,
+          "mean_iou": 0.7792176116632756,
+          "mean_leak_rate": 0.00017979144192736425,
+          "pixel_leak_rate": 0.00014334040479330315,
+          "worst_leak_rate": 0.0010787486515641855,
+          "leaking_frame_fraction": 0.16666666666666666,
+          "temporal_metrics_available": false,
+          "longest_leak_frames": null,
+          "longest_leak_seconds": null,
+          "mean_excess_frame_fraction": 0.0065806593231162195,
+          "per_frame": [
+            {
+              "frame": 0,
+              "iou": 0.7542645442331962,
+              "visible_pixels": 22999,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 15491,
+              "excess_frame_fraction": 0.006182551085568327
+            },
+            {
+              "frame": 30,
+              "iou": 0.8908857075168376,
+              "visible_pixels": 27348,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 17998,
+              "excess_frame_fraction": 0.007183109833971903
+            },
+            {
+              "frame": 60,
+              "iou": 0.8350287866326133,
+              "visible_pixels": 19690,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 19621,
+              "excess_frame_fraction": 0.007830858876117498
+            },
+            {
+              "frame": 90,
+              "iou": 0.7770159399906236,
+              "visible_pixels": 13905,
+              "leaked_pixels": 15,
+              "leak_rate": 0.0010787486515641855,
+              "excess_pixels": 16564,
+              "excess_frame_fraction": 0.006610791826309068
+            },
+            {
+              "frame": 120,
+              "iou": 0.6305882352941177,
+              "visible_pixels": 9815,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 17713,
+              "excess_frame_fraction": 0.007069364623243934
+            },
+            {
+              "frame": 149,
+              "iou": 0.7875224563122653,
+              "visible_pixels": 10889,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 11544,
+              "excess_frame_fraction": 0.00460727969348659
+            }
+          ]
+        },
+        "65": {
+          "frames": 6,
+          "visible_frames": 6,
+          "mean_iou": 0.7792176116632756,
+          "mean_leak_rate": 0.0,
+          "pixel_leak_rate": 0.0,
+          "worst_leak_rate": 0.0,
+          "leaking_frame_fraction": 0.0,
+          "temporal_metrics_available": false,
+          "longest_leak_frames": null,
+          "longest_leak_seconds": null,
+          "mean_excess_frame_fraction": 0.012649864303959132,
+          "per_frame": [
+            {
+              "frame": 0,
+              "iou": 0.7542645442331962,
+              "visible_pixels": 22999,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 30846,
+              "excess_frame_fraction": 0.012310823754789271
+            },
+            {
+              "frame": 30,
+              "iou": 0.8908857075168376,
+              "visible_pixels": 27348,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 33805,
+              "excess_frame_fraction": 0.013491778416347381
+            },
+            {
+              "frame": 60,
+              "iou": 0.8350287866326133,
+              "visible_pixels": 19690,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 36343,
+              "excess_frame_fraction": 0.01450470945083014
+            },
+            {
+              "frame": 90,
+              "iou": 0.7770159399906236,
+              "visible_pixels": 13905,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 31905,
+              "excess_frame_fraction": 0.012733477011494253
+            },
+            {
+              "frame": 120,
+              "iou": 0.6305882352941177,
+              "visible_pixels": 9815,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 32611,
+              "excess_frame_fraction": 0.013015245849297573
+            },
+            {
+              "frame": 149,
+              "iou": 0.7875224563122653,
+              "visible_pixels": 10889,
+              "leaked_pixels": 0,
+              "leak_rate": 0.0,
+              "excess_pixels": 24663,
+              "excess_frame_fraction": 0.009843151340996168
+            }
+          ]
+        }
+      },
+      "guarded_output": {
+        "frames": 6,
+        "visible_frames": 6,
+        "mean_iou": 0.7792176116632756,
+        "mean_leak_rate": 0.019783164159698934,
+        "pixel_leak_rate": 0.01736330103396212,
+        "worst_leak_rate": 0.04545871980898154,
+        "leaking_frame_fraction": 1.0,
+        "temporal_metrics_available": false,
+        "longest_leak_frames": null,
+        "longest_leak_seconds": null,
+        "mean_excess_frame_fraction": 0.002273507343550447
+      },
+      "frames": 6,
+      "visible_frames": 6,
+      "mean_iou": 0.7792176116632756,
+      "mean_leak_rate": 0.019783164159698934,
+      "pixel_leak_rate": 0.01736330103396212,
+      "worst_leak_rate": 0.04545871980898154,
+      "leaking_frame_fraction": 1.0,
+      "temporal_metrics_available": false,
+      "longest_leak_frames": null,
+      "longest_leak_seconds": null,
+      "mean_excess_frame_fraction": 0.002273507343550447,
+      "per_frame": [
+        {
+          "frame": 0,
+          "state": "tracking",
+          "confidence": 0.905379056930542,
+          "iou": 0.7542645442331962,
+          "visible_pixels": 22999,
+          "leaked_pixels": 865,
+          "leak_rate": 0.03761033088395148,
+          "excess_pixels": 4460,
+          "excess_frame_fraction": 0.0017800127713920818
+        },
+        {
+          "frame": 30,
+          "state": "tracking",
+          "confidence": 0.9694468975067139,
+          "iou": 0.8908857075168376,
+          "visible_pixels": 27348,
+          "leaked_pixels": 15,
+          "leak_rate": 0.0005484861781483107,
+          "excess_pixels": 5481,
+          "excess_frame_fraction": 0.0021875
+        },
+        {
+          "frame": 60,
+          "state": "tracking",
+          "confidence": 0.974635660648346,
+          "iou": 0.8350287866326133,
+          "visible_pixels": 19690,
+          "leaked_pixels": 54,
+          "leak_rate": 0.0027425088877602844,
+          "excess_pixels": 7187,
+          "excess_frame_fraction": 0.002868374840357599
+        },
+        {
+          "frame": 90,
+          "state": "tracking",
+          "confidence": 0.9666983485221863,
+          "iou": 0.7770159399906236,
+          "visible_pixels": 13905,
+          "leaked_pixels": 240,
+          "leak_rate": 0.017259978425026967,
+          "excess_pixels": 6162,
+          "excess_frame_fraction": 0.0024592911877394635
+        },
+        {
+          "frame": 120,
+          "state": "tracking",
+          "confidence": 0.9671791195869446,
+          "iou": 0.6305882352941177,
+          "visible_pixels": 9815,
+          "leaked_pixels": 148,
+          "leak_rate": 0.015078960774325013,
+          "excess_pixels": 7535,
+          "excess_frame_fraction": 0.003007263729246488
+        },
+        {
+          "frame": 149,
+          "state": "tracking",
+          "confidence": 0.9755991101264954,
+          "iou": 0.7875224563122653,
+          "visible_pixels": 10889,
+          "leaked_pixels": 495,
+          "leak_rate": 0.04545871980898154,
+          "excess_pixels": 3354,
+          "excess_frame_fraction": 0.0013386015325670497
+        }
+      ]
+    }
+  ]
+}

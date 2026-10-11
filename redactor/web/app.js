@@ -2,6 +2,7 @@
 const $ = (id) => document.getElementById(id);
 const state = { video: null, frame: 0, image: null, imageFrame: -1, prompts: [], mode: "manual", target: "target-1", targetCount: 1, drawing: null, imageRequest: 0, job: null, busy: false, reviewFrames: [], reviewTargets: {}, reviewIndex: 0, exportMode: "manual" };
 const canvas = $("canvas"), context = canvas.getContext("2d");
+Object.assign(state, { preview: null, previewVersion: 0, previewBusy: false, showPreview: true });
 
 async function api(url, options = {}) {
   const response = await fetch(url, options);
@@ -13,7 +14,16 @@ async function api(url, options = {}) {
   return response.json();
 }
 function message(text = "") { $("message").textContent = text; $("message").hidden = !text; }
-function ready() { $("export").disabled = !state.video || state.busy || (state.mode === "manual" && !state.prompts.length); }
+function ready() {
+  $("export").disabled = !state.video || state.busy || state.previewBusy || (state.mode === "manual" && !state.prompts.length);
+  $("preview").disabled = !state.video || state.imageFrame !== state.frame || state.busy || state.previewBusy || (state.mode === "manual" && !framePrompts().length);
+}
+function framePrompts() { return state.prompts.filter((prompt) => prompt.frame === state.frame && prompt.action !== "end"); }
+function invalidatePreview() {
+  state.preview = null; state.previewVersion++; state.showPreview = true;
+  $("toggle-preview").hidden = true;
+  $("preview-status").textContent = state.mode === "manual" ? "Preview selections drawn on this frame." : "Preview matching objects on this frame.";
+}
 function targetLabel(id) { return id.startsWith("detected-") ? id.replace("detected-", "Detected target ") : id.replace("target-", "Target "); }
 function formatTime(seconds) { return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${(seconds % 60).toFixed(2).padStart(5, "0")}`; }
 
@@ -35,13 +45,15 @@ function geometry(prompt) { if (prompt.polygon) return prompt.polygon; const [x1
 function render() {
   context.clearRect(0, 0, canvas.width, canvas.height);
   if (state.image) context.drawImage(state.image, 0, 0, canvas.width, canvas.height);
-  if (state.mode === "manual") state.prompts.filter((prompt) => prompt.frame === state.frame && prompt.action !== "end").forEach((prompt) => drawPolygon(geometry(prompt), prompt.id === state.target ? "#359566" : "#e7a64a", targetLabel(prompt.id)));
+  if (state.preview && state.showPreview) { context.save(); context.globalAlpha = .55; context.drawImage(state.preview, 0, 0, canvas.width, canvas.height); context.restore(); }
+  else if (state.mode === "manual") framePrompts().forEach((prompt) => drawPolygon(geometry(prompt), prompt.id === state.target ? "#359566" : "#e7a64a", targetLabel(prompt.id)));
   if (state.drawing) drawPolygon(state.drawing.points, "#359566");
 }
 async function seek(frame) {
   if (!state.video) return;
   frame = Math.max(0, Math.min(state.video.frames - 1, Number(frame)));
   state.frame = frame; state.drawing = null;
+  invalidatePreview(); ready(); render();
   $("seek").value = frame; $("timecode").textContent = formatTime(frame / state.video.fps);
   $("frame-label").textContent = `Frame ${frame + 1} of ${state.video.frames}`;
   const request = ++state.imageRequest;
@@ -49,7 +61,7 @@ async function seek(frame) {
     const image = new Image();
     await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("Could not load this frame.")); image.src = `/api/videos/${encodeURIComponent(state.video.id)}/frames/${frame}`; });
     if (request !== state.imageRequest) return;
-    state.image = image; state.imageFrame = frame; render();
+    state.image = image; state.imageFrame = frame; ready(); render();
   } catch (error) { message(error.message); }
 }
 function selectionList() {
@@ -60,7 +72,7 @@ function selectionList() {
     const jump = document.createElement("button"); jump.className = "jump"; jump.textContent = `${targetLabel(prompt.id)}${prompt.action === "end" ? " ends" : ""} · frame ${prompt.frame + 1}`;
     jump.onclick = () => { state.target = prompt.id; $("target").value = prompt.id; seek(prompt.frame); };
     const remove = document.createElement("button"); remove.className = "remove"; remove.textContent = "×"; remove.setAttribute("aria-label", `Remove ${targetLabel(prompt.id)} selection at frame ${prompt.frame + 1}`);
-    remove.onclick = () => { state.prompts = state.prompts.filter((item) => item !== prompt); selectionList(); render(); };
+    remove.onclick = () => { state.prompts = state.prompts.filter((item) => item !== prompt); invalidatePreview(); selectionList(); render(); };
     row.append(jump, remove); list.append(row);
   });
   ready();
@@ -80,9 +92,9 @@ function point(event) {
 }
 canvas.addEventListener("pointerdown", (event) => {
   if (!state.video || state.imageFrame !== state.frame || state.mode !== "manual" || state.busy || event.button !== 0) return;
-  canvas.setPointerCapture(event.pointerId); canvas.focus();
+  canvas.setPointerCapture(event.pointerId); canvas.focus({ preventScroll: true });
   const start = point(event); state.drawing = { start, points: [start], tool: $("tool").value };
-  message(); render();
+  invalidatePreview(); message(); render();
 });
 canvas.addEventListener("pointermove", (event) => {
   if (!state.drawing) return;
@@ -117,16 +129,40 @@ $("end-target").onclick = () => {
   const earlier = state.prompts.filter((p) => p.id === state.target && p.frame < state.frame).sort((a,b) => a.frame - b.frame);
   if (!earlier.length || earlier[earlier.length - 1].action === "end") { message("Choose a frame after this target was selected to end its redaction."); return; }
   state.prompts = state.prompts.filter((p) => !(p.id === state.target && p.frame >= state.frame));
-  state.prompts.push({id:state.target, frame:state.frame, action:"end", source:"manual"}); selectionList(); render();
+  state.prompts.push({id:state.target, frame:state.frame, action:"end", source:"manual"}); invalidatePreview(); selectionList(); render();
 };
 function mode(value) {
   state.mode = value; $("manual-settings").hidden = value !== "manual"; $("auto-settings").hidden = value === "manual";
+  invalidatePreview();
   for (const name of ["manual","auto"]) { const active = name === value; $(name + "-mode").classList.toggle("selected", active); $(name + "-mode").setAttribute("aria-pressed", String(active)); }
   $("canvas-help").textContent = value === "manual" ? "Drag an outline around the object you want to hide" : "Matching objects will be checked for throughout the clip";
   ready(); render();
 }
 $("manual-mode").onclick = () => mode("manual"); $("auto-mode").onclick = () => mode("auto");
-$("find").onchange = () => { $("description-label").hidden = $("find").value !== "text"; };
+$("find").onchange = () => { $("description-label").hidden = $("find").value !== "text"; invalidatePreview(); render(); };
+$("backend").onchange = () => { invalidatePreview(); render(); };
+$("margin").onchange = () => { invalidatePreview(); render(); };
+$("description").oninput = () => { invalidatePreview(); render(); };
+$("preview").onclick = async () => {
+  if (!state.video || state.busy || state.previewBusy) return;
+  invalidatePreview(); const version = state.previewVersion;
+  state.previewBusy = true; ready(); message();
+  $("preview").textContent = "Preparing mask…";
+  $("preview-status").textContent = "Segmenting this frame. Models may take a moment to load.";
+  try {
+    const body = { video_id: state.video.id, frame: state.frame, prompts: framePrompts(), backend: $("backend").value, mode: state.mode === "manual" ? "manual" : $("find").value, text: $("description").value, margin: Number($("margin").value) };
+    const response = await api("/api/previews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const image = new Image();
+    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("Could not display the mask.")); image.src = response.mask; });
+    if (version !== state.previewVersion) return;
+    state.preview = image; state.showPreview = true;
+    $("toggle-preview").hidden = false; $("toggle-preview").textContent = "Hide mask";
+    $("preview-status").textContent = `${response.targets} ${response.targets === 1 ? "target" : "targets"} · Green: segmentation. Faint edge: ${response.margin}px extra coverage. Tracking can change it.`;
+    render();
+  } catch (error) { if (version === state.previewVersion) { message(error.message); $("preview-status").textContent = "Adjust the selection and try again."; } }
+  finally { state.previewBusy = false; $("preview").textContent = "Preview mask"; ready(); }
+};
+$("toggle-preview").onclick = () => { state.showPreview = !state.showPreview; $("toggle-preview").textContent = state.showPreview ? "Hide mask" : "Show mask"; render(); };
 $("upload").onchange = async (event) => {
   const file = event.target.files[0]; if (!file) return;
   if (state.busy) { message("Finish or cancel the current export before opening another video."); event.target.value = ""; return; }
@@ -140,7 +176,7 @@ $("export").onclick = async () => {
   if (!state.video || state.busy) return;
   message(); state.busy = true; ready(); $("result").hidden = true;
   try {
-    const body = { video_id: state.video.id, prompts: state.prompts, backend: $("backend").value, style: $("style").value, mode: state.mode === "manual" ? "manual" : $("find").value, text: $("description").value, audio: $("audio").checked };
+    const body = { video_id: state.video.id, prompts: state.prompts, backend: $("backend").value, style: $("style").value, mode: state.mode === "manual" ? "manual" : $("find").value, text: $("description").value, audio: $("audio").checked, margin: Number($("margin").value) };
     state.exportMode = body.mode;
     const response = await api("/api/exports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     state.job = response.id; $("job-panel").hidden = false; $("job-title").textContent = "Preparing your video…"; $("job-detail").textContent = "Loading models and preparing frames. This may take a moment."; $("progress").value = 0; $("cancel").hidden = false;
@@ -179,6 +215,7 @@ $("review-next").onclick = () => { if (!state.reviewFrames.length) return; const
   try {
     const [videos, capabilities] = await Promise.all([api("/api/videos"), api("/api/capabilities")]);
     $("backend").querySelector('[value="sam2"]').disabled = !capabilities.sam2;
+    $("backend").querySelector('[value="learned"]').disabled = !capabilities.learned;
     if (capabilities.sam2) $("backend").value = "sam2";
     if (!capabilities.grounding) { $("find").querySelector('[value="text"]').disabled = true; $("find").querySelector('[value="plates"]').disabled = true; $("find").value = "faces"; $("description-label").hidden = true; }
     if (videos.length) await loadVideo(videos[0]);

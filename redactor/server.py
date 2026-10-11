@@ -1,16 +1,19 @@
 """A loopback-only review application. Videos stay on the local machine."""
 
 import argparse
+import base64
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 import importlib.util
 import json
 from pathlib import Path
 import threading
+import tempfile
 from urllib.parse import urlparse
 from uuid import uuid4
 
 import cv2
+import numpy as np
 from fastapi import FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -26,11 +29,29 @@ from .video import VideoReader
 class ExportRequest(BaseModel):
     video_id: str
     prompts: list[dict] = Field(default_factory=list)
-    backend: Literal["classical", "sam2", "baseline"] = "classical"
+    backend: Literal["classical", "sam2", "baseline", "learned"] = "classical"
     style: Literal["blur", "solid", "pixelate"] = "blur"
     mode: Literal["manual", "text", "faces", "plates"] = "manual"
     text: str = ""
     audio: bool = True
+    margin: int = Field(default=4, ge=0, le=128, strict=True)
+
+
+class PreviewRequest(ExportRequest):
+    frame: int = Field(default=0, ge=0)
+
+
+def make_detector(options):
+    if options.mode == "manual":
+        return None
+    from .detection import DetectorSource, FaceDetector, GroundingDetector
+    if options.mode == "faces" and importlib.util.find_spec("transformers") is None:
+        return DetectorSource(FaceDetector())
+    description = options.text if options.mode == "text" else "a human face" if options.mode == "faces" else "a vehicle license plate"
+    if not description.strip():
+        raise ValueError("Describe what you want to hide")
+    required = ["face" if options.mode == "faces" else "plate"] if options.mode in ("faces", "plates") else None
+    return DetectorSource(GroundingDetector(description, required_labels=required))
 
 
 def create_app(storage=None, demo=None):
@@ -39,6 +60,7 @@ def create_app(storage=None, demo=None):
     videos, jobs = {}, {}
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="redactor-export")
     lock = threading.Lock()
+    compute = threading.Lock()  # Preview and export must not load models concurrently.
 
     @asynccontextmanager
     async def lifespan(app):
@@ -90,6 +112,7 @@ def create_app(storage=None, demo=None):
     @app.get("/api/capabilities")
     def capabilities():
         return {"sam2": importlib.util.find_spec("sam2") is not None and Path("models/sam2.1_hiera_tiny.pt").is_file(),
+                "learned": importlib.util.find_spec("torchvision") is not None,
                 "grounding": importlib.util.find_spec("transformers") is not None}
 
     @app.post("/api/videos")
@@ -131,24 +154,66 @@ def create_app(storage=None, demo=None):
         finally:
             capture.release()
 
+    @app.post("/api/previews")
+    def preview(options: PreviewRequest):
+        from .preview import preview_mask
+        entry = video(options.video_id)
+        if options.frame >= entry["frames"]:
+            raise HTTPException(400, "Frame is outside the video")
+        if not compute.acquire(blocking=False):
+            raise HTTPException(409, "An export or preview is running; wait for it to finish")
+        detector = None
+        try:
+            with tempfile.TemporaryDirectory(prefix="redactor-selection-") as directory:
+                if any("mask" in prompt for prompt in options.prompts):
+                    raise ValueError("The browser accepts boxes and outlines only")
+                if options.mode == "manual":
+                    if any(prompt.get("frame", 0) != options.frame or prompt.get("action") == "end" for prompt in options.prompts):
+                        raise ValueError("Preview only selections drawn on the displayed frame")
+                    path = Path(directory) / "prompts.json"
+                    path.write_text(json.dumps({"version": 1, "prompts": options.prompts}), encoding="utf-8")
+                    prompts = load_prompts(path, (entry["height"], entry["width"]))
+                capture = cv2.VideoCapture(entry["path"])
+                try:
+                    capture.set(cv2.CAP_PROP_POS_FRAMES, options.frame)
+                    ok, image = capture.read()
+                finally:
+                    capture.release()
+                if not ok:
+                    raise ValueError("Could not decode this frame")
+                detector = make_detector(options)
+                if detector is not None:
+                    prompts = detector.prompts(image, options.frame, {})
+                mask = preview_mask(image, prompts, options.backend)
+                overlay = np.zeros((*mask.shape, 4), np.uint8)
+                overlay[:, :, :3] = (102, 205, 60)  # BGRA: opaque mask, faint coverage margin.
+                expanded = cv2.dilate(mask, np.ones((2 * options.margin + 1, 2 * options.margin + 1), np.uint8))
+                overlay[:, :, 3] = np.where(mask > 0, 255, np.where(expanded > 0, 80, 0)).astype(np.uint8)
+                ok, png = cv2.imencode(".png", overlay)
+                if not ok:
+                    raise OSError("Could not encode the preview")
+                return {"mask": "data:image/png;base64," + base64.b64encode(png).decode("ascii"),
+                        "targets": len(prompts), "frame": options.frame, "backend": options.backend, "margin": options.margin}
+        except (ValueError, TypeError, KeyError, RuntimeError, OSError) as error:
+            raise HTTPException(400, str(error)) from error
+        finally:
+            try:
+                if detector is not None:
+                    detector.close()
+            finally:
+                compute.release()
+
     def run_job(job_id, options, prompts):
         job = jobs[job_id]
         job["status"] = "running"
         detector = None
         try:
-            if options.mode != "manual":
-                from .detection import DetectorSource, FaceDetector, GroundingDetector
-                if options.mode == "faces" and importlib.util.find_spec("transformers") is None:
-                    detector = DetectorSource(FaceDetector())
-                else:
-                    description = options.text if options.mode == "text" else "a human face" if options.mode == "faces" else "a vehicle license plate"
-                    required = ["face" if options.mode == "faces" else "plate"] if options.mode in ("faces", "plates") else None
-                    detector = DetectorSource(GroundingDetector(description, required_labels=required))
+            detector = make_detector(options)
             def progress(done, total):
                 job.update(done=done, total=total)
             report = process_video(video(options.video_id)["path"], job["output"], prompts,
                                    backend=options.backend, style=options.style, audio=options.audio,
-                                   detector=detector, progress=progress, cancelled=job["cancel"].is_set)
+                                   detector=detector, progress=progress, cancelled=job["cancel"].is_set, margin=options.margin)
             job.update(status="complete", report=report, review_frames=[row["frame"] for row in report["per_frame"]
                                                                        if row["covered_for_review"]],
                        review_targets={str(row["frame"]): [target["id"] for target in row["targets"]
@@ -157,8 +222,11 @@ def create_app(storage=None, demo=None):
         except Exception as error:
             job.update(status="cancelled" if job["cancel"].is_set() else "failed", error=str(error))
         finally:
-            if detector is not None:
-                detector.close()
+            try:
+                if detector is not None:
+                    detector.close()
+            finally:
+                compute.release()
 
     @app.post("/api/exports", status_code=202)
     def start_export(options: ExportRequest):
@@ -186,8 +254,15 @@ def create_app(storage=None, demo=None):
             job = {"id": job_id, "status": "queued", "done": 0, "total": entry["frames"],
                    "cancel": threading.Event(), "output": directory / "redacted.mp4", "review_frames": [],
                    "mode": options.mode}
+            if not compute.acquire(blocking=False):
+                raise HTTPException(409, "A preview is running; wait for it to finish")
             jobs[job_id] = job
-            executor.submit(run_job, job_id, options, prompts)
+            try:
+                executor.submit(run_job, job_id, options, prompts)
+            except Exception:
+                jobs.pop(job_id, None)
+                compute.release()
+                raise
         return {"id": job_id}
 
     @app.get("/api/exports/{job_id}")

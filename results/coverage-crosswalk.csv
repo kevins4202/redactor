@@ -1,0 +1,2 @@
+sequence,method,slack,prompt_frame,setup_seconds,seconds,processed_frames,fps,review_frames,review_frame_fraction,frames,visible_frames,mean_iou,mean_leak_rate,pixel_leak_rate,worst_leak_rate,leaking_frame_fraction,temporal_metrics_available,longest_leak_frames,longest_leak_seconds,mean_excess_frame_fraction
+crosswalk-annotations,sam2,5,0,34.48357359995134,26.785484600113705,150,5.600048020014663,0,0.0,6,6,0.7792176116632756,0.019783164159698934,0.01736330103396212,0.04545871980898154,1.0,False,,,0.002273507343550447

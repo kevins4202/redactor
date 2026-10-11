@@ -101,3 +101,38 @@ synthetic and real-video runs have different source digests because detector
 provenance was added between them; the measured tracking algorithms did not
 change. Dirty flags can reflect untracked result and documentation artifacts;
 the recorded source digest identifies the exact Python files used.
+
+## Proposal follow-up experiments
+
+```sh
+python scripts/evaluate_prompts.py
+python scripts/evaluate.py --methods classical learned --slack 5 9 13 --output results/recovery-synthetic.json
+python scripts/evaluate.py --davis data/DAVIS --sequences blackswan bmx-trees breakdance car-roundabout drift-chicane libby horsejump-high soapbox --methods classical learned --slack 5 --output results/recovery-davis.json
+python scripts/evaluate.py --annotations data/crosswalk-annotations.json --methods classical learned --slack 5 --output results/recovery-crosswalk.json
+python scripts/evaluate.py --davis data/DAVIS --sequences blackswan bmx-trees breakdance car-roundabout drift-chicane libby horsejump-high soapbox --methods sam2 --slack 5 --coverage-dilations 9 17 33 65 --output results/coverage-davis.json
+python scripts/evaluate.py --annotations data/crosswalk-annotations.json --methods sam2 --slack 5 --coverage-dilations 9 17 33 65 --output results/coverage-crosswalk.json
+python scripts/summarize_followup.py
+```
+
+The prompt ablation independently segments all six labeled crosswalk frames with
+three slack values and three variants: rectangle-initialized GrabCut, a rectangle
+with the same seed construction as lasso, and the coarse outline. The second
+variant controls for initialization, so prompt shape and GrabCut initialization
+are not conflated. All prompts are mechanically derived from approximate labels;
+this is not a freehand usability or annotation-effort study. No propagation is
+run in this ablation; the question is initial segmentation in crowded frames.
+
+The coverage sweep scores several margins on the SAME raw SAM 2 predictions;
+it does not change the tracker, initial prompt, confidence flag, or policy.
+Kernels 9/17/33/65 correspond to 4/8/16/32 source pixels of margin per side. All
+rows include excess covered frame area and worst-frame leakage. Separate
+guarded_output values retain the historical default 9×9 kernel; they should not
+be confused with the raw-mask coverage sweep. The extra metric calculations
+affect elapsed time, so coverage-run fps is not an inference-speed comparison.
+
+The same convenience subset and development annotations are reused. These runs
+extend the experiments, not their statistical generalizability. Source digests
+differ as preview/report code was added; the frozen recovery algorithm and SAM 2
+inference settings did not change between these follow-up runs. Timings are
+single local runs and some other local tests ran concurrently; no new controlled
+speed claim is made. Historical `final-*` results remain unchanged.

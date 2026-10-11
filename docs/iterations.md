@@ -21,3 +21,15 @@ midterm meetings or course presentations have occurred.
 Final measurements are in [results.md](results.md). The final report explains
 the difference between implemented proposal deliverables and the unsolved
 general no-leak objective.
+
+## Proposal follow-up
+
+Added the proposed frozen learned-feature recovery experiment, a paired
+crowded-frame box/lasso ablation with an initialization control, actual browser
+segmentation preview, and a coverage-margin sweep. Learned recovery worsened
+aggregate DAVIS accuracy and remains experimental. Wider margins reduced
+boundary leakage while covering more surroundings; they did not eliminate
+worst-frame exposure. The [follow-up report](proposal-followup.md) preserves
+these negative results and distinguishes completed implementation from the
+open reliability objective. A [midterm draft](midterm-report.md) and
+[presentation runbook](demo-runbook.md) are ready for team review.

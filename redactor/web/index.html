@@ -21,6 +21,7 @@
         <div class="frame-stage" id="stage"><canvas id="canvas" aria-label="Video frame. Drag to outline or box a target." tabindex="0"></canvas><div id="empty-state">Open a video or try the crosswalk sample.</div><div class="canvas-help" id="canvas-help">Drag an outline around the object you want to hide</div></div>
         <div class="timeline"><button class="icon-button" id="previous" aria-label="Previous frame">‹</button><input id="seek" type="range" min="0" max="0" value="0" aria-label="Video frame"><button class="icon-button" id="next" aria-label="Next frame">›</button><span id="timecode">00:00.00</span></div>
         <div class="frame-footer"><span id="frame-label">Frame 0 of 0</span><span>← → step through frames <span class="separator">·</span> Escape cancels drawing</span></div>
+        <div class="preview-controls"><button class="button secondary compact" id="preview" disabled>Preview mask</button><button class="button secondary compact" id="toggle-preview" hidden>Hide mask</button><span id="preview-status" role="status">Draw a selection to check its segmentation.</span></div>
       </section>
       <aside class="controls" aria-label="Redaction settings">
         <div class="panel-heading"><span class="step-chip">02 / PROTECT</span><h2>What should stay private?</h2></div>
@@ -34,8 +35,10 @@
         </div>
         <div id="auto-settings" hidden><label>Find<select id="find"><option value="text">An object I describe</option><option value="faces">Faces</option><option value="plates">License plates</option></select></label><label id="description-label">Description<input id="description" type="text" placeholder="The woman in a white skirt" maxlength="200"></label><p class="hint">New objects are checked for throughout the clip. Automatic detections still need your review.</p></div>
         <div class="divider"></div>
-        <label>Tracking<select id="backend"><option value="classical">Classical · works on CPU</option><option value="sam2">SAM 2 · recommended for real footage</option></select></label>
+        <label>Tracking<select id="backend"><option value="classical">Classical · works on CPU</option><option value="sam2">SAM 2 · recommended for real footage</option><option value="learned">Learned recovery · experimental</option></select></label>
         <label>Redaction style<select id="style"><option value="blur">Soft blur</option><option value="solid">Solid cover</option><option value="pixelate">Pixelation</option></select></label>
+        <label>Extra coverage<select id="margin"><option value="4">4 pixels · standard</option><option value="8">8 pixels</option><option value="16">16 pixels</option><option value="32">32 pixels</option></select></label>
+        <p class="hint">A wider margin covers more surrounding detail. It can help with edges, but cannot fix a lost target.</p>
         <p class="hint" id="style-hint">Solid cover completely hides detail inside the mask. Blur and pixelation may leave recognizable detail.</p>
         <label class="checkbox"><input type="checkbox" id="audio" checked> Keep original audio</label>
         <button class="button primary" id="export" disabled>Redact video <span aria-hidden="true">↗</span></button>

@@ -13,7 +13,7 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description="Select an object once and redact it throughout a video.")
     parser.add_argument("input", type=Path)
     parser.add_argument("-o", "--output", type=Path)
-    parser.add_argument("--backend", choices=["classical", "baseline", "sam2"], default="classical")
+    parser.add_argument("--backend", choices=["classical", "baseline", "sam2", "learned"], default="classical")
     parser.add_argument("--checkpoint", type=Path, help="SAM 2 checkpoint (default: models/sam2.1_hiera_tiny.pt)")
     parser.add_argument("--model-config", help="SAM 2 Hydra config path")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")
@@ -26,6 +26,7 @@ def parse_args(argv=None):
     parser.add_argument("--detect-every", type=int, default=1, help="Run detection every N frames; larger intervals can miss new arrivals")
     parser.add_argument("--threshold", type=float, default=0.30, help="Grounding DINO detection threshold")
     parser.add_argument("--style", choices=["blur", "solid", "pixelate"], default="blur")
+    parser.add_argument("--margin", type=int, default=4, help="Expand redaction by this many source pixels on each side (default 4; range 0-128)")
     parser.add_argument("--on-failure", choices=["cover", "stop", "predict"], default="cover",
                         help="Cover uncertain frames (default), stop for a correction, or export predicted masks for research")
     parser.add_argument("--mask-dir", type=Path, help="Save undilated union masks for inspection")
@@ -66,7 +67,7 @@ def main(argv=None):
                                on_failure=args.on_failure, overwrite=args.overwrite, audio=not args.no_audio,
                                mask_dir=args.mask_dir, progress=progress, checkpoint=args.checkpoint,
                                model_config=args.model_config, device=args.device, detector=detector,
-                               detect_every=args.detect_every)
+                               detect_every=args.detect_every, margin=args.margin)
         print(f"Saved {output} ({report['frames']} frames; {report['review_frames']} covered frames need review)")
         return 0
     except (ValueError, RuntimeError, OSError, StopIteration) as error:

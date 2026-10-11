@@ -54,3 +54,36 @@ back to **Draw a selection** after the first export.
 
 References: [SAM 2 source and checkpoint license](https://github.com/facebookresearch/sam2),
 [Grounding DINO integration](https://huggingface.co/docs/transformers/en/model_doc/grounding-dino).
+
+## Learned appearance recovery
+
+`--backend learned` uses [TorchVision ResNet-18](https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.resnet18.html)
+with the explicitly selected `ResNet18_Weights.IMAGENET1K_V1` weights. TorchVision
+downloads the 44.7 MB checkpoint to its normal torch cache on first use; subsequent
+inference is local. Install the existing optional torch/torchvision dependencies.
+To cache the model before opening the studio:
+
+```sh
+python -c "from redactor.appearance import AppearanceEncoder; model = AppearanceEncoder(); print(model.metadata); model.close()"
+```
+
+This experiment uses frozen layer3 features at stride 16. Input is converted to
+RGB, resized with preserved approximate aspect ratio (multiples of 32, longest
+side at most 640), scaled to [0,1], and normalized with ImageNet channel means
+and standard deviations. It deliberately omits the classification center crop
+so objects can be searched across the frame. A soft foreground-weighted feature
+template is frozen on the first prompt, then matched by spatial cosine
+correlation over scales 0.4–1.5 plus the current scale. Competing non-overlapping
+matches within 0.04 score are rejected; accepted matches require score ≥0.80.
+These are fixed experimental thresholds, not calibrated probabilities.
+
+LK motion, histogram monitoring, and GrabCut refinement remain identical to
+`classical`; only the recovery search changes. A learned match transfers the
+initial mask shape before refinement, which still limits large pose changes.
+The features are not a trained person re-identification system. The encoder is
+shared across targets in an export, has no online weight updates, and never
+uses later benchmark labels. Model URL, checkpoint SHA-256, dependency versions,
+preprocessing, and thresholds are saved with each evaluation/export.
+
+The paired experiment did not improve average DAVIS tracking. The option stays
+explicitly experimental rather than replacing either default backend.
