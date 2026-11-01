@@ -79,9 +79,15 @@ class ClassicalTracker:
 
     def initialize(self, frame, prompt):
         self.instance_id = prompt.instance_id
-        self.mask = segment(frame, prompt.selection(frame.shape[:2]))
-        if not np.any(self.mask):
+        mask = segment(frame, prompt.selection(frame.shape[:2]))
+        if not np.any(mask):
             raise ValueError("Segmentation produced an empty target; redraw the selection")
+        self.set_reference(frame, mask)
+        return TrackResult(self.instance_id, self.mask.copy())
+
+    def set_reference(self, frame, mask):
+        """Freeze the appearance template used by re-detection."""
+        self.mask = mask.copy()
         self.previous = frame.copy()
         self.index = 0
         self.missing = 0
@@ -95,7 +101,6 @@ class ClassicalTracker:
         histogram = cv2.calcHist([hsv], [0, 1], self.mask, [30, 32], [0, 180, 0, 256])
         histogram = cv2.GaussianBlur(histogram, (3, 3), 0)
         self.histogram = cv2.normalize(histogram, None, 0, 255, cv2.NORM_MINMAX)
-        return TrackResult(self.instance_id, self.mask.copy())
 
     def appearance(self, frame, mask):
         if not np.any(mask):

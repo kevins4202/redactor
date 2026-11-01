@@ -17,6 +17,15 @@ midterm meetings or course presentations have occurred.
    target ending, checked audio/video export, and real-video benchmarks.
    Result: substantially better real-video coverage with SAM 2, while remaining
    edge leakage and unflagged errors justify mandatory human review.
+4. **Restore recovery inside SAM 2.** Iteration 3's benchmark showed SAM 2 was
+   the worst method under full occlusion (48.9% leakage); per-frame logs showed
+   it never re-acquired the target after it reappeared. Iteration 2's frozen
+   appearance template now re-finds a lost target and re-prompts SAM 2.
+   Result: occlusion leakage 48.9% → 5.9% and review frames 54% → 12%;
+   DAVIS and crosswalk are unchanged because recovery never triggered there.
+   Trade-off: exported occlusion frames are now precisely redacted rather than
+   fully covered, raising guarded leakage from 0.09% to 3.47%. See
+   [occlusion-recovery.md](occlusion-recovery.md).
 
 Final measurements are in [results.md](results.md). The final report explains
 the difference between implemented proposal deliverables and the unsolved

@@ -44,13 +44,14 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
     setup_started = time.perf_counter()
     model_metadata = None
     with ExitStack() as resources:
-        if method == "sam2":
+        if method.startswith("sam2"):
             from redactor.sam_backend import DEFAULT_CHECKPOINT, DEFAULT_CONFIG, Sam2Session
             directory = Path(resources.enter_context(tempfile.TemporaryDirectory(prefix="redactor-eval-")))
             for index, frame in enumerate(sequence.frames):
                 if not cv2.imwrite(str(directory / f"{index:06d}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, 100]):
                     raise OSError("Could not prepare SAM 2 evaluation input")
-            tracker = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device)
+            tracker = Sam2Session(directory, checkpoint or DEFAULT_CHECKPOINT, model_config or DEFAULT_CONFIG, device,
+                                  recover=method == "sam2-recover")
             resources.callback(tracker.close)
             model_metadata = tracker.metadata
         elif method == "learned":
@@ -63,9 +64,9 @@ def evaluate(sequence, method, slack=9, checkpoint=None, model_config=None, devi
             tracker = make_tracker(method)
         setup_seconds = time.perf_counter() - setup_started
         started = time.perf_counter()
-        for index in range(0 if method == "sam2" else start, len(sequence.frames)):
+        for index in range(0 if method.startswith("sam2") else start, len(sequence.frames)):
             frame = sequence.frames[index]
-            if method == "sam2":
+            if method.startswith("sam2"):
                 results = tracker.step(frame, [prompt] if index == start else [])
                 if index < start:
                     continue
@@ -110,7 +111,7 @@ def provenance(extra_sources=()):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("results/synthetic.json"))
-    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical", "sam2", "learned"], default=["box", "lasso", "gate", "affine", "classical"])
+    parser.add_argument("--methods", nargs="+", choices=["box", "lasso", "gate", "affine", "classical", "sam2", "sam2-recover", "learned"], default=["box", "lasso", "gate", "affine", "classical"])
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--model-config")
     parser.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto")

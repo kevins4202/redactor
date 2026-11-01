@@ -58,3 +58,22 @@ def test_sam2_single_frame_preview_matches_first_export_mask(tmp_path):
         assert np.array_equal(preview, actual)
     finally:
         session.close()
+
+
+@pytest.mark.model
+@pytest.mark.skipif(os.environ.get("REDACTOR_MODEL_TESTS") != "1", reason="Requires installed SAM 2 weights")
+def test_sam2_recovers_target_after_full_occlusion(tmp_path):
+    sequence = synthetic_sequence("occlusion")
+    for index, frame in enumerate(sequence.frames):
+        assert cv2.imwrite(str(tmp_path / f"{index:06d}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    selection = cv2.dilate(sequence.masks[0], np.ones((11, 11), np.uint8))
+    session = Sam2Session(tmp_path)
+    try:
+        results = [session.step(frame, [TargetPrompt("one", 0, mask=selection)] if index == 0 else [])[0]
+                   for index, frame in enumerate(sequence.frames)]
+    finally:
+        session.close()
+    assert any(result.state == "recovered" for result in results)
+    # The last frames show the whole target again, clear of the pillar.
+    tail = [frame_metrics(result.mask, mask)["iou"] for result, mask in zip(results[-10:], sequence.masks[-10:])]
+    assert np.mean(tail) > 0.75
