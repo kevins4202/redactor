@@ -1,6 +1,6 @@
 # First object-removal experiment
 
-Measured November 1, 2026 on `codex/temporal-object-removal`, for the November 2
+Measured November 1, 2026 on `temporal-object-removal`, for the November 2
 meeting. This is a new reconstruction experiment, not a matched rerun of the
 proposal's tracking benchmark. It establishes a starting point for further
 iterations; it is not a claim of an original research algorithm.

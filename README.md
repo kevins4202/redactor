@@ -1,6 +1,6 @@
 # Text-guided video object removal
 
-Experimental branch: `codex/temporal-object-removal`.
+Experimental branch: `temporal-object-removal`.
 
 Describe an object, obtain its box with **Grounding DINO**, track its masks with
 **SAM 2.1 Base+**, and reconstruct the background using our OpenCV pipeline.

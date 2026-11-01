@@ -1,5 +1,5 @@
 {
-  "branch": "codex/temporal-object-removal",
+  "branch": "temporal-object-removal",
   "gpu_host": "Allegro",
   "gpu_tests": "30 passed, 1 existing dependency deprecation warning",
   "local_tests": "27 passed, 3 optional model tests deselected",
