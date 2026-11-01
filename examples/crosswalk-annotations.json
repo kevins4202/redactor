@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "video": "crosswalk-short.mp4",
+  "video": "crosswalk.mp4",
   "instance_id": "woman-white-skirt",
   "label": "woman in a white skirt",
   "annotation_method": "Manually traced visible-person polygons from source frames during development; approximate boundaries, not expert-reviewed dense ground truth. Includes clothing and attached shoulder bag; excludes the carried pink box where separable. Occluded body parts are excluded.",

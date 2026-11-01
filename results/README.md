@@ -113,7 +113,7 @@ previously sampled every eight frames with playback rate adjusted accordingly.
 The real demos use 3-pixel dilation at their working resolution. No dense
 reconstruction accuracy is claimed for their genuinely hidden backgrounds.
 
-Open the [meeting demo page](removal-demo.html). It contains all
+Open the [meeting demo page](demo.html). It contains all
 comparison videos and the controlled camera-pan/failure examples. Generated
 media lives in ignored `output/` and can be regenerated with the commands below.
 
@@ -121,13 +121,14 @@ media lives in ignored `output/` and can be regenerated with the commands below.
 
 ## Validation and reproducibility
 
-The complete Allegro suite passed **30 tests**, including three actual-model
-integration tests and five reconstruction/CLI tests. New checks verify that
+Before repository cleanup, the full application suite passed **30 tests**.
+After removing the old application, the focused suite contains **nine tests**,
+including three actual-model integration tests and five reconstruction/CLI tests. The reconstruction checks verify that
 masked source pixels never contaminate a reconstructable background, permanently
 hidden pixels are not claimed as observed, known camera translation is recovered,
 output stays unchanged outside the mask, cached masks run without loading model
 weights, frame count is preserved, and the source cannot be overwritten.
-The existing FastAPI dependency emits one deprecation warning.
+The old browser application and its dependencies have been removed.
 
 GPU text/tracking: Allegro RTX A6000, PyTorch 2.7.1+cu118. Reconstruction is CPU
 OpenCV; numerical comparisons ran locally on macOS. Detailed demo metadata and
@@ -138,14 +139,13 @@ source hashes are in [real-demo report](../results/removal-real-demos.json) and
 python -m pytest -p no:capture -q -m "not model"
 REDACTOR_MODEL_TESTS=1 python -m pytest -p no:capture -q
 python scripts/benchmark_removal.py
-python scripts/remove_object.py data/crosswalk-short.mp4 --text "woman wearing a white skirt" -o output/removal/white-skirt-text.mp4
-python scripts/remove_object.py output/rewrite-smoke/01_dog-source.mp4 --text dog -o output/removal/dog-text.mp4
-python scripts/remove_object.py data/crosswalk-short.mp4 --masks output/rewrite/light-jacket.masks -o output/removal/light-jacket.mp4
+python scripts/remove_object.py examples/crosswalk.mp4 --text "woman wearing a white skirt" -o output/removal/white-skirt-text.mp4
+python scripts/remove_object.py examples/dog.mp4 --text dog -o output/removal/dog-text.mp4
+python scripts/remove_object.py examples/crosswalk.mp4 --masks output/legacy/rewrite/light-jacket.masks -o output/removal/light-jacket.mp4
 ```
 
-The dog source can be regenerated using the earlier `scripts/smoke_clips.py`;
-that script also processes masks for its redaction checks. Existing outputs need
-`--overwrite`. Setup instructions and text dependencies are in the root README.
+The bundled `examples/dog.mp4` is the sampled gallery source used in the run.
+Existing outputs need `--overwrite`. Setup instructions are in the root README.
 
 ## What to discuss at the meeting
 

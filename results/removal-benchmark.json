@@ -16,7 +16,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.23634850000962615,
+      "feature_setup_seconds": 0.2411510837264359,
       "methods": {
         "spatial": {
           "masked_mae": 25.577383406815322,
@@ -24,7 +24,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 15.759692774059504,
-          "seconds": 0.23152266582474113,
+          "seconds": 0.2357359160669148,
           "per_frame": [
             {
               "frame": 0,
@@ -250,7 +250,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 1.09030379075557,
+          "seconds": 1.1268529160879552,
           "per_frame": [
             {
               "frame": 0,
@@ -476,7 +476,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.026362846778725794,
-          "seconds": 12.36230633361265,
+          "seconds": 12.895904874894768,
           "per_frame": [
             {
               "frame": 0,
@@ -706,7 +706,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.20204066717997193,
+      "feature_setup_seconds": 0.20259095774963498,
       "methods": {
         "spatial": {
           "masked_mae": 25.664105370000318,
@@ -714,7 +714,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 30.76902876411383,
-          "seconds": 0.2181118750013411,
+          "seconds": 0.22763224970549345,
           "per_frame": [
             {
               "frame": 0,
@@ -940,7 +940,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 22.618593640899878,
-          "seconds": 1.1518828752450645,
+          "seconds": 1.2252259170636535,
           "per_frame": [
             {
               "frame": 0,
@@ -1166,7 +1166,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 1.2766429946014066,
-          "seconds": 12.306996167171746,
+          "seconds": 21.99644483299926,
           "per_frame": [
             {
               "frame": 0,
@@ -1396,7 +1396,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.19948504166677594,
+      "feature_setup_seconds": 0.2015332500450313,
       "methods": {
         "spatial": {
           "masked_mae": 24.11266533447521,
@@ -1404,7 +1404,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 0.2279536658897996,
+          "seconds": 0.22371491696685553,
           "per_frame": [
             {
               "frame": 0,
@@ -1630,7 +1630,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 1.8982277503237128,
+          "seconds": 1.9481521248817444,
           "per_frame": [
             {
               "frame": 0,
@@ -1856,7 +1856,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 12.994805332738906,
+          "seconds": 14.454185666982085,
           "per_frame": [
             {
               "frame": 0,
@@ -2086,7 +2086,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.19897208409383893,
+      "feature_setup_seconds": 0.20584266679361463,
       "methods": {
         "spatial": {
           "masked_mae": 30.7814465907529,
@@ -2094,7 +2094,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 21.08234472657913,
-          "seconds": 0.21891987463459373,
+          "seconds": 0.22775237541645765,
           "per_frame": [
             {
               "frame": 0,
@@ -2320,7 +2320,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 1.0818122080527246,
+          "seconds": 1.2265217918902636,
           "per_frame": [
             {
               "frame": 0,
@@ -2546,7 +2546,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.036877331017217595,
-          "seconds": 12.253312000073493,
+          "seconds": 19.386406749952585,
           "per_frame": [
             {
               "frame": 0,
@@ -2776,7 +2776,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.20093454094603658,
+      "feature_setup_seconds": 0.21314849983900785,
       "methods": {
         "spatial": {
           "masked_mae": 31.00382740719595,
@@ -2784,7 +2784,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 35.53791106796778,
-          "seconds": 0.21879862481728196,
+          "seconds": 0.2531733331270516,
           "per_frame": [
             {
               "frame": 0,
@@ -3010,7 +3010,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 20.071663345765426,
-          "seconds": 1.1464208750985563,
+          "seconds": 1.224453250411898,
           "per_frame": [
             {
               "frame": 0,
@@ -3236,7 +3236,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 1.1033123861101177,
-          "seconds": 12.0801996672526,
+          "seconds": 14.069999041967094,
           "per_frame": [
             {
               "frame": 0,
@@ -3466,7 +3466,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.19659845810383558,
+      "feature_setup_seconds": 0.19925020821392536,
       "methods": {
         "spatial": {
           "masked_mae": 30.389570844038442,
@@ -3474,7 +3474,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 0.2275868747383356,
+          "seconds": 0.22662325017154217,
           "per_frame": [
             {
               "frame": 0,
@@ -3700,7 +3700,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 9.225259250029922,
+          "seconds": 1.95229774992913,
           "per_frame": [
             {
               "frame": 0,
@@ -3926,7 +3926,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 22.69672220898792,
+          "seconds": 12.890422417316586,
           "per_frame": [
             {
               "frame": 0,
@@ -4156,7 +4156,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.30629062466323376,
+      "feature_setup_seconds": 0.21891658287495375,
       "methods": {
         "spatial": {
           "masked_mae": 27.046135058838455,
@@ -4164,7 +4164,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 16.640787479350806,
-          "seconds": 0.38658416690304875,
+          "seconds": 0.21951962495222688,
           "per_frame": [
             {
               "frame": 0,
@@ -4390,7 +4390,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 1.9393814159557223,
+          "seconds": 1.1185766658745706,
           "per_frame": [
             {
               "frame": 0,
@@ -4616,7 +4616,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.02299766685399956,
-          "seconds": 27.2950157080777,
+          "seconds": 13.283019375056028,
           "per_frame": [
             {
               "frame": 0,
@@ -4846,7 +4846,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.22761725028976798,
+      "feature_setup_seconds": 0.20735824992880225,
       "methods": {
         "spatial": {
           "masked_mae": 27.19244615726203,
@@ -4854,7 +4854,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 31.498090907542704,
-          "seconds": 0.23009408405050635,
+          "seconds": 0.22467379085719585,
           "per_frame": [
             {
               "frame": 0,
@@ -5080,7 +5080,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 21.729171137110647,
-          "seconds": 1.2356912498362362,
+          "seconds": 1.1586483749561012,
           "per_frame": [
             {
               "frame": 0,
@@ -5306,7 +5306,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 1.4372622149559768,
-          "seconds": 13.762359292246401,
+          "seconds": 12.37602579081431,
           "per_frame": [
             {
               "frame": 0,
@@ -5536,7 +5536,7 @@
         320,
         3
       ],
-      "feature_setup_seconds": 0.22441212506964803,
+      "feature_setup_seconds": 0.24910433404147625,
       "methods": {
         "spatial": {
           "masked_mae": 29.349129317727662,
@@ -5544,7 +5544,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 0.2207595002837479,
+          "seconds": 0.22882212465628982,
           "per_frame": [
             {
               "frame": 0,
@@ -5770,7 +5770,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 1.9623612919822335,
+          "seconds": 1.9302364587783813,
           "per_frame": [
             {
               "frame": 0,
@@ -5996,7 +5996,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 0.0,
-          "seconds": 16.610503332689404,
+          "seconds": 17.07791612483561,
           "per_frame": [
             {
               "frame": 0,
@@ -6226,7 +6226,7 @@
         480,
         3
       ],
-      "feature_setup_seconds": 0.4306450830772519,
+      "feature_setup_seconds": 0.6173636671155691,
       "methods": {
         "spatial": {
           "masked_mae": 44.08351822658181,
@@ -6234,7 +6234,7 @@
           "observed_fraction": 0.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 40.32601772750973,
-          "seconds": 0.29126908304169774,
+          "seconds": 0.36021820781752467,
           "per_frame": [
             {
               "frame": 0,
@@ -6460,7 +6460,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 11.704447920426743,
-          "seconds": 1.6103852079249918,
+          "seconds": 1.8077839999459684,
           "per_frame": [
             {
               "frame": 0,
@@ -6686,7 +6686,7 @@
           "observed_fraction": 1.0,
           "outside_max_change": 0,
           "temporal_residual_mae": 12.336910921269,
-          "seconds": 20.457004459109157,
+          "seconds": 28.335441375151277,
           "per_frame": [
             {
               "frame": 0,

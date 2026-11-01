@@ -2,10 +2,7 @@ __pycache__/
 .pytest_cache/
 .venv/
 models/
-data/DAVIS/
-data/downloads/
-output/*
-!output/crosswalk-short.mp4
+output/
 *.egg-info/
+.DS_Store
 .agents/
-

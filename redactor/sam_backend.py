@@ -2,8 +2,6 @@
 
 from contextlib import nullcontext
 import hashlib
-from dataclasses import replace
-import os
 import shutil
 import tempfile
 from collections import OrderedDict
@@ -133,47 +131,3 @@ class VideoSegmenter:
             self.torch.cuda.empty_cache()
         elif self.device == "mps":
             self.torch.mps.empty_cache()
-
-
-def extract_frames(input_path, destination, cancelled=None, progress=None):
-    from .video import VideoReader, scene_cut
-    destination = Path(destination)
-    destination.mkdir(parents=True, exist_ok=True)
-    cuts, previous = [], None
-    with VideoReader(input_path) as reader:
-        for index, frame in reader:
-            if previous is not None and scene_cut(previous, frame):
-                cuts.append(index)
-            previous = frame
-            check_cancelled(cancelled)
-            if not cv2.imwrite(str(destination / f"{index:06d}.jpg"), frame, [cv2.IMWRITE_JPEG_QUALITY, 100]):
-                raise OSError(f"Could not prepare frame {index}")
-            if progress:
-                progress("prepare", index + 1, reader.count)
-        return reader.index, cuts
-
-
-def propagate_shots(model, frame_dir, prompts, shape, count, cuts, cancelled=None):
-    boundaries = [0, *cuts, count]
-    for start, end in zip(boundaries, boundaries[1:]):
-        anchors = [prompt for prompt in prompts if start <= prompt.frame_index < end]
-        if not anchors:
-            for index in range(start, end):
-                check_cancelled(cancelled)
-                yield index, np.zeros(shape, np.uint8), 0.0
-            continue
-        if not cuts:
-            yield from model.propagate(frame_dir, anchors, shape, cancelled)
-            continue
-        with tempfile.TemporaryDirectory(prefix='redactor-shot-') as directory:
-            for index in range(start, end):
-                check_cancelled(cancelled)
-                source = Path(frame_dir) / f'{index:06d}.jpg'
-                target = Path(directory) / f'{index-start:06d}.jpg'
-                try:
-                    os.link(source, target)
-                except OSError:
-                    shutil.copyfile(source, target)
-            local = [replace(prompt, frame_index=prompt.frame_index-start) for prompt in anchors]
-            for index, mask, stability in model.propagate(directory, local, shape, cancelled):
-                yield index + start, mask, stability

@@ -1,3 +1,3 @@
-"""Select-once video redaction and reproducible tracking evaluation."""
+"""Text-guided object removal with observed-background reconstruction."""
 
-__version__ = "0.1.0"
+__version__ = "0.4.0"

@@ -15,5 +15,6 @@ jobs:
           cache: pip
       - run: python -m pip install -r requirements-lock.txt
       - run: python -m pip install --no-deps -e .
-      - run: python -m pytest -q
-      - run: redact --help
+      - run: python -m pytest -q -m "not model"
+      - run: python scripts/remove_object.py --help
+      - run: python scripts/benchmark_removal.py --help

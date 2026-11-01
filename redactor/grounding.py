@@ -10,7 +10,7 @@ def ground_target(frame, text):
         import torch
         from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
     except ImportError as error:
-        raise RuntimeError('Install text selection with pip install -e ".[text]"') from error
+        raise RuntimeError('Install text selection with pip install -e .') from error
     name = 'IDEA-Research/grounding-dino-tiny'
     revision = 'a2bb814dd30d776dcf7e30523b00659f4f141c71'
     device = 'cuda' if torch.cuda.is_available() else 'cpu'

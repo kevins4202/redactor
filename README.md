@@ -1,70 +1,83 @@
 # Text-guided video object removal
 
-Experimental branch: `temporal-object-removal`.
-
-Describe an object, obtain its box with **Grounding DINO**, track its masks with
-**SAM 2.1 Base+**, and reconstruct the background using our OpenCV pipeline.
-The reconstruction uses ORB background matches, RANSAC homographies, masked
-pixel medians across frames, and Telea inpainting where observations are absent.
-There is no generative video model and no model training.
+Describe an object. Grounding DINO selects it, SAM 2 tracks its mask, and our
+OpenCV pipeline reconstructs the background from other frames. Unrecoverable
+pixels use spatial inpainting. No generative video model is used.
 
 ## Run
 
-Use the existing Python 3.11-3.13 environment, FFmpeg, and SAM setup:
+Run commands from this project folder. Python 3.11-3.13 and FFmpeg are required.
 
 ```sh
+source .venv/bin/activate
+python -m pip install -e ".[test]"
+python scripts/remove_object.py examples/crosswalk.mp4 \
+  --text "woman wearing a white skirt" -o output/example.mp4
+```
+
+For a fresh machine, first create the environment and install the tracking model:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install -r requirements-lock.txt
-python -m pip install -e ".[text]"
+python -m pip install --no-deps -e .
 python scripts/setup_models.py
-python scripts/remove_object.py clip.mp4 --text "red car" -o output/removed.mp4
 ```
 
-The text detector downloads its pinned pretrained checkpoint on first use.
-Footage is processed locally on the machine running the script. Check the saved
-`removed-assets/selection.jpg`: text selection uses the highest-scoring first-frame
-candidate and can select the wrong instance. This prototype does not pause for
-interactive confirmation. Targets must be visible in the first frame.
+The text detector downloads its pinned weights on first use. CUDA or the Mac GPU
+is selected automatically for SAM; local processing can be slow. Footage stays on
+the machine running the program.
 
-For a manual selection, use `--box x1 y1 x2 y2` in original image coordinates.
-For reconstruction-only comparisons, use `--masks path/to/original-resolution-masks`
-instead. These three input methods are mutually exclusive. The output resolution
-is capped at 640 pixels wide; clips must be a single shot with at most 300 frames.
-Existing output artifacts require `--overwrite`.
+Inspect `output/example-assets/selection.jpg` to check that the correct object was
+selected. That folder also contains a four-panel comparison video and masks.
+`output/example.mp4` is the final reconstruction; `output/example.json` records
+settings and observation support. Add `--overwrite` to replace existing outputs.
 
-Outputs include the removed video with source audio, a four-panel comparison,
-selection/mask artifacts, and a JSON report. Raw masks are expanded by 3 working
-pixels; all three comparison methods receive exactly those masks. Reconstruction
-uses up to 17 distributed source frames, excludes the frame being reconstructed,
-and requires at least two unmasked observations before copying a temporal median.
-Unrecoverable pixels use single-frame Telea filling. Pixels outside the expanded
-mask are unchanged before lossy video encoding. No separate seam blending is
-implemented yet.
-
-## Results and reproducibility
-
-[Measured comparisons and meeting notes](docs/removal-results.md)
+For an easier example:
 
 ```sh
-python -m pytest -p no:capture -q -m "not model"
-python scripts/benchmark_removal.py
+python scripts/remove_object.py examples/dog.mp4 --text dog -o output/dog.mp4
 ```
 
-The benchmark compares single-frame inpainting, unaligned temporal medians,
-and aligned temporal medians with identical masks and source access. Clean
-reference pixels are used only for scoring. This is a new reconstruction
-benchmark, not a continuation of the proposal's tracking IoU table.
+Instead of text, use `--box x1 y1 x2 y2` in original source coordinates. `--masks`
+reuses original-resolution masks for controlled reconstruction comparisons.
 
-## Scope
+## Results and tests
 
-This is a first geometry-based reconstruction experiment, not a new foundation
-model or a claim of research novelty. Strong parallax, moving non-target objects,
-shadows, inaccurate masks, and never-observed background remain difficult.
-Observation support is not a calibrated confidence or proof of reconstruction
-correctness. The text selector has only been smoke-tested on a small number of
-prompts; broad referring-expression accuracy has not been established.
+[Open the completed demos](results/demo.html) · [Read the measured results](results/README.md)
 
-The earlier redaction application remains available through `python app.py`.
-Its [workflow](docs/redaction-workflow.md) and historical reports are retained
-for comparison; they do not describe the removal CLI. New removal code is limited
-to `grounding.py`, `reconstruction.py`, and the two scripts above. We have not
-reintroduced old tracker, recovery, or configuration menus.
+```sh
+python scripts/benchmark_removal.py
+python -m pytest -p no:capture -q
+REDACTOR_MODEL_TESTS=1 python -m pytest -p no:capture -q
+```
+
+The first test command skips the three optional actual-model tests. The benchmark
+compares spatial filling, unaligned temporal reconstruction, and aligned temporal
+reconstruction with identical masks. It evaluates background reconstruction,
+not the proposal's tracking IoU/leakage tests.
+
+## Files
+
+```text
+redactor/   selection, tracking, reconstruction, video I/O
+scripts/    run removal, run benchmark, set up model
+tests/     focused reconstruction and model tests
+examples/   crosswalk and dog clips, existing annotations
+results/    current measurements, report, demo page
+reference/  proposal and supplied past-project examples
+output/     generated videos/masks; old artifacts in legacy/ (ignored)
+models/     downloaded model source and weights (ignored)
+```
+
+The old browser app, classical trackers, duplicate reports, and promotional-video
+project have been removed from this branch. Their tracked versions remain in Git
+history. Existing completed demos are preserved under `output/removal/`.
+
+This is a short-clip prototype: one target visible in the first frame, one shot,
+at most 300 frames, and output capped at 640 pixels wide. Text uses the highest
+scoring first-frame candidate and can be wrong. Reconstruction uses background
+alignment and a masked temporal median; moving bystanders, parallax, seams,
+shadows, and never-visible background remain limitations. Temporal source
+optimization and separate seam blending are not implemented.

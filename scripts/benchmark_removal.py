@@ -116,7 +116,7 @@ def main():
             args.output.write_text(json.dumps(report, indent=2)+'\n')
     # Natural moving footage with artificial corruption has observable reference
     # pixels too. Its underlying moving people remain in the reference video.
-    cap = cv2.VideoCapture('data/crosswalk-short.mp4')
+    cap = cv2.VideoCapture('examples/crosswalk.mp4')
     truth, frames, masks = [], [], []
     for t in range(36):
         cap.set(cv2.CAP_PROP_POS_FRAMES, t*4)

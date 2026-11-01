@@ -5,13 +5,15 @@ import cv2
 import numpy as np
 import pytest
 
-from redactor.sam_backend import FrameStore, VideoSegmenter, prompt_box, propagate_shots
+from redactor.sam_backend import FrameStore, VideoSegmenter, prompt_box
 from redactor.types import TargetPrompt, mask_box
-from redactor.datasets import synthetic_sequence
-from redactor.metrics import frame_metrics
+from tracking_fixtures import synthetic_sequence
+def frame_metrics(prediction, truth):
+    predicted, actual = prediction > 0, truth > 0
+    return {'iou': np.count_nonzero(predicted & actual) / max(1, np.count_nonzero(predicted | actual))}
 
 
-def test_legacy_outline_uses_the_same_box_prompt_as_the_new_ui():
+def test_mask_selection_converts_to_a_tight_box():
     mask = np.zeros((100, 100), np.uint8)
     cv2.circle(mask, (50, 50), 20, 255, -1)
     box = prompt_box(TargetPrompt('one', 0, mask=mask), mask.shape)
@@ -30,25 +32,6 @@ def model():
 def frames_to_disk(frames, directory):
     for index, frame in enumerate(frames):
         assert cv2.imwrite(str(directory / f'{index:06d}.jpg'), frame, [cv2.IMWRITE_JPEG_QUALITY, 100])
-
-
-def test_shots_never_share_tracking_memory(tmp_path):
-    frames_to_disk([np.full((20, 30, 3), i * 20, np.uint8) for i in range(6)], tmp_path)
-    class RecordingModel:
-        def __init__(self):
-            self.calls = []
-        def propagate(self, directory, prompts, shape, cancelled=None):
-            paths = sorted(Path(directory).glob('*.jpg'))
-            self.calls.append(([p.frame_index for p in prompts], len(paths)))
-            for index in range(len(paths)):
-                yield index, np.full(shape, 255, np.uint8), .95
-    model = RecordingModel()
-    prompt = TargetPrompt('one', 4, box=(1, 1, 5, 5))
-    results = list(propagate_shots(model, tmp_path, [prompt], (20, 30), 6, [3]))
-    assert model.calls == [([1], 3)]
-    assert [i for i, _, _ in results] == list(range(6))
-    assert all(not mask.any() for _, mask, _ in results[:3])
-    assert all(mask.any() for _, mask, _ in results[3:])
 
 
 @pytest.mark.model
