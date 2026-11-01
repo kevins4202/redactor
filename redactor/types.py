@@ -45,15 +45,6 @@ class TargetPrompt:
         return selection
 
 
-@dataclass
-class TrackResult:
-    instance_id: str
-    mask: np.ndarray
-    confidence: float = 1.0
-    state: Literal["tracking", "recovered", "uncertain", "lost", "absent"] = "tracking"
-    reason: str = ""
-
-
 def mask_box(mask: np.ndarray) -> tuple[int, int, int, int]:
     """Return an exclusive xyxy box; an empty mask has box (0, 0, 0, 0)."""
     x, y, width, height = cv2.boundingRect(mask.astype(np.uint8))

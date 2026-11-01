@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 
 import cv2
+import numpy as np
 
 
 class VideoReader:
@@ -101,3 +102,15 @@ class VideoWriter:
             final.replace(self.output)
         finally:
             self.temp.cleanup()
+
+def scene_cut(previous, frame):
+    a = cv2.resize(previous, (64, 48))
+    b = cv2.resize(frame, (64, 48))
+    if float(np.mean(np.abs(a.astype(float) - b))) / 255 <= 0.20:
+        return False
+    histograms = []
+    for image in (a, b):
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        hist = cv2.calcHist([hsv], [0, 1], None, [24, 16], [0, 180, 0, 256])
+        histograms.append(cv2.normalize(hist, None, norm_type=cv2.NORM_L1))
+    return cv2.compareHist(*histograms, cv2.HISTCMP_BHATTACHARYYA) > 0.65

@@ -1,0 +1,83 @@
+{
+  "model": {
+    "name": "SAM 2.1 Large",
+    "config": "configs/sam2.1/sam2.1_hiera_l.yaml",
+    "checkpoint_sha256": "2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318",
+    "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+    "device": "cuda",
+    "torch": "2.7.1+cu118"
+  },
+  "frames": 150,
+  "review_frames": [],
+  "video": {
+    "frames": 150,
+    "fps": 30.0,
+    "black_frames": 0
+  },
+  "seconds": 45.923347348347306,
+  "source_points": "data/light-jacket-checkpoints.json",
+  "annotation_method": "Manually chosen interior source-image points, before viewing the rewritten full-clip predictions. These check target retention and obvious distraction, not dense boundary accuracy. Coordinates are approximate and exclude body regions hidden by foreground pedestrians.",
+  "target_points": 38,
+  "covered_target_points": 38,
+  "other_points": 15,
+  "covered_other_points": 0,
+  "per_checkpoint": [
+    {
+      "frame": 0,
+      "target_points": 6,
+      "covered_target_points": 6,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 39,
+      "target_points": 6,
+      "covered_target_points": 6,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 49,
+      "target_points": 5,
+      "covered_target_points": 5,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 60,
+      "target_points": 8,
+      "covered_target_points": 8,
+      "uncovered_points": [],
+      "other_points": 3,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 90,
+      "target_points": 4,
+      "covered_target_points": 4,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 120,
+      "target_points": 4,
+      "covered_target_points": 4,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    },
+    {
+      "frame": 149,
+      "target_points": 5,
+      "covered_target_points": 5,
+      "uncovered_points": [],
+      "other_points": 2,
+      "covered_other_points": 0
+    }
+  ],
+  "limits": "Interior point checks and visual review are not dense boundary ground truth. No inference about unannotated clips."
+}

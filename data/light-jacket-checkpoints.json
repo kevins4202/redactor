@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "video": "crosswalk-short.mp4",
+  "width": 2320,
+  "height": 1080,
+  "target": "The light-jacket pedestrian selected in the failing studio export",
+  "method": "Manually chosen interior source-image points, before viewing the rewritten full-clip predictions. These check target retention and obvious distraction, not dense boundary accuracy. Coordinates are approximate and exclude body regions hidden by foreground pedestrians.",
+  "checkpoints": [
+    {
+      "frame": 0,
+      "target_points": [
+        [
+          1540,
+          770
+        ],
+        [
+          1527,
+          900
+        ],
+        [
+          1480,
+          900
+        ],
+        [
+          1585,
+          920
+        ],
+        [
+          1495,
+          1050
+        ],
+        [
+          1545,
+          1055
+        ]
+      ],
+      "other_points": [
+        [
+          1830,
+          880
+        ],
+        [
+          2200,
+          950
+        ]
+      ]
+    },
+    {
+      "frame": 39,
+      "target_points": [
+        [
+          1605,
+          770
+        ],
+        [
+          1585,
+          895
+        ],
+        [
+          1530,
+          900
+        ],
+        [
+          1640,
+          930
+        ],
+        [
+          1560,
+          990
+        ],
+        [
+          1607,
+          990
+        ]
+      ],
+      "other_points": [
+        [
+          1692,
+          970
+        ],
+        [
+          1360,
+          780
+        ]
+      ]
+    },
+    {
+      "frame": 49,
+      "target_points": [
+        [
+          1636,
+          752
+        ],
+        [
+          1630,
+          840
+        ],
+        [
+          1705,
+          870
+        ],
+        [
+          1570,
+          860
+        ],
+        [
+          1670,
+          880
+        ]
+      ],
+      "other_points": [
+        [
+          1620,
+          950
+        ],
+        [
+          2040,
+          900
+        ]
+      ]
+    },
+    {
+      "frame": 60,
+      "target_points": [
+        [
+          1665,
+          726
+        ],
+        [
+          1660,
+          820
+        ],
+        [
+          1660,
+          875
+        ],
+        [
+          1640,
+          960
+        ],
+        [
+          1680,
+          970
+        ],
+        [
+          1718,
+          878
+        ],
+        [
+          1635,
+          1020
+        ],
+        [
+          1670,
+          1018
+        ]
+      ],
+      "other_points": [
+        [
+          1540,
+          970
+        ],
+        [
+          1405,
+          820
+        ],
+        [
+          2000,
+          900
+        ]
+      ]
+    },
+    {
+      "frame": 90,
+      "target_points": [
+        [
+          1787,
+          695
+        ],
+        [
+          1775,
+          790
+        ],
+        [
+          1820,
+          825
+        ],
+        [
+          1780,
+          830
+        ]
+      ],
+      "other_points": [
+        [
+          1750,
+          1000
+        ],
+        [
+          1920,
+          850
+        ]
+      ]
+    },
+    {
+      "frame": 120,
+      "target_points": [
+        [
+          1908,
+          680
+        ],
+        [
+          1910,
+          750
+        ],
+        [
+          1932,
+          785
+        ],
+        [
+          1927,
+          850
+        ]
+      ],
+      "other_points": [
+        [
+          1860,
+          770
+        ],
+        [
+          2000,
+          1020
+        ]
+      ]
+    },
+    {
+      "frame": 149,
+      "target_points": [
+        [
+          2015,
+          667
+        ],
+        [
+          2000,
+          740
+        ],
+        [
+          2030,
+          760
+        ],
+        [
+          1970,
+          730
+        ],
+        [
+          1965,
+          820
+        ]
+      ],
+      "other_points": [
+        [
+          2020,
+          970
+        ],
+        [
+          1825,
+          800
+        ]
+      ]
+    }
+  ],
+  "input_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e"
+}

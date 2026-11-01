@@ -1,223 +1,118 @@
-"use strict";
-const $ = (id) => document.getElementById(id);
-const state = { video: null, frame: 0, image: null, imageFrame: -1, prompts: [], mode: "manual", target: "target-1", targetCount: 1, drawing: null, imageRequest: 0, job: null, busy: false, reviewFrames: [], reviewTargets: {}, reviewIndex: 0, exportMode: "manual" };
-const canvas = $("canvas"), context = canvas.getContext("2d");
-Object.assign(state, { preview: null, previewVersion: 0, previewBusy: false, showPreview: true });
-
-async function api(url, options = {}) {
+'use strict';
+const $ = id => document.getElementById(id);
+const canvas = $('canvas'), context = canvas.getContext('2d');
+const state = {video:null, frame:0, loadedFrame:-1, image:null, prompts:[], drawing:null, overlay:null, request:0, job:null, busy:false, ready:false, flags:[], flagIndex:0};
+async function api(url, options={}) {
   const response = await fetch(url, options);
   if (!response.ok) {
-    let detail = "The request could not be completed.";
-    try { const body = await response.json(); detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail); } catch (_) { /* preserve readable fallback */ }
-    const error = new Error(detail); error.status = response.status; throw error;
+    let detail = `Request failed (${response.status})`;
+    try {const body = await response.json(); detail = typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail);} catch (_) {}
+    const error=new Error(detail);error.status=response.status;throw error;
   }
   return response.json();
 }
-function message(text = "") { $("message").textContent = text; $("message").hidden = !text; }
-function ready() {
-  $("export").disabled = !state.video || state.busy || state.previewBusy || (state.mode === "manual" && !state.prompts.length);
-  $("preview").disabled = !state.video || state.imageFrame !== state.frame || state.busy || state.previewBusy || (state.mode === "manual" && !framePrompts().length);
+function post(url, body) {return api(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+function message(text='') {$('message').textContent=text; $('message').hidden=!text;}
+function controls() {
+  $('process').disabled = !state.ready || state.busy || !state.prompts.length;
+  $('preview').disabled = !state.ready || state.busy || state.loadedFrame!==state.frame || !state.prompts.some(p=>p.frame===state.frame);
+  $('clear').disabled = state.busy;
+  $('upload').disabled = state.busy;
+  $('seek').disabled = state.busy;
+  $('previous').disabled = state.busy;
+  $('next').disabled = state.busy;
 }
-function framePrompts() { return state.prompts.filter((prompt) => prompt.frame === state.frame && prompt.action !== "end"); }
-function invalidatePreview() {
-  state.preview = null; state.previewVersion++; state.showPreview = true;
-  $("toggle-preview").hidden = true;
-  $("preview-status").textContent = state.mode === "manual" ? "Preview selections drawn on this frame." : "Preview matching objects on this frame.";
+function drawBox(box) {
+  context.strokeStyle='#69e17d'; context.lineWidth=3*canvas.width/Math.max(1,canvas.clientWidth);
+  context.strokeRect(box[0],box[1],box[2]-box[0],box[3]-box[1]);
 }
-function targetLabel(id) { return id.startsWith("detected-") ? id.replace("detected-", "Detected target ") : id.replace("target-", "Target "); }
-function formatTime(seconds) { return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${(seconds % 60).toFixed(2).padStart(5, "0")}`; }
-
-function drawPolygon(points, color, label) {
-  if (!points.length) return;
-  const factor = canvas.width / Math.max(1, canvas.clientWidth);
-  context.beginPath(); context.moveTo(...points[0]);
-  points.slice(1).forEach((point) => context.lineTo(...point));
-  context.closePath(); context.fillStyle = color + "28"; context.fill();
-  context.strokeStyle = color; context.lineWidth = 2 * factor; context.stroke();
-  if (label) {
-    const x = Math.min(...points.map((point) => point[0])), y = Math.max(18 * factor, Math.min(...points.map((point) => point[1])) - 6 * factor);
-    context.font = `600 ${11 * factor}px sans-serif`; const width = context.measureText(label).width;
-    context.fillStyle = color; context.fillRect(x, y - 17 * factor, width + 12 * factor, 20 * factor);
-    context.fillStyle = "#fff"; context.fillText(label, x + 6 * factor, y - 3 * factor);
-  }
-}
-function geometry(prompt) { if (prompt.polygon) return prompt.polygon; const [x1, y1, x2, y2] = prompt.box; return [[x1,y1],[x2,y1],[x2,y2],[x1,y2]]; }
 function render() {
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  if (state.image) context.drawImage(state.image, 0, 0, canvas.width, canvas.height);
-  if (state.preview && state.showPreview) { context.save(); context.globalAlpha = .55; context.drawImage(state.preview, 0, 0, canvas.width, canvas.height); context.restore(); }
-  else if (state.mode === "manual") framePrompts().forEach((prompt) => drawPolygon(geometry(prompt), prompt.id === state.target ? "#359566" : "#e7a64a", targetLabel(prompt.id)));
-  if (state.drawing) drawPolygon(state.drawing.points, "#359566");
+  context.clearRect(0,0,canvas.width,canvas.height);
+  if (state.image) context.drawImage(state.image,0,0);
+  if (state.overlay) {context.save();context.globalAlpha=.55;context.drawImage(state.overlay,0,0);context.restore();}
+  else state.prompts.filter(p=>p.frame===state.frame).forEach(p=>drawBox(p.box));
+  if (state.drawing) drawBox(state.drawing.box);
 }
-async function seek(frame) {
-  if (!state.video) return;
-  frame = Math.max(0, Math.min(state.video.frames - 1, Number(frame)));
-  state.frame = frame; state.drawing = null;
-  invalidatePreview(); ready(); render();
-  $("seek").value = frame; $("timecode").textContent = formatTime(frame / state.video.fps);
-  $("frame-label").textContent = `Frame ${frame + 1} of ${state.video.frames}`;
-  const request = ++state.imageRequest;
-  try {
-    const image = new Image();
-    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("Could not load this frame.")); image.src = `/api/videos/${encodeURIComponent(state.video.id)}/frames/${frame}`; });
-    if (request !== state.imageRequest) return;
-    state.image = image; state.imageFrame = frame; ready(); render();
-  } catch (error) { message(error.message); }
-}
-function selectionList() {
-  const list = $("selections"); list.replaceChildren();
-  if (!state.prompts.length) { const empty = document.createElement("p"); empty.className = "empty-hint"; empty.textContent = "Your selections will appear here."; list.append(empty); }
-  state.prompts.slice().sort((a,b) => a.frame - b.frame).forEach((prompt) => {
-    const row = document.createElement("div"); row.className = "selection-item";
-    const jump = document.createElement("button"); jump.className = "jump"; jump.textContent = `${targetLabel(prompt.id)}${prompt.action === "end" ? " ends" : ""} · frame ${prompt.frame + 1}`;
-    jump.onclick = () => { state.target = prompt.id; $("target").value = prompt.id; seek(prompt.frame); };
-    const remove = document.createElement("button"); remove.className = "remove"; remove.textContent = "×"; remove.setAttribute("aria-label", `Remove ${targetLabel(prompt.id)} selection at frame ${prompt.frame + 1}`);
-    remove.onclick = () => { state.prompts = state.prompts.filter((item) => item !== prompt); invalidatePreview(); selectionList(); render(); };
-    row.append(jump, remove); list.append(row);
-  });
-  ready();
-}
-async function loadVideo(video) {
-  state.video = video; state.prompts = []; state.target = "target-1"; state.targetCount = 1; state.image = null; state.reviewFrames = [];
-  $("target").replaceChildren(new Option("Target 1", "target-1"));
-  $("video-name").textContent = video.name; $("video-detail").textContent = `${video.width} × ${video.height} · ${video.fps.toFixed(2).replace(/\.00$/, "")} fps · ${(video.frames / video.fps).toFixed(1)} seconds`;
-  canvas.width = video.width; canvas.height = video.height; $("stage").style.aspectRatio = `${video.width} / ${video.height}`;
-  $("empty-state").hidden = true; $("seek").max = video.frames - 1; $("result").hidden = true; $("job-panel").hidden = true;
-  selectionList(); message(); await seek(0);
-}
-
-function point(event) {
-  const rect = canvas.getBoundingClientRect();
-  return [Math.max(0, Math.min(canvas.width - 1, (event.clientX - rect.left) * canvas.width / rect.width)), Math.max(0, Math.min(canvas.height - 1, (event.clientY - rect.top) * canvas.height / rect.height))].map(Math.round);
-}
-canvas.addEventListener("pointerdown", (event) => {
-  if (!state.video || state.imageFrame !== state.frame || state.mode !== "manual" || state.busy || event.button !== 0) return;
-  canvas.setPointerCapture(event.pointerId); canvas.focus({ preventScroll: true });
-  const start = point(event); state.drawing = { start, points: [start], tool: $("tool").value };
-  invalidatePreview(); message(); render();
-});
-canvas.addEventListener("pointermove", (event) => {
-  if (!state.drawing) return;
-  const current = point(event), drawing = state.drawing;
-  if (drawing.tool === "box") { const [x1,y1] = drawing.start, [x2,y2] = current; drawing.points = [[x1,y1],[x2,y1],[x2,y2],[x1,y2]]; }
-  else { const last = drawing.points[drawing.points.length - 1]; if (Math.hypot(current[0] - last[0], current[1] - last[1]) > 2) drawing.points.push(current); }
-  render();
-});
-canvas.addEventListener("pointerup", () => {
-  if (!state.drawing) return;
-  const drawing = state.drawing; state.drawing = null;
-  const points = drawing.points;
-  if (points.length < 3 || Math.max(...points.map((p) => p[0])) - Math.min(...points.map((p) => p[0])) < 3 || Math.max(...points.map((p) => p[1])) - Math.min(...points.map((p) => p[1])) < 3) { render(); return; }
-  const prompt = { id: state.target, frame: state.frame, label: targetLabel(state.target), source: "manual" };
-  if (drawing.tool === "box") prompt.box = [Math.min(...points.map((p) => p[0])), Math.min(...points.map((p) => p[1])), Math.max(...points.map((p) => p[0])), Math.max(...points.map((p) => p[1]))];
-  else prompt.polygon = points;
-  state.prompts = state.prompts.filter((p) => !(p.id === prompt.id && (p.frame === prompt.frame || (p.source === "detector" && p.frame >= prompt.frame)))); state.prompts.push(prompt);
-  selectionList(); render();
-});
-canvas.addEventListener("pointercancel", () => { state.drawing = null; render(); });
-$("seek").addEventListener("input", (event) => seek(event.target.value));
-$("previous").onclick = () => seek(state.frame - 1); $("next").onclick = () => seek(state.frame + 1);
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") { state.drawing = null; render(); }
-  if (["INPUT","SELECT","TEXTAREA"].includes(event.target.tagName)) return;
-  if (event.key === "ArrowLeft" || event.key === "ArrowRight") { event.preventDefault(); seek(state.frame + (event.key === "ArrowLeft" ? -1 : 1)); }
-});
-$("new-target").onclick = () => { state.target = `target-${++state.targetCount}`; $("target").add(new Option(targetLabel(state.target), state.target)); $("target").value = state.target; render(); };
-$("target").onchange = (event) => { state.target = event.target.value; render(); };
-$("end-target").onclick = () => {
+async function seek(index) {
   if (!state.video || state.busy) return;
-  const earlier = state.prompts.filter((p) => p.id === state.target && p.frame < state.frame).sort((a,b) => a.frame - b.frame);
-  if (!earlier.length || earlier[earlier.length - 1].action === "end") { message("Choose a frame after this target was selected to end its redaction."); return; }
-  state.prompts = state.prompts.filter((p) => !(p.id === state.target && p.frame >= state.frame));
-  state.prompts.push({id:state.target, frame:state.frame, action:"end", source:"manual"}); invalidatePreview(); selectionList(); render();
-};
-function mode(value) {
-  state.mode = value; $("manual-settings").hidden = value !== "manual"; $("auto-settings").hidden = value === "manual";
-  invalidatePreview();
-  for (const name of ["manual","auto"]) { const active = name === value; $(name + "-mode").classList.toggle("selected", active); $(name + "-mode").setAttribute("aria-pressed", String(active)); }
-  $("canvas-help").textContent = value === "manual" ? "Drag an outline around the object you want to hide" : "Matching objects will be checked for throughout the clip";
-  ready(); render();
+  if(state.overlay) message();
+  state.frame=Math.max(0,Math.min(state.video.frames-1,Number(index))); state.overlay=null; state.drawing=null;
+  $('seek').value=state.frame; $('frame-label').textContent=`Frame ${state.frame+1} / ${state.video.frames}`; controls();
+  const request=++state.request;
+  try {
+    const image=new Image();
+    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Could not load frame'));image.src=`/api/videos/${state.video.id}/frames/${state.frame}`;});
+    if (request!==state.request) return;
+    state.image=image;state.loadedFrame=state.frame;render();controls();
+  } catch(error) {message(error.message);}
 }
-$("manual-mode").onclick = () => mode("manual"); $("auto-mode").onclick = () => mode("auto");
-$("find").onchange = () => { $("description-label").hidden = $("find").value !== "text"; invalidatePreview(); render(); };
-$("backend").onchange = () => { invalidatePreview(); render(); };
-$("margin").onchange = () => { invalidatePreview(); render(); };
-$("description").oninput = () => { invalidatePreview(); render(); };
-$("preview").onclick = async () => {
-  if (!state.video || state.busy || state.previewBusy) return;
-  invalidatePreview(); const version = state.previewVersion;
-  state.previewBusy = true; ready(); message();
-  $("preview").textContent = "Preparing mask…";
-  $("preview-status").textContent = "Segmenting this frame. Models may take a moment to load.";
-  try {
-    const body = { video_id: state.video.id, frame: state.frame, prompts: framePrompts(), backend: $("backend").value, mode: state.mode === "manual" ? "manual" : $("find").value, text: $("description").value, margin: Number($("margin").value) };
-    const response = await api("/api/previews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    const image = new Image();
-    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(new Error("Could not display the mask.")); image.src = response.mask; });
-    if (version !== state.previewVersion) return;
-    state.preview = image; state.showPreview = true;
-    $("toggle-preview").hidden = false; $("toggle-preview").textContent = "Hide mask";
-    $("preview-status").textContent = `${response.targets} ${response.targets === 1 ? "target" : "targets"} · Green: segmentation. Faint edge: ${response.margin}px extra coverage. Tracking can change it.`;
-    render();
-  } catch (error) { if (version === state.previewVersion) { message(error.message); $("preview-status").textContent = "Adjust the selection and try again."; } }
-  finally { state.previewBusy = false; $("preview").textContent = "Preview mask"; ready(); }
-};
-$("toggle-preview").onclick = () => { state.showPreview = !state.showPreview; $("toggle-preview").textContent = state.showPreview ? "Hide mask" : "Show mask"; render(); };
-$("upload").onchange = async (event) => {
-  const file = event.target.files[0]; if (!file) return;
-  if (state.busy) { message("Finish or cancel the current export before opening another video."); event.target.value = ""; return; }
-  message("Opening your video locally…");
-  const form = new FormData(); form.append("file", file);
-  try { await loadVideo(await api("/api/videos", { method: "POST", body: form })); } catch (error) { message(error.message); }
-  event.target.value = "";
-};
-
-$("export").onclick = async () => {
-  if (!state.video || state.busy) return;
-  message(); state.busy = true; ready(); $("result").hidden = true;
-  try {
-    const body = { video_id: state.video.id, prompts: state.prompts, backend: $("backend").value, style: $("style").value, mode: state.mode === "manual" ? "manual" : $("find").value, text: $("description").value, audio: $("audio").checked, margin: Number($("margin").value) };
-    state.exportMode = body.mode;
-    const response = await api("/api/exports", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-    state.job = response.id; $("job-panel").hidden = false; $("job-title").textContent = "Preparing your video…"; $("job-detail").textContent = "Loading models and preparing frames. This may take a moment."; $("progress").value = 0; $("cancel").hidden = false;
-    poll();
-  } catch (error) { state.busy = false; ready(); message(error.message); }
-};
-async function poll() {
-  try {
-    const job = await api(`/api/exports/${state.job}`);
-    if (["queued","running"].includes(job.status)) {
-      if (job.done > 0) { $("job-title").textContent = "Following your targets…"; $("job-detail").textContent = `${job.done} of ${job.total} frames processed. Your original video stays unchanged.`; }
-      $("progress").value = 100 * job.done / Math.max(1, job.total); setTimeout(poll, 1200); return;
-    }
-    state.busy = false; ready(); $("cancel").hidden = true;
-    if (job.status !== "complete") { $("job-title").textContent = job.status === "cancelled" ? "Export cancelled" : "Export needs attention"; $("job-detail").textContent = job.error || "No output was published."; return; }
-    $("job-panel").hidden = true; $("result").hidden = false; state.reviewFrames = job.review_frames; state.reviewTargets = job.review_targets || {}; state.reviewIndex = 0;
-    const base = `/api/exports/${state.job}/file/`;
-    if (state.exportMode !== "manual") {
-      const saved = await api(base + "prompts"); state.prompts = saved.prompts;
-      const ids = [...new Set(state.prompts.map((prompt) => prompt.id))];
-      $("target").replaceChildren(...ids.map((id) => new Option(targetLabel(id), id)));
-      state.target = ids[0] || "target-1"; $("target").value = state.target; selectionList();
-    }
-    $("result-video").src = base + "video"; $("download").href = base + "video"; $("report-link").href = base + "report"; $("prompts-link").href = base + "prompts";
-    $("review-summary").textContent = job.review_frames.length ? `${job.review_frames.length} frames were covered because tracking was uncertain. Add corrections on those frames and export again.` : "No uncertain frames were flagged. Watch the full clip to check the result.";
-    $("review-next").disabled = !job.review_frames.length;
-  } catch (error) {
-    if (error.status === 404) { state.busy = false; ready(); $("job-title").textContent = "Export session ended"; $("job-detail").textContent = "The server may have restarted. Start a new export."; $("cancel").hidden = true; }
-    else { message(`Could not check export progress: ${error.message} Retrying…`); setTimeout(poll, 4000); }
+function selections() {
+  $('selections').replaceChildren();
+  for (const prompt of state.prompts.slice().sort((a,b)=>a.frame-b.frame)) {
+    const button=document.createElement('button');button.textContent=`Selection at frame ${prompt.frame+1} ×`;
+    button.title='Remove this selection';button.disabled=state.busy;
+    button.onclick=()=>{state.prompts=state.prompts.filter(p=>p!==prompt);state.overlay=null;invalidateResult();selections();render();controls();};
+    $('selections').append(button);
   }
 }
-$("cancel").onclick = async () => { if (!state.job) return; try { await api(`/api/exports/${state.job}/cancel`, { method: "POST" }); $("job-detail").textContent = "Stopping after the current frame…"; } catch (error) { message(error.message); } };
-$("review-next").onclick = () => { if (!state.reviewFrames.length) return; const frame = state.reviewFrames[state.reviewIndex++ % state.reviewFrames.length]; const target = state.reviewTargets[String(frame)]?.[0]; if (target) { state.target = target; $("target").value = target; } mode("manual"); seek(frame); $("stage").scrollIntoView({ block: "center", behavior: "auto" }); };
-
-(async () => {
-  try {
-    const [videos, capabilities] = await Promise.all([api("/api/videos"), api("/api/capabilities")]);
-    $("backend").querySelector('[value="sam2"]').disabled = !capabilities.sam2;
-    $("backend").querySelector('[value="learned"]').disabled = !capabilities.learned;
-    if (capabilities.sam2) $("backend").value = "sam2";
-    if (!capabilities.grounding) { $("find").querySelector('[value="text"]').disabled = true; $("find").querySelector('[value="plates"]').disabled = true; $("find").value = "faces"; $("description-label").hidden = true; }
-    if (videos.length) await loadVideo(videos[0]);
-  } catch (error) { message(error.message); }
-})();
+function invalidateResult() {$('result').hidden=true;state.job=null;state.flags=[];}
+async function load(video) {
+  state.video=video;state.prompts=[];state.image=null;state.loadedFrame=-1;invalidateResult();
+  canvas.width=video.width;canvas.height=video.height;$('seek').max=video.frames-1;$('video-name').textContent=video.name;
+  selections();await seek(0);
+}
+function point(event) {
+  const r=canvas.getBoundingClientRect();
+  return [Math.round(Math.max(0,Math.min(canvas.width-1,(event.clientX-r.left)*canvas.width/r.width))),Math.round(Math.max(0,Math.min(canvas.height-1,(event.clientY-r.top)*canvas.height/r.height)))];
+}
+canvas.onpointerdown=event=>{
+  if (!state.video || state.busy || state.loadedFrame!==state.frame || event.button!==0)return;
+  canvas.setPointerCapture(event.pointerId);const start=point(event);state.overlay=null;state.drawing={start,box:[...start,...start]};render();
+};
+canvas.onpointermove=event=>{if(!state.drawing)return;const [x,y]=point(event),[a,b]=state.drawing.start;state.drawing.box=[Math.min(a,x),Math.min(b,y),Math.max(a,x),Math.max(b,y)];render();};
+canvas.onpointerup=()=>{
+  if(!state.drawing)return;const box=state.drawing.box;state.drawing=null;
+  if(box[2]-box[0]>3 && box[3]-box[1]>3){state.prompts=state.prompts.filter(p=>p.frame!==state.frame);state.prompts.push({id:'target',frame:state.frame,box});invalidateResult();selections();controls();}
+  render();
+};
+canvas.onpointercancel=()=>{state.drawing=null;render();};
+$('seek').oninput=event=>seek(event.target.value);$('previous').onclick=()=>seek(state.frame-1);$('next').onclick=()=>seek(state.frame+1);
+document.onkeydown=event=>{if(event.key==='Escape'){state.drawing=null;render();}if(event.target.tagName==='INPUT')return;if(['ArrowLeft','ArrowRight'].includes(event.key)){event.preventDefault();seek(state.frame+(event.key==='ArrowRight'?1:-1));}};
+$('clear').onclick=()=>{state.prompts=[];state.overlay=null;invalidateResult();selections();render();controls();};
+$('upload').onchange=async event=>{const file=event.target.files[0];if(!file)return;try{const form=new FormData();form.append('file',file);await load(await api('/api/videos',{method:'POST',body:form}));message();}catch(error){message(error.message);}event.target.value='';};
+$('preview').onclick=async()=>{
+  const frame=state.frame,request=state.request;state.busy=true;controls();selections();message('Checking selection…');
+  try{
+    const response=await post('/api/previews',{video_id:state.video.id,frame,prompts:state.prompts.filter(p=>p.frame===frame)});
+    const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('Could not display mask'));image.src=response.mask;});
+    if(request===state.request){state.overlay=image;render();}message('Green shows the initial mask and its coverage margin. Adjust the box if it selects the wrong object.');
+  }catch(error){message(error.message);}finally{state.busy=false;controls();selections();}
+};
+$('process').onclick=async()=>{
+  state.busy=true;controls();selections();invalidateResult();message();
+  try{const job=await post('/api/exports',{video_id:state.video.id,prompts:state.prompts});state.job=job.id;$('job').hidden=false;$('cancel').hidden=false;$('progress').value=0;poll();}
+  catch(error){state.busy=false;controls();selections();message(error.message);}
+};
+async function poll(){
+  try{
+    const job=await api(`/api/exports/${state.job}`);
+    if(['queued','running'].includes(job.status)){
+      const names={prepare:'Preparing frames',track:'Following the selected object',render:'Rendering the preview'};
+      $('job-title').textContent=names[job.stage]||'Preparing';$('job-detail').textContent=`${job.done} / ${job.total} frames`;$('progress').value=100*job.done/Math.max(1,job.total);setTimeout(poll,1000);return;
+    }
+    state.busy=false;controls();selections();$('cancel').hidden=true;
+    if(!['complete','review'].includes(job.status)){$('job-title').textContent=job.status==='cancelled'?'Cancelled':'Processing failed';$('job-detail').textContent=job.error||'Try again';return;}
+    $('job').hidden=true;$('result').hidden=false;state.flags=job.review_frames;state.flagIndex=0;state.reviewReasons=job.review_reasons||{};
+    const base=`/api/exports/${state.job}/file/`;
+    $('result-video').src=base+'preview';$('report-link').href=base+'report';$('prompts-link').href=base+'prompts';$('download').href=base+'video';
+    $('download').hidden=job.status!=='complete';$('approve').hidden=job.status!=='review';$('review-next').hidden=!state.flags.length;
+    $('review-summary').textContent=job.status==='review'?`${state.flags.length} frames need review. Check them, add a corrective box and process again, or approve if the visible target is properly covered.`:'Processing finished. Watch the full result to check coverage and identity.';
+  }catch(error){
+    if(error.status===404){state.busy=false;controls();selections();$('cancel').hidden=true;message('The processing session ended. Open the video again after restarting the app.');}
+    else{message(`Could not check progress: ${error.message}. Retrying…`);setTimeout(poll,2000);}
+  }
+}
+$('cancel').onclick=async()=>{try{await post(`/api/exports/${state.job}/cancel`,{});$('job-detail').textContent='Stopping after the current model step…';}catch(error){message(error.message);}};
+$('review-next').onclick=async()=>{const frame=state.flags[state.flagIndex++%state.flags.length];await seek(frame);message((state.reviewReasons[String(frame)]||[]).join('. '));$('result-video').currentTime=frame/state.video.fps;canvas.scrollIntoView({block:'center'});};
+$('approve').onclick=async()=>{try{await post(`/api/exports/${state.job}/approve`,{});$('approve').hidden=true;$('download').hidden=false;$('review-summary').textContent='Flagged frames marked as reviewed. The video is ready to download.';}catch(error){message(error.message);}};
+(async()=>{try{const [videos,capabilities]=await Promise.all([api('/api/videos'),api('/api/capabilities')]);state.ready=capabilities.ready;if(!state.ready)message('The tracking model is not installed. Run python scripts/setup_models.py, then refresh.');if(videos.length)await load(videos[0]);controls();}catch(error){message(error.message);}})();

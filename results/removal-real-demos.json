@@ -1,0 +1,2518 @@
+{
+  "notes": "Real removal has no hidden-background ground truth. Full source/output contact sheets inspected. Actual text prompts tested: dog and woman wearing a white skirt. Third run reuses prior masks.",
+  "runs": [
+    {
+      "name": "white-skirt-text",
+      "input": "data/crosswalk-short.mp4",
+      "input_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e",
+      "selection": {
+        "text": "woman wearing a white skirt",
+        "model": "IDEA-Research/grounding-dino-tiny",
+        "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+        "policy": "highest scoring first-frame candidate; inspect selection preview",
+        "selected": {
+          "box": [
+            56.342411041259766,
+            203.79920959472656,
+            95.1084213256836,
+            295.9155578613281
+          ],
+          "score": 0.8198844194412231
+        },
+        "candidates": [
+          {
+            "box": [
+              56.342411041259766,
+              203.79920959472656,
+              95.1084213256836,
+              295.9155578613281
+            ],
+            "score": 0.8198844194412231
+          },
+          {
+            "box": [
+              62.474002838134766,
+              249.38973999023438,
+              93.68412780761719,
+              295.8771057128906
+            ],
+            "score": 0.4129423201084137
+          }
+        ]
+      },
+      "tracking_model": {
+        "name": "SAM 2.1 Base+",
+        "config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "checkpoint_sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5",
+        "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+        "device": "cuda",
+        "torch": "2.7.1+cu118"
+      },
+      "frames": 150,
+      "fps": 30.0,
+      "working_resolution": [
+        640,
+        298
+      ],
+      "source_resolution": [
+        2320,
+        1080
+      ],
+      "mask_expansion_pixels": 3,
+      "source_candidates": 16,
+      "minimum_source_support": 2,
+      "method": "ORB + RANSAC homography; masked temporal median; Telea fallback; hard composite inside expanded mask",
+      "notes": "Prototype. First-frame highest-score text selection can be wrong. Non-target moving objects are not masked. Homographies assume approximately planar background/pure rotation. Observation support does not imply correctness. No claim of hidden-background accuracy on real removal.",
+      "seconds": 132.20727514661849,
+      "per_frame": [
+        {
+          "frame": 0,
+          "mask_pixels": 2664,
+          "observed_pixels": 2664,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 1,
+          "mask_pixels": 2649,
+          "observed_pixels": 2649,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 2,
+          "mask_pixels": 2684,
+          "observed_pixels": 2684,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 3,
+          "mask_pixels": 2674,
+          "observed_pixels": 2674,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 4,
+          "mask_pixels": 2642,
+          "observed_pixels": 2642,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 5,
+          "mask_pixels": 2608,
+          "observed_pixels": 2608,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 6,
+          "mask_pixels": 2586,
+          "observed_pixels": 2586,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 7,
+          "mask_pixels": 2543,
+          "observed_pixels": 2543,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 8,
+          "mask_pixels": 2532,
+          "observed_pixels": 2532,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 9,
+          "mask_pixels": 2514,
+          "observed_pixels": 2514,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 10,
+          "mask_pixels": 2529,
+          "observed_pixels": 2529,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 11,
+          "mask_pixels": 2498,
+          "observed_pixels": 2498,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 12,
+          "mask_pixels": 2490,
+          "observed_pixels": 2490,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 13,
+          "mask_pixels": 2487,
+          "observed_pixels": 2487,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 14,
+          "mask_pixels": 2536,
+          "observed_pixels": 2536,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 15,
+          "mask_pixels": 2596,
+          "observed_pixels": 2596,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 16,
+          "mask_pixels": 2670,
+          "observed_pixels": 2670,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 17,
+          "mask_pixels": 2686,
+          "observed_pixels": 2686,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 18,
+          "mask_pixels": 2763,
+          "observed_pixels": 2763,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 19,
+          "mask_pixels": 2834,
+          "observed_pixels": 2834,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 20,
+          "mask_pixels": 2898,
+          "observed_pixels": 2898,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 21,
+          "mask_pixels": 2891,
+          "observed_pixels": 2891,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 22,
+          "mask_pixels": 2908,
+          "observed_pixels": 2908,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 23,
+          "mask_pixels": 2915,
+          "observed_pixels": 2915,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 24,
+          "mask_pixels": 2911,
+          "observed_pixels": 2911,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 25,
+          "mask_pixels": 2919,
+          "observed_pixels": 2919,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 26,
+          "mask_pixels": 2926,
+          "observed_pixels": 2926,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 27,
+          "mask_pixels": 2975,
+          "observed_pixels": 2975,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 28,
+          "mask_pixels": 3024,
+          "observed_pixels": 3024,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 29,
+          "mask_pixels": 3062,
+          "observed_pixels": 3062,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 30,
+          "mask_pixels": 3099,
+          "observed_pixels": 3099,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 31,
+          "mask_pixels": 3081,
+          "observed_pixels": 3081,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 32,
+          "mask_pixels": 3103,
+          "observed_pixels": 3103,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 33,
+          "mask_pixels": 3089,
+          "observed_pixels": 3089,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 34,
+          "mask_pixels": 3083,
+          "observed_pixels": 3083,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 35,
+          "mask_pixels": 3058,
+          "observed_pixels": 3058,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 36,
+          "mask_pixels": 3056,
+          "observed_pixels": 3056,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 37,
+          "mask_pixels": 3010,
+          "observed_pixels": 3010,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 38,
+          "mask_pixels": 3002,
+          "observed_pixels": 3002,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 39,
+          "mask_pixels": 3036,
+          "observed_pixels": 3036,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 40,
+          "mask_pixels": 3087,
+          "observed_pixels": 3087,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 41,
+          "mask_pixels": 3096,
+          "observed_pixels": 3096,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 42,
+          "mask_pixels": 3143,
+          "observed_pixels": 3143,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 43,
+          "mask_pixels": 3172,
+          "observed_pixels": 3172,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 44,
+          "mask_pixels": 3182,
+          "observed_pixels": 3182,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 45,
+          "mask_pixels": 3174,
+          "observed_pixels": 3174,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 46,
+          "mask_pixels": 3152,
+          "observed_pixels": 3152,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 47,
+          "mask_pixels": 3154,
+          "observed_pixels": 3154,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 48,
+          "mask_pixels": 3154,
+          "observed_pixels": 3154,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 49,
+          "mask_pixels": 3117,
+          "observed_pixels": 3117,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 50,
+          "mask_pixels": 3067,
+          "observed_pixels": 3067,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 51,
+          "mask_pixels": 3055,
+          "observed_pixels": 3055,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 52,
+          "mask_pixels": 3031,
+          "observed_pixels": 3031,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 53,
+          "mask_pixels": 2974,
+          "observed_pixels": 2974,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 54,
+          "mask_pixels": 2859,
+          "observed_pixels": 2859,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 55,
+          "mask_pixels": 2780,
+          "observed_pixels": 2780,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 56,
+          "mask_pixels": 2706,
+          "observed_pixels": 2706,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 57,
+          "mask_pixels": 2696,
+          "observed_pixels": 2696,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 58,
+          "mask_pixels": 2723,
+          "observed_pixels": 2723,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 59,
+          "mask_pixels": 2740,
+          "observed_pixels": 2740,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 60,
+          "mask_pixels": 2711,
+          "observed_pixels": 2711,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 61,
+          "mask_pixels": 2626,
+          "observed_pixels": 2626,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 62,
+          "mask_pixels": 2659,
+          "observed_pixels": 2659,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 63,
+          "mask_pixels": 2611,
+          "observed_pixels": 2611,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 64,
+          "mask_pixels": 2526,
+          "observed_pixels": 2526,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 65,
+          "mask_pixels": 2460,
+          "observed_pixels": 2460,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 66,
+          "mask_pixels": 2430,
+          "observed_pixels": 2430,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 67,
+          "mask_pixels": 2325,
+          "observed_pixels": 2325,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 68,
+          "mask_pixels": 2362,
+          "observed_pixels": 2362,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 69,
+          "mask_pixels": 2603,
+          "observed_pixels": 2603,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 70,
+          "mask_pixels": 2556,
+          "observed_pixels": 2556,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 71,
+          "mask_pixels": 2572,
+          "observed_pixels": 2572,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 72,
+          "mask_pixels": 2541,
+          "observed_pixels": 2541,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 73,
+          "mask_pixels": 2744,
+          "observed_pixels": 2744,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 74,
+          "mask_pixels": 2770,
+          "observed_pixels": 2770,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 75,
+          "mask_pixels": 2799,
+          "observed_pixels": 2799,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 76,
+          "mask_pixels": 2807,
+          "observed_pixels": 2807,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 77,
+          "mask_pixels": 2772,
+          "observed_pixels": 2772,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 78,
+          "mask_pixels": 2724,
+          "observed_pixels": 2724,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 79,
+          "mask_pixels": 2638,
+          "observed_pixels": 2638,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 80,
+          "mask_pixels": 2551,
+          "observed_pixels": 2551,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 81,
+          "mask_pixels": 2470,
+          "observed_pixels": 2470,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 82,
+          "mask_pixels": 2382,
+          "observed_pixels": 2382,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 83,
+          "mask_pixels": 2341,
+          "observed_pixels": 2341,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 84,
+          "mask_pixels": 2236,
+          "observed_pixels": 2236,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 85,
+          "mask_pixels": 2192,
+          "observed_pixels": 2192,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 86,
+          "mask_pixels": 2149,
+          "observed_pixels": 2149,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 87,
+          "mask_pixels": 2123,
+          "observed_pixels": 2123,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 88,
+          "mask_pixels": 2089,
+          "observed_pixels": 2089,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 89,
+          "mask_pixels": 2028,
+          "observed_pixels": 2028,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 90,
+          "mask_pixels": 2004,
+          "observed_pixels": 2004,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 91,
+          "mask_pixels": 2062,
+          "observed_pixels": 2062,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 92,
+          "mask_pixels": 2155,
+          "observed_pixels": 2155,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 93,
+          "mask_pixels": 2145,
+          "observed_pixels": 2145,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 94,
+          "mask_pixels": 2000,
+          "observed_pixels": 2000,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 95,
+          "mask_pixels": 1984,
+          "observed_pixels": 1984,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 96,
+          "mask_pixels": 1980,
+          "observed_pixels": 1980,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 97,
+          "mask_pixels": 1966,
+          "observed_pixels": 1966,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 98,
+          "mask_pixels": 1972,
+          "observed_pixels": 1972,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 99,
+          "mask_pixels": 1982,
+          "observed_pixels": 1982,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 100,
+          "mask_pixels": 1980,
+          "observed_pixels": 1980,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 101,
+          "mask_pixels": 1979,
+          "observed_pixels": 1979,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 102,
+          "mask_pixels": 2000,
+          "observed_pixels": 2000,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 103,
+          "mask_pixels": 2032,
+          "observed_pixels": 2032,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 104,
+          "mask_pixels": 2187,
+          "observed_pixels": 2187,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 105,
+          "mask_pixels": 2270,
+          "observed_pixels": 2270,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 106,
+          "mask_pixels": 2307,
+          "observed_pixels": 2307,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 107,
+          "mask_pixels": 2280,
+          "observed_pixels": 2280,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 108,
+          "mask_pixels": 2217,
+          "observed_pixels": 2217,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 109,
+          "mask_pixels": 2181,
+          "observed_pixels": 2181,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 110,
+          "mask_pixels": 2108,
+          "observed_pixels": 2108,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 111,
+          "mask_pixels": 2082,
+          "observed_pixels": 2082,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 112,
+          "mask_pixels": 2066,
+          "observed_pixels": 2066,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 113,
+          "mask_pixels": 2008,
+          "observed_pixels": 2008,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 114,
+          "mask_pixels": 1968,
+          "observed_pixels": 1968,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 115,
+          "mask_pixels": 2008,
+          "observed_pixels": 2008,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 116,
+          "mask_pixels": 1913,
+          "observed_pixels": 1913,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 117,
+          "mask_pixels": 1873,
+          "observed_pixels": 1873,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 118,
+          "mask_pixels": 1858,
+          "observed_pixels": 1858,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 119,
+          "mask_pixels": 1830,
+          "observed_pixels": 1830,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 120,
+          "mask_pixels": 1678,
+          "observed_pixels": 1678,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 121,
+          "mask_pixels": 1628,
+          "observed_pixels": 1628,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 122,
+          "mask_pixels": 1655,
+          "observed_pixels": 1655,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 123,
+          "mask_pixels": 1589,
+          "observed_pixels": 1589,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 124,
+          "mask_pixels": 1591,
+          "observed_pixels": 1591,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 125,
+          "mask_pixels": 1607,
+          "observed_pixels": 1607,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 126,
+          "mask_pixels": 1545,
+          "observed_pixels": 1545,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 127,
+          "mask_pixels": 1543,
+          "observed_pixels": 1543,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 128,
+          "mask_pixels": 1570,
+          "observed_pixels": 1570,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 129,
+          "mask_pixels": 1475,
+          "observed_pixels": 1475,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 130,
+          "mask_pixels": 1491,
+          "observed_pixels": 1491,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 131,
+          "mask_pixels": 1396,
+          "observed_pixels": 1396,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 132,
+          "mask_pixels": 1316,
+          "observed_pixels": 1316,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 133,
+          "mask_pixels": 1387,
+          "observed_pixels": 1387,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 134,
+          "mask_pixels": 1377,
+          "observed_pixels": 1377,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 135,
+          "mask_pixels": 1370,
+          "observed_pixels": 1370,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 136,
+          "mask_pixels": 1497,
+          "observed_pixels": 1497,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 137,
+          "mask_pixels": 1542,
+          "observed_pixels": 1542,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 138,
+          "mask_pixels": 1469,
+          "observed_pixels": 1469,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 139,
+          "mask_pixels": 1478,
+          "observed_pixels": 1478,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 140,
+          "mask_pixels": 1336,
+          "observed_pixels": 1336,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 141,
+          "mask_pixels": 1377,
+          "observed_pixels": 1377,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 142,
+          "mask_pixels": 1361,
+          "observed_pixels": 1361,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 143,
+          "mask_pixels": 1357,
+          "observed_pixels": 1357,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 144,
+          "mask_pixels": 1371,
+          "observed_pixels": 1371,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 145,
+          "mask_pixels": 1361,
+          "observed_pixels": 1361,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 146,
+          "mask_pixels": 1337,
+          "observed_pixels": 1337,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 147,
+          "mask_pixels": 1339,
+          "observed_pixels": 1339,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 148,
+          "mask_pixels": 1387,
+          "observed_pixels": 1387,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 149,
+          "mask_pixels": 1427,
+          "observed_pixels": 1427,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        }
+      ],
+      "complete": true
+    },
+    {
+      "name": "dog-text",
+      "input": "output/rewrite-smoke/01_dog-source.mp4",
+      "input_sha256": "5d77709639e083647dadcf5e8924c20fb9527ad305e282581d8bcf377a259242",
+      "selection": {
+        "text": "dog",
+        "model": "IDEA-Research/grounding-dino-tiny",
+        "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+        "policy": "highest scoring first-frame candidate; inspect selection preview",
+        "selected": {
+          "box": [
+            224.2025146484375,
+            189.71908569335938,
+            350.204833984375,
+            274.234375
+          ],
+          "score": 0.9191836714744568
+        },
+        "candidates": [
+          {
+            "box": [
+              224.2025146484375,
+              189.71908569335938,
+              350.204833984375,
+              274.234375
+            ],
+            "score": 0.9191836714744568
+          }
+        ]
+      },
+      "tracking_model": {
+        "name": "SAM 2.1 Base+",
+        "config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "checkpoint_sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5",
+        "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+        "device": "cuda",
+        "torch": "2.7.1+cu118"
+      },
+      "frames": 37,
+      "fps": 3.746,
+      "working_resolution": [
+        640,
+        360
+      ],
+      "source_resolution": [
+        1280,
+        720
+      ],
+      "mask_expansion_pixels": 3,
+      "maximum_source_candidates": 17,
+      "minimum_source_support": 2,
+      "method": "ORB + RANSAC homography; masked temporal median; Telea fallback; hard composite inside expanded mask",
+      "notes": "Prototype. First-frame highest-score text selection can be wrong. Non-target moving objects are not masked. Homographies assume approximately planar background/pure rotation. Observation support does not imply correctness. No claim of hidden-background accuracy on real removal.",
+      "seconds": 35.80201547034085,
+      "per_frame": [
+        {
+          "frame": 0,
+          "mask_pixels": 6987,
+          "observed_pixels": 6987,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 1,
+          "mask_pixels": 7001,
+          "observed_pixels": 7001,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 2,
+          "mask_pixels": 7542,
+          "observed_pixels": 7542,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 3,
+          "mask_pixels": 6937,
+          "observed_pixels": 6937,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 4,
+          "mask_pixels": 4508,
+          "observed_pixels": 4508,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 5,
+          "mask_pixels": 6456,
+          "observed_pixels": 6456,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 6,
+          "mask_pixels": 7456,
+          "observed_pixels": 7456,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 7,
+          "mask_pixels": 7929,
+          "observed_pixels": 7929,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 8,
+          "mask_pixels": 6299,
+          "observed_pixels": 6299,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 9,
+          "mask_pixels": 620,
+          "observed_pixels": 620,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 10,
+          "mask_pixels": 0,
+          "observed_pixels": 0,
+          "accepted_sources": 0,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 11,
+          "mask_pixels": 0,
+          "observed_pixels": 0,
+          "accepted_sources": 0,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 12,
+          "mask_pixels": 0,
+          "observed_pixels": 0,
+          "accepted_sources": 0,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 13,
+          "mask_pixels": 1695,
+          "observed_pixels": 1695,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 14,
+          "mask_pixels": 6620,
+          "observed_pixels": 6620,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 15,
+          "mask_pixels": 9113,
+          "observed_pixels": 9113,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 16,
+          "mask_pixels": 9311,
+          "observed_pixels": 9311,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 17,
+          "mask_pixels": 9113,
+          "observed_pixels": 9113,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 18,
+          "mask_pixels": 8746,
+          "observed_pixels": 8746,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 19,
+          "mask_pixels": 8258,
+          "observed_pixels": 8258,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 20,
+          "mask_pixels": 7341,
+          "observed_pixels": 7341,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 21,
+          "mask_pixels": 7737,
+          "observed_pixels": 7737,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 22,
+          "mask_pixels": 6716,
+          "observed_pixels": 6716,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 23,
+          "mask_pixels": 4324,
+          "observed_pixels": 4324,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 24,
+          "mask_pixels": 6934,
+          "observed_pixels": 6934,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 25,
+          "mask_pixels": 7246,
+          "observed_pixels": 7246,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 26,
+          "mask_pixels": 7511,
+          "observed_pixels": 7511,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 27,
+          "mask_pixels": 5686,
+          "observed_pixels": 5686,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 28,
+          "mask_pixels": 3668,
+          "observed_pixels": 3668,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 29,
+          "mask_pixels": 6914,
+          "observed_pixels": 6914,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 30,
+          "mask_pixels": 11669,
+          "observed_pixels": 11669,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 31,
+          "mask_pixels": 10320,
+          "observed_pixels": 10320,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 32,
+          "mask_pixels": 10026,
+          "observed_pixels": 10026,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 33,
+          "mask_pixels": 7839,
+          "observed_pixels": 7839,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 34,
+          "mask_pixels": 7622,
+          "observed_pixels": 7622,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 35,
+          "mask_pixels": 6044,
+          "observed_pixels": 6044,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 36,
+          "mask_pixels": 7704,
+          "observed_pixels": 7704,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        }
+      ],
+      "complete": true
+    },
+    {
+      "name": "light-jacket",
+      "input": "data/crosswalk-short.mp4",
+      "input_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e",
+      "selection": {
+        "source": "cached masks",
+        "path": "output/rewrite/light-jacket.masks"
+      },
+      "tracking_model": null,
+      "frames": 150,
+      "fps": 30.0,
+      "working_resolution": [
+        640,
+        298
+      ],
+      "source_resolution": [
+        2320,
+        1080
+      ],
+      "mask_expansion_pixels": 3,
+      "source_candidates": 16,
+      "minimum_source_support": 2,
+      "method": "ORB + RANSAC homography; masked temporal median; Telea fallback; hard composite inside expanded mask",
+      "notes": "Prototype. First-frame highest-score text selection can be wrong. Non-target moving objects are not masked. Homographies assume approximately planar background/pure rotation. Observation support does not imply correctness. No claim of hidden-background accuracy on real removal.",
+      "seconds": 167.1889544161968,
+      "per_frame": [
+        {
+          "frame": 0,
+          "mask_pixels": 3323,
+          "observed_pixels": 3323,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 1,
+          "mask_pixels": 3318,
+          "observed_pixels": 3318,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 2,
+          "mask_pixels": 3269,
+          "observed_pixels": 3269,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 3,
+          "mask_pixels": 3242,
+          "observed_pixels": 3242,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 4,
+          "mask_pixels": 3217,
+          "observed_pixels": 3217,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 5,
+          "mask_pixels": 3205,
+          "observed_pixels": 3205,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 6,
+          "mask_pixels": 3204,
+          "observed_pixels": 3204,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 7,
+          "mask_pixels": 3191,
+          "observed_pixels": 3191,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 8,
+          "mask_pixels": 3170,
+          "observed_pixels": 3170,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 9,
+          "mask_pixels": 3147,
+          "observed_pixels": 3147,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 10,
+          "mask_pixels": 3125,
+          "observed_pixels": 3125,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 11,
+          "mask_pixels": 3100,
+          "observed_pixels": 3100,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 12,
+          "mask_pixels": 3062,
+          "observed_pixels": 3062,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 13,
+          "mask_pixels": 3040,
+          "observed_pixels": 3040,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 14,
+          "mask_pixels": 3017,
+          "observed_pixels": 3017,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 15,
+          "mask_pixels": 3008,
+          "observed_pixels": 3008,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 16,
+          "mask_pixels": 2980,
+          "observed_pixels": 2980,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 17,
+          "mask_pixels": 2956,
+          "observed_pixels": 2956,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 18,
+          "mask_pixels": 2947,
+          "observed_pixels": 2947,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 19,
+          "mask_pixels": 2936,
+          "observed_pixels": 2936,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 20,
+          "mask_pixels": 2928,
+          "observed_pixels": 2928,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 21,
+          "mask_pixels": 2921,
+          "observed_pixels": 2921,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 22,
+          "mask_pixels": 2908,
+          "observed_pixels": 2908,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 23,
+          "mask_pixels": 2904,
+          "observed_pixels": 2904,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 24,
+          "mask_pixels": 2919,
+          "observed_pixels": 2919,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 25,
+          "mask_pixels": 2952,
+          "observed_pixels": 2952,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 26,
+          "mask_pixels": 2980,
+          "observed_pixels": 2980,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 27,
+          "mask_pixels": 3017,
+          "observed_pixels": 3017,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 28,
+          "mask_pixels": 3013,
+          "observed_pixels": 3013,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 29,
+          "mask_pixels": 3033,
+          "observed_pixels": 3033,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 30,
+          "mask_pixels": 3017,
+          "observed_pixels": 3017,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 31,
+          "mask_pixels": 3020,
+          "observed_pixels": 3020,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 32,
+          "mask_pixels": 2988,
+          "observed_pixels": 2988,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 33,
+          "mask_pixels": 2998,
+          "observed_pixels": 2998,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 34,
+          "mask_pixels": 2989,
+          "observed_pixels": 2989,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 35,
+          "mask_pixels": 2919,
+          "observed_pixels": 2919,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 36,
+          "mask_pixels": 2882,
+          "observed_pixels": 2882,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 37,
+          "mask_pixels": 2728,
+          "observed_pixels": 2728,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 38,
+          "mask_pixels": 2640,
+          "observed_pixels": 2640,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 39,
+          "mask_pixels": 2515,
+          "observed_pixels": 2515,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 40,
+          "mask_pixels": 2573,
+          "observed_pixels": 2573,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 41,
+          "mask_pixels": 2633,
+          "observed_pixels": 2633,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 42,
+          "mask_pixels": 2645,
+          "observed_pixels": 2645,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 43,
+          "mask_pixels": 2550,
+          "observed_pixels": 2550,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 44,
+          "mask_pixels": 2312,
+          "observed_pixels": 2312,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 45,
+          "mask_pixels": 2320,
+          "observed_pixels": 2320,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 46,
+          "mask_pixels": 2234,
+          "observed_pixels": 2234,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 47,
+          "mask_pixels": 1859,
+          "observed_pixels": 1859,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 48,
+          "mask_pixels": 1905,
+          "observed_pixels": 1905,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 49,
+          "mask_pixels": 1769,
+          "observed_pixels": 1769,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 50,
+          "mask_pixels": 1734,
+          "observed_pixels": 1734,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 51,
+          "mask_pixels": 1645,
+          "observed_pixels": 1645,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 52,
+          "mask_pixels": 1700,
+          "observed_pixels": 1700,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 53,
+          "mask_pixels": 1799,
+          "observed_pixels": 1799,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 54,
+          "mask_pixels": 1896,
+          "observed_pixels": 1896,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 55,
+          "mask_pixels": 2218,
+          "observed_pixels": 2218,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 56,
+          "mask_pixels": 2391,
+          "observed_pixels": 2391,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 57,
+          "mask_pixels": 2544,
+          "observed_pixels": 2544,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 58,
+          "mask_pixels": 2649,
+          "observed_pixels": 2649,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 59,
+          "mask_pixels": 2702,
+          "observed_pixels": 2702,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 60,
+          "mask_pixels": 2743,
+          "observed_pixels": 2743,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 61,
+          "mask_pixels": 2798,
+          "observed_pixels": 2798,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 62,
+          "mask_pixels": 2750,
+          "observed_pixels": 2750,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 63,
+          "mask_pixels": 2710,
+          "observed_pixels": 2710,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 64,
+          "mask_pixels": 2625,
+          "observed_pixels": 2625,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 65,
+          "mask_pixels": 2568,
+          "observed_pixels": 2568,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 66,
+          "mask_pixels": 2549,
+          "observed_pixels": 2549,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 67,
+          "mask_pixels": 2600,
+          "observed_pixels": 2600,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 68,
+          "mask_pixels": 2609,
+          "observed_pixels": 2609,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 69,
+          "mask_pixels": 2547,
+          "observed_pixels": 2547,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 70,
+          "mask_pixels": 2521,
+          "observed_pixels": 2521,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 71,
+          "mask_pixels": 2526,
+          "observed_pixels": 2526,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 72,
+          "mask_pixels": 2518,
+          "observed_pixels": 2518,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 73,
+          "mask_pixels": 2460,
+          "observed_pixels": 2460,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 74,
+          "mask_pixels": 2379,
+          "observed_pixels": 2379,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 75,
+          "mask_pixels": 2335,
+          "observed_pixels": 2335,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 76,
+          "mask_pixels": 2315,
+          "observed_pixels": 2315,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 77,
+          "mask_pixels": 2295,
+          "observed_pixels": 2295,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 78,
+          "mask_pixels": 2222,
+          "observed_pixels": 2222,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 79,
+          "mask_pixels": 2063,
+          "observed_pixels": 2063,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 80,
+          "mask_pixels": 2045,
+          "observed_pixels": 2045,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 81,
+          "mask_pixels": 2030,
+          "observed_pixels": 2030,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 82,
+          "mask_pixels": 2045,
+          "observed_pixels": 2045,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 83,
+          "mask_pixels": 2048,
+          "observed_pixels": 2048,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 84,
+          "mask_pixels": 1997,
+          "observed_pixels": 1997,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 85,
+          "mask_pixels": 1889,
+          "observed_pixels": 1889,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 86,
+          "mask_pixels": 1879,
+          "observed_pixels": 1879,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 87,
+          "mask_pixels": 1854,
+          "observed_pixels": 1854,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 88,
+          "mask_pixels": 1740,
+          "observed_pixels": 1740,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 89,
+          "mask_pixels": 1811,
+          "observed_pixels": 1811,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 90,
+          "mask_pixels": 1767,
+          "observed_pixels": 1767,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 91,
+          "mask_pixels": 1588,
+          "observed_pixels": 1588,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 92,
+          "mask_pixels": 1645,
+          "observed_pixels": 1645,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 93,
+          "mask_pixels": 1849,
+          "observed_pixels": 1849,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 94,
+          "mask_pixels": 1851,
+          "observed_pixels": 1851,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 95,
+          "mask_pixels": 1882,
+          "observed_pixels": 1882,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 96,
+          "mask_pixels": 1860,
+          "observed_pixels": 1860,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 97,
+          "mask_pixels": 1880,
+          "observed_pixels": 1880,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 98,
+          "mask_pixels": 1886,
+          "observed_pixels": 1886,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 99,
+          "mask_pixels": 1995,
+          "observed_pixels": 1995,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 100,
+          "mask_pixels": 1954,
+          "observed_pixels": 1954,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 101,
+          "mask_pixels": 1863,
+          "observed_pixels": 1863,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 102,
+          "mask_pixels": 1808,
+          "observed_pixels": 1808,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 103,
+          "mask_pixels": 1655,
+          "observed_pixels": 1655,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 104,
+          "mask_pixels": 1699,
+          "observed_pixels": 1699,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 105,
+          "mask_pixels": 1490,
+          "observed_pixels": 1490,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 106,
+          "mask_pixels": 1427,
+          "observed_pixels": 1427,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 107,
+          "mask_pixels": 1602,
+          "observed_pixels": 1602,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 108,
+          "mask_pixels": 1495,
+          "observed_pixels": 1495,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 109,
+          "mask_pixels": 1352,
+          "observed_pixels": 1352,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 110,
+          "mask_pixels": 1190,
+          "observed_pixels": 1190,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 111,
+          "mask_pixels": 1109,
+          "observed_pixels": 1109,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 112,
+          "mask_pixels": 900,
+          "observed_pixels": 900,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 113,
+          "mask_pixels": 842,
+          "observed_pixels": 842,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 114,
+          "mask_pixels": 926,
+          "observed_pixels": 926,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 115,
+          "mask_pixels": 1152,
+          "observed_pixels": 1152,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 116,
+          "mask_pixels": 1212,
+          "observed_pixels": 1212,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 117,
+          "mask_pixels": 1190,
+          "observed_pixels": 1190,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 118,
+          "mask_pixels": 1129,
+          "observed_pixels": 1129,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 119,
+          "mask_pixels": 1370,
+          "observed_pixels": 1370,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 120,
+          "mask_pixels": 1491,
+          "observed_pixels": 1491,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 121,
+          "mask_pixels": 1470,
+          "observed_pixels": 1470,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 122,
+          "mask_pixels": 1589,
+          "observed_pixels": 1589,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 123,
+          "mask_pixels": 1641,
+          "observed_pixels": 1641,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 124,
+          "mask_pixels": 1682,
+          "observed_pixels": 1682,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 125,
+          "mask_pixels": 1714,
+          "observed_pixels": 1714,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 126,
+          "mask_pixels": 1754,
+          "observed_pixels": 1754,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 127,
+          "mask_pixels": 1781,
+          "observed_pixels": 1781,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 128,
+          "mask_pixels": 1793,
+          "observed_pixels": 1793,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 129,
+          "mask_pixels": 1755,
+          "observed_pixels": 1755,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 130,
+          "mask_pixels": 1749,
+          "observed_pixels": 1749,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 131,
+          "mask_pixels": 1709,
+          "observed_pixels": 1709,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 132,
+          "mask_pixels": 1666,
+          "observed_pixels": 1666,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 133,
+          "mask_pixels": 1716,
+          "observed_pixels": 1716,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 134,
+          "mask_pixels": 1704,
+          "observed_pixels": 1704,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 135,
+          "mask_pixels": 1673,
+          "observed_pixels": 1673,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 136,
+          "mask_pixels": 1658,
+          "observed_pixels": 1658,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 137,
+          "mask_pixels": 1589,
+          "observed_pixels": 1589,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 138,
+          "mask_pixels": 1586,
+          "observed_pixels": 1586,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 139,
+          "mask_pixels": 1570,
+          "observed_pixels": 1570,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 140,
+          "mask_pixels": 1569,
+          "observed_pixels": 1569,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 141,
+          "mask_pixels": 1547,
+          "observed_pixels": 1547,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 142,
+          "mask_pixels": 1506,
+          "observed_pixels": 1506,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 143,
+          "mask_pixels": 1507,
+          "observed_pixels": 1507,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 144,
+          "mask_pixels": 1496,
+          "observed_pixels": 1496,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 145,
+          "mask_pixels": 1442,
+          "observed_pixels": 1442,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 146,
+          "mask_pixels": 1307,
+          "observed_pixels": 1307,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 147,
+          "mask_pixels": 1301,
+          "observed_pixels": 1301,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 148,
+          "mask_pixels": 1259,
+          "observed_pixels": 1259,
+          "accepted_sources": 17,
+          "fallback_pixels": 0
+        },
+        {
+          "frame": 149,
+          "mask_pixels": 1198,
+          "observed_pixels": 1198,
+          "accepted_sources": 16,
+          "fallback_pixels": 0
+        }
+      ],
+      "complete": true
+    }
+  ]
+}

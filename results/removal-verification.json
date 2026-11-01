@@ -1,0 +1,64 @@
+{
+  "branch": "codex/temporal-object-removal",
+  "gpu_host": "Allegro",
+  "gpu_tests": "30 passed, 1 existing dependency deprecation warning",
+  "local_tests": "27 passed, 3 optional model tests deselected",
+  "source_files_byte_identical_to_gpu": {
+    "redactor/reconstruction.py": "d6fb5d7434ed5223488a750838bc8fb138b239938c32f6f0c7aadd23922d6ca3",
+    "redactor/grounding.py": "30aee5cab5ba156e4a1f826715efab791fa6e084fbed6c84012df1f647787a4c",
+    "scripts/remove_object.py": "d0770f32c505ebe1b1972dac06510f3fbed952b05b5b665eba72fb9bc0eed6b5",
+    "scripts/benchmark_removal.py": "36df8719169651e4814005a711fd89edcb30fb5c1c8561833fb6214696d8159c",
+    "tests/test_reconstruction.py": "ebccb61a7dba1f01025aea4d929fb88f6721c33c41922d4fc6a46ac5566ba0ad",
+    "pyproject.toml": "a210a300492032feaa59e9768b6e641614f1c809c733f9d31764829457900ddd",
+    "pytest.ini": "75a37a3e92707b72c0be4499d638aac83a2bf15fcbd9b6f83c09f8f4f517b500"
+  },
+  "benchmark_method_runs": 30,
+  "benchmark_cases": 10,
+  "benchmark_frames_per_case": 36,
+  "benchmark_source_hash_matches": true,
+  "all_benchmark_pixels_outside_hole_unchanged": true,
+  "inspected_frames": {
+    "white-skirt-text": 150,
+    "dog-text": 37,
+    "light-jacket": 150
+  },
+  "videos": [
+    {
+      "path": "output/removal/white-skirt-text.mp4",
+      "decoded_frames": 150,
+      "sha256": "dc0d17658c6e80d9770a56ff7f2858681a2a8acd4f4f1663f2e48945895e9b87"
+    },
+    {
+      "path": "output/removal/white-skirt-text-assets/comparison.mp4",
+      "decoded_frames": 150,
+      "sha256": "3967e52fb7e0057b6010c4caf0c4225c137f3beebb26a02898113366fb3bd233"
+    },
+    {
+      "path": "output/removal/dog-text.mp4",
+      "decoded_frames": 37,
+      "sha256": "65e36a44938c2e86c9465b14dcd76330d6b41efe502e6ad1c4d39fe9e2123909"
+    },
+    {
+      "path": "output/removal/dog-text-assets/comparison.mp4",
+      "decoded_frames": 37,
+      "sha256": "a255457e91792407f7dcf0705c98ccf667f84370dc8fe08a2c3e6bf401285f23"
+    },
+    {
+      "path": "output/removal/light-jacket.mp4",
+      "decoded_frames": 150,
+      "sha256": "6d2520ab05b7ec848ebab6f28e86372f13f90d92760b29110805c9ee5d32045e"
+    },
+    {
+      "path": "output/removal/light-jacket-assets/comparison.mp4",
+      "decoded_frames": 150,
+      "sha256": "f67df5d9db7d6ad3d3b27601cdc6842b7837d78d4209b795ddf45cd56d6cdf86"
+    }
+  ],
+  "known_failures": [
+    "Moving non-target people can contaminate temporal medians",
+    "Leash/shadows outside mask remain",
+    "Never-visible regions use spatial inpainting",
+    "Homography assumptions fail with significant parallax",
+    "No temporal source optimization or seam blending yet"
+  ]
+}
