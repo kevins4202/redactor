@@ -10,7 +10,7 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import cv2
 import numpy as np
-from redactor.reconstruction import BackgroundReconstructor
+from redactor.reconstruction import BackgroundReconstructor, configure_threads
 from redactor.video import VideoReader, VideoWriter, scene_cut
 
 
@@ -20,7 +20,7 @@ def main():
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument('--text')
     selection.add_argument('--box', type=float, nargs=4)
-    selection.add_argument('--masks', type=Path, help='Reuse one PNG per original frame, for matched reconstruction comparisons')
+    selection.add_argument('--masks', type=Path, help='Reuse one original- or working-resolution PNG per frame')
     parser.add_argument('-o', '--output', type=Path, required=True)
     parser.add_argument('--overwrite', action='store_true')
     args = parser.parse_args()
@@ -36,8 +36,11 @@ def main():
     if args.input.resolve() in [path.resolve() for path in protected]:
         raise ValueError('Output artifacts collide with the source')
     began = time.perf_counter()
-    cv2.setNumThreads(1)
+    configure_threads()
+    timings = {}
+    stage = time.perf_counter()
     cv2.setRNGSeed(581)
+    print('decoding', args.input, flush=True)
     with VideoReader(args.input) as reader:
         fps = reader.fps
         original_shape = (reader.height, reader.width)
@@ -55,9 +58,11 @@ def main():
     cuts = [i for i in range(1, len(frames)) if scene_cut(frames[i-1], frames[i])]
     if cuts:
         raise ValueError(f'Use a single shot for this prototype; scene cuts found at {cuts}')
+    timings['decode_seconds'] = time.perf_counter()-stage
     assets.mkdir(parents=True, exist_ok=True)
     selection_info = {'source': 'cached masks', 'path': str(args.masks)}
     model_info = None
+    stage = time.perf_counter()
     if args.masks:
         paths = sorted(args.masks.glob('*.png'))
         if len(paths) != len(frames):
@@ -65,13 +70,14 @@ def main():
         masks = []
         for path in paths:
             mask = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
-            if mask is None or mask.shape != original_shape:
-                raise ValueError(f'Invalid original-resolution mask: {path}')
+            if mask is None or mask.shape not in (original_shape, (height, width)):
+                raise ValueError(f'Invalid original- or working-resolution mask: {path}')
             masks.append(cv2.resize(mask, (width, height), interpolation=cv2.INTER_NEAREST))
     else:
         from redactor.sam_backend import VideoSegmenter
         from redactor.types import TargetPrompt
         if args.text:
+            print('selecting target from text', flush=True)
             from redactor.grounding import ground_target
             selection_info = ground_target(frames[0], args.text)
             box = selection_info['selected']['box']
@@ -85,8 +91,13 @@ def main():
         cv2.imwrite(str(assets/'selection.jpg'), preview)
         (assets/'selection.json').write_text(json.dumps(selection_info, indent=2)+'\n')
         print('selection', json.dumps(selection_info), flush=True)
+        timings['selection_seconds'] = time.perf_counter()-stage
         masks = [None]*len(frames)
+        stage = time.perf_counter()
         model = VideoSegmenter()
+        timings['model_load_seconds'] = time.perf_counter()-stage
+        print('tracking', model.metadata['name'], 'on', model.device, 'at', model.metadata['image_size'], 'pixels', flush=True)
+        stage = time.perf_counter()
         model_info = model.metadata
         try:
             with tempfile.TemporaryDirectory(prefix='removal-frames-') as directory:
@@ -97,45 +108,47 @@ def main():
                     masks[i] = mask
         finally:
             model.close()
+        timings['tracking_and_frame_preparation_seconds'] = time.perf_counter()-stage
         if any(mask is None for mask in masks) or not masks[0].any():
             raise RuntimeError('Incomplete or empty initial segmentation')
-    mask_dir = assets/'masks'
-    mask_dir.mkdir(exist_ok=True)
-    for i, mask in enumerate(masks):
-        cv2.imwrite(str(mask_dir/f'{i:06d}.png'), mask)
+    stage = time.perf_counter()
+    np.savez_compressed(assets/'masks.npz', packed=np.packbits(np.stack(masks) > 0, axis=-1), width=width)
     expanded = [cv2.dilate(mask, np.ones((7, 7), np.uint8)) for mask in masks]
+    timings['mask_preparation_seconds'] = time.perf_counter()-stage
+    stage = time.perf_counter()
+    configure_threads()
     model = BackgroundReconstructor(frames, expanded)
+    timings['background_features_seconds'] = time.perf_counter()-stage
     rows = []
-    comparison = assets/'comparison.mp4'
-    labels = ('Input', 'Single-frame fill', 'Unaligned reconstruction', 'Aligned reconstruction')
-    with VideoWriter(args.output, args.input, fps, (width, height), overwrite=args.overwrite) as writer, VideoWriter(comparison, args.input, fps, (width*2, (height+26)*2), overwrite=args.overwrite) as demo:
+    reconstruction_seconds = 0.
+    stage = time.perf_counter()
+    with VideoWriter(args.output, args.input, fps, (width, height), overwrite=args.overwrite) as writer:
+        parallelism = configure_threads()
+        opencv_threads = parallelism['reported']
+        print('reconstructing with at most 8 sources;', parallelism, flush=True)
         for i, frame in enumerate(frames):
-            outputs = [model.reconstruct(i, method) for method in ('spatial', 'unaligned', 'aligned')]
-            writer.write(outputs[-1].image)
-            tiles = []
-            for image, label in zip([frame, *[r.image for r in outputs]], labels):
-                tile = cv2.copyMakeBorder(image, 26, 0, 0, 0, cv2.BORDER_CONSTANT)
-                cv2.putText(tile, label, (8, 19), cv2.FONT_HERSHEY_SIMPLEX, .5, (255, 255, 255), 1, cv2.LINE_AA)
-                tiles.append(tile)
-            montage = np.concatenate([np.concatenate(tiles[:2], axis=1), np.concatenate(tiles[2:], axis=1)], axis=0)
-            demo.write(montage)
-            if i in (0, len(frames)//2, len(frames)-1):
-                cv2.imwrite(str(assets/f'comparison-{i:03d}.jpg'), montage)
+            tick = time.perf_counter()
+            result = model.reconstruct(i)
+            reconstruction_seconds += time.perf_counter()-tick
+            writer.write(result.image)
             missing = int((expanded[i] > 0).sum())
-            rows.append({'frame': i, 'mask_pixels': missing, 'observed_pixels': int(outputs[-1].observed.sum()),
-                         'accepted_sources': outputs[-1].accepted_sources,
-                         'fallback_pixels': missing-int(outputs[-1].observed.sum())})
+            rows.append({'frame': i, 'mask_pixels': missing, 'observed_pixels': int(result.observed.sum()),
+                         'accepted_sources': result.accepted_sources,
+                         'fallback_pixels': missing-int(result.observed.sum())})
             if i % 20 == 0:
                 print('reconstructed', i, '/', len(frames), flush=True)
+    timings['reconstruction_seconds'] = reconstruction_seconds
+    timings['render_and_encode_seconds'] = time.perf_counter()-stage-reconstruction_seconds
     report = {'input': str(args.input), 'input_sha256': hashlib.sha256(args.input.read_bytes()).hexdigest(),
               'selection': selection_info, 'tracking_model': model_info, 'frames': len(frames), 'fps': fps,
               'working_resolution': [width, height], 'source_resolution': original_shape[::-1],
-              'mask_expansion_pixels': 3, 'maximum_source_candidates': 17, 'minimum_source_support': 2,
+              'mask_expansion_pixels': 3, 'maximum_source_candidates': 8, 'opencv_threads': opencv_threads, 'opencv_parallelism': parallelism, 'timings': timings, 'minimum_source_support': 2,
               'method': 'ORB + RANSAC homography; masked temporal median; Telea fallback; hard composite inside expanded mask',
               'notes': 'Prototype. First-frame highest-score text selection can be wrong. Non-target moving objects are not masked. Homographies assume approximately planar background/pure rotation. Observation support does not imply correctness. No claim of hidden-background accuracy on real removal.',
               'seconds': time.perf_counter()-began, 'per_frame': rows, 'complete': True}
     args.output.with_suffix('.json').write_text(json.dumps(report, indent=2)+'\n')
-    print('saved', args.output, 'seconds', report['seconds'], flush=True)
+    print('saved', args.output, 'seconds', round(report['seconds'], 2), flush=True)
+    print('timings', json.dumps(timings), flush=True)
 
 if __name__ == '__main__':
     main()

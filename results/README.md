@@ -113,8 +113,12 @@ previously sampled every eight frames with playback rate adjusted accordingly.
 The real demos use 3-pixel dilation at their working resolution. No dense
 reconstruction accuracy is claimed for their genuinely hidden backgrounds.
 
-Open the [meeting demo page](demo.html). It contains all
-comparison videos and the controlled camera-pan/failure examples. Generated
+Open the [meeting demo page](demo.html). It contains the two text-guided
+comparison videos and the controlled camera-pan/failure examples. Final outputs
+are `output/demos/crosswalk.mp4` and `output/demos/dog.mp4`; the companion
+`*-comparison.mp4` files show all three reconstruction methods. Benchmark videos
+are in `output/benchmarks/`. Older generated runs and raw mask intermediates
+have been deleted, including the cached-mask light-jacket demo. Generated
 media lives in ignored `output/` and can be regenerated with the commands below.
 
 ![Dog removal comparison](images/removal-dog.jpg)
@@ -139,9 +143,8 @@ source hashes are in [real-demo report](../results/removal-real-demos.json) and
 python -m pytest -p no:capture -q -m "not model"
 REDACTOR_MODEL_TESTS=1 python -m pytest -p no:capture -q
 python scripts/benchmark_removal.py
-python scripts/remove_object.py examples/crosswalk.mp4 --text "woman wearing a white skirt" -o output/removal/white-skirt-text.mp4
-python scripts/remove_object.py examples/dog.mp4 --text dog -o output/removal/dog-text.mp4
-python scripts/remove_object.py examples/crosswalk.mp4 --masks output/legacy/rewrite/light-jacket.masks -o output/removal/light-jacket.mp4
+python scripts/remove_object.py examples/crosswalk.mp4 --text "woman wearing a white skirt" -o output/crosswalk.mp4
+python scripts/remove_object.py examples/dog.mp4 --text dog -o output/dog.mp4
 ```
 
 The bundled `examples/dog.mp4` is the sampled gallery source used in the run.

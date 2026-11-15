@@ -79,6 +79,15 @@ def test_removal_cli_reuses_masks_without_loading_models(tmp_path):
     report = json.loads(output.with_suffix('.json').read_text())
     assert report['complete'] and report['frames'] == 3
     assert report['tracking_model'] is None
+    assert report['maximum_source_candidates'] == 8
+    assert report['opencv_threads'] >= 1
+    parallel = report['opencv_parallelism']
+    assert parallel['requested'] == -1 if parallel['backend'] == 'GCD' else 1 <= parallel['requested'] <= 4
+    assert not (tmp_path/'removed-assets'/'comparison.mp4').exists()
+    assert report['timings']['reconstruction_seconds'] >= 0
+    with np.load(tmp_path/'removed-assets'/'masks.npz') as saved:
+        assert saved['packed'].shape == (3, 64, 12)
+        assert int(saved['width']) == 96
     assert hashlib.sha256(source.read_bytes()).hexdigest() == before
     with VideoReader(output) as reader:
         assert len(list(reader)) == 3

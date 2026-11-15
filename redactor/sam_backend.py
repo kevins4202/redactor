@@ -1,4 +1,4 @@
-"""One SAM 2.1 Base+ model for selection and offline video propagation."""
+"""SAM 2.1 Base+ tracking, with Tiny retained for matched evaluation."""
 
 from contextlib import nullcontext
 import hashlib
@@ -14,8 +14,10 @@ from .types import mask_box
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = "configs/sam2.1/sam2.1_hiera_b+.yaml"
-DEFAULT_CHECKPOINT = ROOT / "models/sam2.1_hiera_base_plus.pt"
+MODELS = {
+    "tiny": ("configs/sam2.1/sam2.1_hiera_t.yaml", "sam2.1_hiera_tiny.pt", "SAM 2.1 Tiny"),
+    "base_plus": ("configs/sam2.1/sam2.1_hiera_b+.yaml", "sam2.1_hiera_base_plus.pt", "SAM 2.1 Base+"),
+}
 SAM_REVISION = "2b90b9f5ceec907a1c18123530e92e794ad901a4"
 
 
@@ -55,35 +57,43 @@ class FrameStore:
 
 
 class VideoSegmenter:
-    def __init__(self):
+    def __init__(self, variant="base_plus", image_size=512, mps_half=True):
+        config, filename, name = MODELS[variant]
+        checkpoint = ROOT / "models" / filename
         try:
             import torch
             from sam2.build_sam import build_sam2_video_predictor
         except ImportError as error:
             raise RuntimeError("Install the tracking model with python scripts/setup_models.py first.") from error
-        if not DEFAULT_CHECKPOINT.is_file():
+        if not checkpoint.is_file():
             raise RuntimeError("Model weights are missing. Run python scripts/setup_models.py first.")
         if torch.__version__.split("+")[0] != "2.7.1":
             raise RuntimeError("Use the tested model runtime: python -m pip install -r requirements-lock.txt")
         self.torch = torch
+        self.mps_half = mps_half
         self.device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
         self.predictor = build_sam2_video_predictor(
-            DEFAULT_CONFIG, str(DEFAULT_CHECKPOINT), device=self.device,
+            config, str(checkpoint), device=self.device,
             apply_postprocessing=False,
             hydra_overrides_extra=[
+                f"++model.image_size={image_size}",
                 "++model.sam_mask_decoder_extra_args.dynamic_multimask_via_stability=true",
                 "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_delta=0.05",
                 "++model.sam_mask_decoder_extra_args.dynamic_multimask_stability_thresh=0.98",
             ],
         )
-        with DEFAULT_CHECKPOINT.open("rb") as stream:
+        with checkpoint.open("rb") as stream:
             checksum = hashlib.file_digest(stream, "sha256").hexdigest()
-        self.metadata = {"name": "SAM 2.1 Base+", "config": DEFAULT_CONFIG,
+        self.metadata = {"name": name, "config": config,
                          "checkpoint_sha256": checksum, "source_revision": SAM_REVISION,
-                         "device": self.device, "torch": torch.__version__}
+                         "device": self.device, "image_size": image_size, "precision": "float16" if self.device == "mps" and mps_half else "bfloat16" if self.device == "cuda" else "float32", "torch": torch.__version__}
 
     def context(self):
-        return self.torch.autocast("cuda", dtype=self.torch.bfloat16) if self.device == "cuda" else nullcontext()
+        if self.device == "cuda":
+            return self.torch.autocast("cuda", dtype=self.torch.bfloat16)
+        if self.device == "mps" and self.mps_half:
+            return self.torch.autocast("mps", dtype=self.torch.float16)
+        return nullcontext()
 
     def propagate(self, frame_dir, prompts, shape, cancelled=None):
         """Yield each frame once, with all corrections available before propagation."""

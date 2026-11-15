@@ -61,7 +61,7 @@ def run_case(name, truth, frames, masks, output, fps=18):
         rows, outputs, previous = [], [], None
         began = time.perf_counter()
         for t, (clean, mask) in enumerate(zip(truth, masks)):
-            result = model.reconstruct(t, method)
+            result = model.reconstruct(t, method, candidates=17)
             missing = mask > 0
             error = result.image.astype(np.float32)-clean.astype(np.float32)
             values = error[missing]
@@ -102,7 +102,7 @@ def run_case(name, truth, frames, masks, output, fps=18):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=Path('results/removal-benchmark.json'))
-    parser.add_argument('--artifacts', type=Path, default=Path('output/removal-benchmark'))
+    parser.add_argument('--artifacts', type=Path, default=Path('output/benchmarks'))
     args = parser.parse_args()
     cv2.setNumThreads(1)
     report = {'protocol': 'reconstruction-v1', 'notes': '36 frames; exact shared masks; full-shot offline access; at most 17 evenly distributed candidate indices excluding target; support >=2; no clean pixels inside holes available to algorithm; Telea fallback; no learned inpainting. Test seeds fixed before execution. Not the proposal tracking benchmark.',

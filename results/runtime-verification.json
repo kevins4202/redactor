@@ -1,0 +1,91 @@
+{
+  "verified_date": "2026-11-14",
+  "implementation": "November 7 M2 runtime experiment",
+  "previous_actual_model_tests": "9 passed on November 7, including three real-model tests; not rerun on November 14",
+  "video": "output/demos/crosswalk-fast.mp4",
+  "decoded_frames": 150,
+  "video_sha256": "e4e5c6e836c140402901f5316619d0fdc1c6b23cf47d1a528bf92d71cd02cbf8",
+  "model": {
+    "name": "SAM 2.1 Base+",
+    "config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+    "checkpoint_sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5",
+    "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+    "device": "mps",
+    "image_size": 512,
+    "precision": "float16",
+    "torch": "2.7.1"
+  },
+  "full_run_seconds": 763.6526103746146,
+  "timings": {
+    "decode_seconds": 9.209600165951997,
+    "selection_seconds": 187.48601870797575,
+    "model_load_seconds": 16.67144679231569,
+    "tracking_and_frame_preparation_seconds": 481.1567209577188,
+    "mask_preparation_seconds": 0.44241204112768173,
+    "background_features_seconds": 7.42202475015074,
+    "reconstruction_seconds": 56.169615586753935,
+    "render_and_encode_seconds": 5.015975455287844
+  },
+  "quality": {
+    "per_frame": [
+      {
+        "frame": 0,
+        "iou": 0.8675675675675676,
+        "leak_rate": 0.0017084282460136675,
+        "mask_to_truth_area": 0.9675398633257403
+      },
+      {
+        "frame": 30,
+        "iou": 0.8868778280542986,
+        "leak_rate": 0.0028971511347175277,
+        "mask_to_truth_area": 1.0135200386286818
+      },
+      {
+        "frame": 60,
+        "iou": 0.7939017504234895,
+        "leak_rate": 0.004002668445630421,
+        "mask_to_truth_area": 1.1194129419613075
+      },
+      {
+        "frame": 90,
+        "iou": 0.7455666923670008,
+        "leak_rate": 0.014218009478672985,
+        "mask_to_truth_area": 1.1459715639810426
+      },
+      {
+        "frame": 120,
+        "iou": 0.5152224824355972,
+        "leak_rate": 0.050666666666666665,
+        "mask_to_truth_area": 1.588
+      },
+      {
+        "frame": 149,
+        "iou": 0.7424083769633508,
+        "leak_rate": 0.0,
+        "mask_to_truth_area": 1.016969696969697
+      }
+    ],
+    "mean_sparse_iou": 0.7585907829685508,
+    "mean_sparse_leak_rate": 0.01224882066195021,
+    "empty_masks": []
+  },
+  "source_sha256": {
+    "pyproject.toml": "6b424100b6d2558f43a6ff86480c108b5a7fc231e0cf793772704dbdfa7b5ce1",
+    "redactor/__init__.py": "a8ead888cc73a133a0744714361c24a8ec2bc4331283e6740642debc62118eec",
+    "redactor/grounding.py": "2f685d33ffc44dcbd6094fbb49887925add44e2e87001b94741ba9c85f3472b9",
+    "redactor/reconstruction.py": "a7b30c475caceebcbd32c10a42ec34ef353c94c4c6e5d132b75d28232c99a334",
+    "redactor/sam_backend.py": "cf94192c4db83b0bb0d242fd0e32c0c54d4657adcd01b9089abe00c9697086b5",
+    "redactor/types.py": "7a71b8f944b8961f690992ea43e0e19ad0e19bd9c8785b621a3fafe814e80f72",
+    "redactor/video.py": "e0c7a2ab34b4b056c17346b54fc54eb226e00577e3c3a8e672d8ef6de5837c7a",
+    "requirements-lock.txt": "daddb9458443f4bb85bd6fb8d0f8f9efe4bfb08b4414c3e2c54eb5980cb921fc",
+    "scripts/benchmark_removal.py": "e054f52d30c6ae0019419546039d5a624bd9a2d23a0266a3244af26408d1ff52",
+    "scripts/benchmark_runtime.py": "58416e77f3c3c4bb1ce9a2666fa5aea9e1b6fcd8c9f7ac8c625f24f28ad3f746",
+    "scripts/remove_object.py": "29645f976aee60a50cbde5cdd4dbf76b27c9f06e8770b1953df272152ae84804",
+    "scripts/setup_models.py": "009da188742372a05d22b0bc5d9a04a8c60d6b8afd57f8ac53831ff8dadb26c4",
+    "tests/test_reconstruction.py": "2764deda2e57f0b7ea4989e4c99ee02de4058026e7c15f5131d0e8e88001e669",
+    "tests/test_sam_backend.py": "4e1e274978a0806cdf899ba852e8d5feb66b596b62ccb9ad8bdc4dfc6a4e42ef",
+    "tests/tracking_fixtures.py": "608515414d2e957e519e9f0394180edb1c69b5674dce1b74ccfacb49ce731d94"
+  },
+  "gpu_sync": "November 7 runtime changes were tested locally on M2. Allegro was unreachable; no synchronization of these changes to Allegro is claimed.",
+  "software_tests_today": "6 passed, 3 optional actual-model tests deselected on November 14"
+}

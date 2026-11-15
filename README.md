@@ -30,7 +30,8 @@ is selected automatically for SAM; local processing can be slow. Footage stays o
 the machine running the program.
 
 Inspect `output/example-assets/selection.jpg` to check that the correct object was
-selected. That folder also contains a four-panel comparison video and masks.
+selected. That folder contains the selection record and one compressed mask file.
+Normal runs generate only the final reconstruction; comparisons belong in the benchmark.
 `output/example.mp4` is the final reconstruction; `output/example.json` records
 settings and observation support. Add `--overwrite` to replace existing outputs.
 
@@ -62,18 +63,19 @@ not the proposal's tracking IoU/leakage tests.
 
 ```text
 redactor/   selection, tracking, reconstruction, video I/O
-scripts/    run removal, run benchmark, set up model
+scripts/    run removal, reconstruction/runtime benchmarks, model setup
 tests/     focused reconstruction and model tests
 examples/   crosswalk and dog clips, existing annotations
 results/    current measurements, report, demo page
 reference/  proposal and supplied past-project examples
-output/     generated videos/masks; old artifacts in legacy/ (ignored)
+output/     current demos and benchmark videos (ignored)
 models/     downloaded model source and weights (ignored)
 ```
 
 The old browser app, classical trackers, duplicate reports, and promotional-video
 project have been removed from this branch. Their tracked versions remain in Git
-history. Existing completed demos are preserved under `output/removal/`.
+history. Completed demos are under `output/demos/`; current benchmark videos are under
+`output/benchmarks/`. Older generated runs and intermediates have been deleted.
 
 This is a short-clip prototype: one target visible in the first frame, one shot,
 at most 300 frames, and output capped at 640 pixels wide. Text uses the highest
@@ -81,3 +83,20 @@ scoring first-frame candidate and can be wrong. Reconstruction uses background
 alignment and a masked temporal median; moving bystanders, parallax, seams,
 shadows, and never-visible background remain limitations. Temporal source
 optimization and separate seam blending are not implemented.
+
+## Runtime settings
+
+Normal processing uses at most eight reconstruction sources and CPU parallelism.
+On macOS OpenCV uses GCD's automatic pool; its reported thread count is not a
+fixed cap. On other builds the request is capped at four threads.
+SAM runs at 512 internal pixels, using float16 autocast on Metal and bfloat16
+on CUDA. Output remains capped at 640 pixels wide. Text weights load from the
+local cache first. Startup and model inference can still be slow on a laptop.
+
+SAM Tiny was tested but rejected as the default because it removed nearby people
+in the crosswalk. Base+ remains the normal model. See [runtime measurements](results/runtime.md).
+
+The original reconstruction benchmark explicitly retains 17 sources for historical
+comparability. `python scripts/benchmark_runtime.py` measures the new settings;
+it additionally requires the official Tiny checkpoint at
+`models/sam2.1_hiera_tiny.pt`. Neither command changes the normal model.

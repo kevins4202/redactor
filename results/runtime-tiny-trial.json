@@ -1,0 +1,1161 @@
+{
+  "input": "examples/crosswalk.mp4",
+  "input_sha256": "d6c1ee70b4b508d63db6c81dcc1b7465bbfe29b0e33bb9accf37505aee81471e",
+  "selection": {
+    "text": "woman wearing a white skirt",
+    "model": "IDEA-Research/grounding-dino-tiny",
+    "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+    "policy": "highest scoring first-frame candidate; inspect selection preview",
+    "selected": {
+      "box": [
+        55.95099639892578,
+        203.77769470214844,
+        95.1392822265625,
+        295.8820495605469
+      ],
+      "score": 0.8278437852859497
+    },
+    "candidates": [
+      {
+        "box": [
+          55.95099639892578,
+          203.77769470214844,
+          95.1392822265625,
+          295.8820495605469
+        ],
+        "score": 0.8278437852859497
+      },
+      {
+        "box": [
+          62.46208572387695,
+          249.466064453125,
+          93.67254638671875,
+          295.85601806640625
+        ],
+        "score": 0.4167078733444214
+      }
+    ]
+  },
+  "tracking_model": {
+    "name": "SAM 2.1 Tiny",
+    "config": "configs/sam2.1/sam2.1_hiera_t.yaml",
+    "checkpoint_sha256": "7402e0d864fa82708a20fbd15bc84245c2f26dff0eb43a4b5b93452deb34be69",
+    "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+    "device": "mps",
+    "image_size": 512,
+    "torch": "2.7.1"
+  },
+  "frames": 150,
+  "fps": 30.0,
+  "working_resolution": [
+    640,
+    298
+  ],
+  "source_resolution": [
+    2320,
+    1080
+  ],
+  "mask_expansion_pixels": 3,
+  "maximum_source_candidates": 8,
+  "opencv_threads": 8,
+  "timings": {
+    "decode_seconds": 10.351771041750908,
+    "selection_seconds": 150.59023000020534,
+    "model_load_seconds": 4.362365250010043,
+    "tracking_and_frame_preparation_seconds": 144.2508816672489,
+    "mask_preparation_seconds": 0.3266832078807056,
+    "background_features_seconds": 6.123746040742844,
+    "reconstruction_seconds": 133.83410845976323,
+    "render_and_encode_seconds": 9.435995707288384
+  },
+  "minimum_source_support": 2,
+  "method": "ORB + RANSAC homography; masked temporal median; Telea fallback; hard composite inside expanded mask",
+  "notes": "Prototype. First-frame highest-score text selection can be wrong. Non-target moving objects are not masked. Homographies assume approximately planar background/pure rotation. Observation support does not imply correctness. No claim of hidden-background accuracy on real removal.",
+  "seconds": 459.501435500104,
+  "per_frame": [
+    {
+      "frame": 0,
+      "mask_pixels": 2776,
+      "observed_pixels": 2776,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 1,
+      "mask_pixels": 2757,
+      "observed_pixels": 2757,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 2,
+      "mask_pixels": 2734,
+      "observed_pixels": 2734,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 3,
+      "mask_pixels": 2713,
+      "observed_pixels": 2713,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 4,
+      "mask_pixels": 2709,
+      "observed_pixels": 2709,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 5,
+      "mask_pixels": 2666,
+      "observed_pixels": 2666,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 6,
+      "mask_pixels": 2666,
+      "observed_pixels": 2666,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 7,
+      "mask_pixels": 2621,
+      "observed_pixels": 2621,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 8,
+      "mask_pixels": 2596,
+      "observed_pixels": 2596,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 9,
+      "mask_pixels": 2597,
+      "observed_pixels": 2597,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 10,
+      "mask_pixels": 2663,
+      "observed_pixels": 2663,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 11,
+      "mask_pixels": 2739,
+      "observed_pixels": 2739,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 12,
+      "mask_pixels": 2799,
+      "observed_pixels": 2799,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 13,
+      "mask_pixels": 2788,
+      "observed_pixels": 2788,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 14,
+      "mask_pixels": 2790,
+      "observed_pixels": 2790,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 15,
+      "mask_pixels": 2801,
+      "observed_pixels": 2801,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 16,
+      "mask_pixels": 2765,
+      "observed_pixels": 2765,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 17,
+      "mask_pixels": 2898,
+      "observed_pixels": 2898,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 18,
+      "mask_pixels": 2899,
+      "observed_pixels": 2899,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 19,
+      "mask_pixels": 2982,
+      "observed_pixels": 2982,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 20,
+      "mask_pixels": 2978,
+      "observed_pixels": 2978,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 21,
+      "mask_pixels": 2931,
+      "observed_pixels": 2931,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 22,
+      "mask_pixels": 3106,
+      "observed_pixels": 3106,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 23,
+      "mask_pixels": 3122,
+      "observed_pixels": 3122,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 24,
+      "mask_pixels": 3259,
+      "observed_pixels": 3259,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 25,
+      "mask_pixels": 3307,
+      "observed_pixels": 3307,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 26,
+      "mask_pixels": 3397,
+      "observed_pixels": 3397,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 27,
+      "mask_pixels": 3523,
+      "observed_pixels": 3523,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 28,
+      "mask_pixels": 3624,
+      "observed_pixels": 3624,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 29,
+      "mask_pixels": 3802,
+      "observed_pixels": 3802,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 30,
+      "mask_pixels": 3898,
+      "observed_pixels": 3898,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 31,
+      "mask_pixels": 4017,
+      "observed_pixels": 4017,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 32,
+      "mask_pixels": 4149,
+      "observed_pixels": 4149,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 33,
+      "mask_pixels": 4219,
+      "observed_pixels": 4219,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 34,
+      "mask_pixels": 4277,
+      "observed_pixels": 4277,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 35,
+      "mask_pixels": 4348,
+      "observed_pixels": 4348,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 36,
+      "mask_pixels": 4515,
+      "observed_pixels": 4515,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 37,
+      "mask_pixels": 4457,
+      "observed_pixels": 4457,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 38,
+      "mask_pixels": 4535,
+      "observed_pixels": 4535,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 39,
+      "mask_pixels": 4532,
+      "observed_pixels": 4532,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 40,
+      "mask_pixels": 4575,
+      "observed_pixels": 4575,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 41,
+      "mask_pixels": 4514,
+      "observed_pixels": 4514,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 42,
+      "mask_pixels": 4458,
+      "observed_pixels": 4458,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 43,
+      "mask_pixels": 4546,
+      "observed_pixels": 4546,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 44,
+      "mask_pixels": 4551,
+      "observed_pixels": 4551,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 45,
+      "mask_pixels": 4634,
+      "observed_pixels": 4634,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 46,
+      "mask_pixels": 4854,
+      "observed_pixels": 4854,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 47,
+      "mask_pixels": 4788,
+      "observed_pixels": 4788,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 48,
+      "mask_pixels": 4947,
+      "observed_pixels": 4947,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 49,
+      "mask_pixels": 4972,
+      "observed_pixels": 4972,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 50,
+      "mask_pixels": 4967,
+      "observed_pixels": 4967,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 51,
+      "mask_pixels": 4901,
+      "observed_pixels": 4901,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 52,
+      "mask_pixels": 4834,
+      "observed_pixels": 4834,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 53,
+      "mask_pixels": 4896,
+      "observed_pixels": 4896,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 54,
+      "mask_pixels": 5133,
+      "observed_pixels": 5133,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 55,
+      "mask_pixels": 5227,
+      "observed_pixels": 5227,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 56,
+      "mask_pixels": 5235,
+      "observed_pixels": 5235,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 57,
+      "mask_pixels": 5105,
+      "observed_pixels": 5105,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 58,
+      "mask_pixels": 4893,
+      "observed_pixels": 4893,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 59,
+      "mask_pixels": 7288,
+      "observed_pixels": 7288,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 60,
+      "mask_pixels": 6655,
+      "observed_pixels": 6655,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 61,
+      "mask_pixels": 6421,
+      "observed_pixels": 6421,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 62,
+      "mask_pixels": 5582,
+      "observed_pixels": 5582,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 63,
+      "mask_pixels": 4984,
+      "observed_pixels": 4984,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 64,
+      "mask_pixels": 4724,
+      "observed_pixels": 4724,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 65,
+      "mask_pixels": 4718,
+      "observed_pixels": 4718,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 66,
+      "mask_pixels": 4693,
+      "observed_pixels": 4693,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 67,
+      "mask_pixels": 4663,
+      "observed_pixels": 4663,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 68,
+      "mask_pixels": 4531,
+      "observed_pixels": 4531,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 69,
+      "mask_pixels": 4468,
+      "observed_pixels": 4468,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 70,
+      "mask_pixels": 5549,
+      "observed_pixels": 5549,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 71,
+      "mask_pixels": 5655,
+      "observed_pixels": 5655,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 72,
+      "mask_pixels": 5666,
+      "observed_pixels": 5666,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 73,
+      "mask_pixels": 5934,
+      "observed_pixels": 5934,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 74,
+      "mask_pixels": 5885,
+      "observed_pixels": 5885,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 75,
+      "mask_pixels": 5910,
+      "observed_pixels": 5910,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 76,
+      "mask_pixels": 5773,
+      "observed_pixels": 5773,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 77,
+      "mask_pixels": 5422,
+      "observed_pixels": 5422,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 78,
+      "mask_pixels": 5376,
+      "observed_pixels": 5376,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 79,
+      "mask_pixels": 4960,
+      "observed_pixels": 4960,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 80,
+      "mask_pixels": 4724,
+      "observed_pixels": 4724,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 81,
+      "mask_pixels": 4607,
+      "observed_pixels": 4607,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 82,
+      "mask_pixels": 4537,
+      "observed_pixels": 4537,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 83,
+      "mask_pixels": 4546,
+      "observed_pixels": 4546,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 84,
+      "mask_pixels": 4495,
+      "observed_pixels": 4495,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 85,
+      "mask_pixels": 4378,
+      "observed_pixels": 4378,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 86,
+      "mask_pixels": 4356,
+      "observed_pixels": 4356,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 87,
+      "mask_pixels": 4135,
+      "observed_pixels": 4135,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 88,
+      "mask_pixels": 4072,
+      "observed_pixels": 4072,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 89,
+      "mask_pixels": 4252,
+      "observed_pixels": 4252,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 90,
+      "mask_pixels": 4390,
+      "observed_pixels": 4390,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 91,
+      "mask_pixels": 4456,
+      "observed_pixels": 4456,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 92,
+      "mask_pixels": 4317,
+      "observed_pixels": 4317,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 93,
+      "mask_pixels": 4452,
+      "observed_pixels": 4452,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 94,
+      "mask_pixels": 4390,
+      "observed_pixels": 4390,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 95,
+      "mask_pixels": 4474,
+      "observed_pixels": 4474,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 96,
+      "mask_pixels": 4407,
+      "observed_pixels": 4407,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 97,
+      "mask_pixels": 4333,
+      "observed_pixels": 4333,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 98,
+      "mask_pixels": 4166,
+      "observed_pixels": 4166,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 99,
+      "mask_pixels": 4093,
+      "observed_pixels": 4093,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 100,
+      "mask_pixels": 4073,
+      "observed_pixels": 4073,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 101,
+      "mask_pixels": 4050,
+      "observed_pixels": 4050,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 102,
+      "mask_pixels": 4089,
+      "observed_pixels": 4089,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 103,
+      "mask_pixels": 4109,
+      "observed_pixels": 4109,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 104,
+      "mask_pixels": 4259,
+      "observed_pixels": 4259,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 105,
+      "mask_pixels": 4286,
+      "observed_pixels": 4286,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 106,
+      "mask_pixels": 4263,
+      "observed_pixels": 4263,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 107,
+      "mask_pixels": 4209,
+      "observed_pixels": 4209,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 108,
+      "mask_pixels": 4181,
+      "observed_pixels": 4181,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 109,
+      "mask_pixels": 4472,
+      "observed_pixels": 4472,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 110,
+      "mask_pixels": 4803,
+      "observed_pixels": 4803,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 111,
+      "mask_pixels": 4854,
+      "observed_pixels": 4854,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 112,
+      "mask_pixels": 5168,
+      "observed_pixels": 5168,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 113,
+      "mask_pixels": 5398,
+      "observed_pixels": 5398,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 114,
+      "mask_pixels": 4960,
+      "observed_pixels": 4960,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 115,
+      "mask_pixels": 5296,
+      "observed_pixels": 5296,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 116,
+      "mask_pixels": 5457,
+      "observed_pixels": 5457,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 117,
+      "mask_pixels": 5631,
+      "observed_pixels": 5631,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 118,
+      "mask_pixels": 5693,
+      "observed_pixels": 5693,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 119,
+      "mask_pixels": 5685,
+      "observed_pixels": 5685,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 120,
+      "mask_pixels": 5677,
+      "observed_pixels": 5677,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 121,
+      "mask_pixels": 5655,
+      "observed_pixels": 5655,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 122,
+      "mask_pixels": 5757,
+      "observed_pixels": 5757,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 123,
+      "mask_pixels": 6072,
+      "observed_pixels": 6072,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 124,
+      "mask_pixels": 6073,
+      "observed_pixels": 6073,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 125,
+      "mask_pixels": 5866,
+      "observed_pixels": 5866,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 126,
+      "mask_pixels": 6001,
+      "observed_pixels": 6001,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 127,
+      "mask_pixels": 5919,
+      "observed_pixels": 5919,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 128,
+      "mask_pixels": 6213,
+      "observed_pixels": 6213,
+      "accepted_sources": 7,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 129,
+      "mask_pixels": 7095,
+      "observed_pixels": 7087,
+      "accepted_sources": 8,
+      "fallback_pixels": 8
+    },
+    {
+      "frame": 130,
+      "mask_pixels": 6116,
+      "observed_pixels": 6116,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 131,
+      "mask_pixels": 5975,
+      "observed_pixels": 5975,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 132,
+      "mask_pixels": 6565,
+      "observed_pixels": 6565,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 133,
+      "mask_pixels": 7479,
+      "observed_pixels": 7462,
+      "accepted_sources": 8,
+      "fallback_pixels": 17
+    },
+    {
+      "frame": 134,
+      "mask_pixels": 7417,
+      "observed_pixels": 7410,
+      "accepted_sources": 8,
+      "fallback_pixels": 7
+    },
+    {
+      "frame": 135,
+      "mask_pixels": 7590,
+      "observed_pixels": 7590,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 136,
+      "mask_pixels": 7468,
+      "observed_pixels": 7444,
+      "accepted_sources": 8,
+      "fallback_pixels": 24
+    },
+    {
+      "frame": 137,
+      "mask_pixels": 7724,
+      "observed_pixels": 7662,
+      "accepted_sources": 8,
+      "fallback_pixels": 62
+    },
+    {
+      "frame": 138,
+      "mask_pixels": 7794,
+      "observed_pixels": 7744,
+      "accepted_sources": 8,
+      "fallback_pixels": 50
+    },
+    {
+      "frame": 139,
+      "mask_pixels": 7813,
+      "observed_pixels": 7813,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 140,
+      "mask_pixels": 7920,
+      "observed_pixels": 7920,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 141,
+      "mask_pixels": 8143,
+      "observed_pixels": 8122,
+      "accepted_sources": 8,
+      "fallback_pixels": 21
+    },
+    {
+      "frame": 142,
+      "mask_pixels": 7898,
+      "observed_pixels": 7882,
+      "accepted_sources": 8,
+      "fallback_pixels": 16
+    },
+    {
+      "frame": 143,
+      "mask_pixels": 8554,
+      "observed_pixels": 8533,
+      "accepted_sources": 8,
+      "fallback_pixels": 21
+    },
+    {
+      "frame": 144,
+      "mask_pixels": 11497,
+      "observed_pixels": 11351,
+      "accepted_sources": 8,
+      "fallback_pixels": 146
+    },
+    {
+      "frame": 145,
+      "mask_pixels": 10963,
+      "observed_pixels": 10963,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 146,
+      "mask_pixels": 10900,
+      "observed_pixels": 10829,
+      "accepted_sources": 8,
+      "fallback_pixels": 71
+    },
+    {
+      "frame": 147,
+      "mask_pixels": 11067,
+      "observed_pixels": 11067,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 148,
+      "mask_pixels": 10683,
+      "observed_pixels": 10683,
+      "accepted_sources": 8,
+      "fallback_pixels": 0
+    },
+    {
+      "frame": 149,
+      "mask_pixels": 10513,
+      "observed_pixels": 10430,
+      "accepted_sources": 7,
+      "fallback_pixels": 83
+    }
+  ],
+  "complete": true,
+  "sparse_scores": [
+    {
+      "frame": 0,
+      "iou": 0.8544461003477397,
+      "leak_rate": 0.0
+    },
+    {
+      "frame": 30,
+      "iou": 0.6380705730009711,
+      "leak_rate": 0.001931434089811685
+    },
+    {
+      "frame": 60,
+      "iou": 0.2742686789640395,
+      "leak_rate": 0.0020013342228152103
+    },
+    {
+      "frame": 90,
+      "iou": 0.3132716049382716,
+      "leak_rate": 0.01800947867298578
+    },
+    {
+      "frame": 120,
+      "iou": 0.1404079861111111,
+      "leak_rate": 0.072
+    },
+    {
+      "frame": 149,
+      "iou": 0.0543870830677714,
+      "leak_rate": 0.15393939393939393
+    }
+  ],
+  "quality_note": "Rejected as default: at 512 internal pixels the Tiny mask expands onto bystanders late in the clip. One M2 trial; stage timings include cold startup, no comparison against older CUDA wall time."
+}

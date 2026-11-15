@@ -1,0 +1,329 @@
+{
+  "notes": "Reconstruction: identical 36-frame natural fixture, before encoding, one pass per setting; no model inference in those timings. Model: same 31 sampled crosswalk frames, same initial box, both at 512 internal resolution; six approximate polygon labels scored. Sampling changes temporal difficulty versus full video. No download time included. Single-run timings, not statistical confidence intervals. GCD ignores a numerical parallel thread cap: requested 1 disables parallel loops, requested 4 enables the native pool, reported as 8 on this M2. Wall times are single unrandomized runs and fluctuate; the final_only row was slower than the previous row despite less work.",
+  "environment": {
+    "platform": "macOS-15.1-arm64-arm-64bit",
+    "opencv": "5.0.0",
+    "opencv_parallel_backend": "GCD"
+  },
+  "reconstruction_source_sha256": "9640fd7bc852fc884fea1fee8a07390f2e86e28ef49449f19342bd7d08547f45",
+  "reconstruction": [
+    {
+      "name": "previous",
+      "maximum_sources": 17,
+      "comparison_methods": true,
+      "seconds": 93.76781608397141,
+      "feature_setup_seconds": 7.481815958861262,
+      "masked_mae": 17.740083883147467,
+      "observed_fraction": 1.0,
+      "threads_requested": 1,
+      "threads_reported": 8,
+      "opencv_backend": "GCD"
+    },
+    {
+      "name": "final_only",
+      "maximum_sources": 17,
+      "comparison_methods": false,
+      "seconds": 119.78949991706759,
+      "feature_setup_seconds": 5.9973272499628365,
+      "masked_mae": 17.740083883147467,
+      "observed_fraction": 1.0,
+      "threads_requested": 1,
+      "threads_reported": 8,
+      "opencv_backend": "GCD"
+    },
+    {
+      "name": "eight_sources",
+      "maximum_sources": 8,
+      "comparison_methods": false,
+      "seconds": 63.983983166050166,
+      "feature_setup_seconds": 1.9389920406974852,
+      "masked_mae": 18.53488157100874,
+      "observed_fraction": 1.0,
+      "threads_requested": 1,
+      "threads_reported": 8,
+      "opencv_backend": "GCD"
+    },
+    {
+      "name": "four_threads",
+      "maximum_sources": 8,
+      "comparison_methods": false,
+      "seconds": 20.741783250123262,
+      "feature_setup_seconds": 2.1134263752028346,
+      "masked_mae": 18.53488157100874,
+      "observed_fraction": 1.0,
+      "threads_requested": 4,
+      "threads_reported": 8,
+      "opencv_backend": "GCD"
+    }
+  ],
+  "models": [
+    {
+      "variant": "tiny",
+      "model": {
+        "name": "SAM 2.1 Tiny",
+        "config": "configs/sam2.1/sam2.1_hiera_t.yaml",
+        "checkpoint_sha256": "7402e0d864fa82708a20fbd15bc84245c2f26dff0eb43a4b5b93452deb34be69",
+        "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+        "device": "mps",
+        "image_size": 512,
+        "torch": "2.7.1",
+        "precision": "float32"
+      },
+      "sampled_frames": 31,
+      "indices": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        149
+      ],
+      "load_seconds": 21.678575332742184,
+      "tracking_seconds": 67.36059391591698,
+      "mean_sparse_iou": 0.5522770285580328,
+      "mean_sparse_leak": 0.026063296158854336,
+      "per_frame": [
+        {
+          "frame": 0,
+          "iou": 0.8544461003477397,
+          "leak_rate": 0.0,
+          "stability": 0.8859188544152745
+        },
+        {
+          "frame": 30,
+          "iou": 0.6120875732346592,
+          "leak_rate": 0.0,
+          "stability": 0.8742550655542313
+        },
+        {
+          "frame": 60,
+          "iou": 0.7264056224899599,
+          "leak_rate": 0.00266844563042028,
+          "stability": 0.7943197434722858
+        },
+        {
+          "frame": 90,
+          "iou": 0.47562707051585423,
+          "leak_rate": 0.015165876777251185,
+          "stability": 0.6800847457627118
+        },
+        {
+          "frame": 120,
+          "iou": 0.4075,
+          "leak_rate": 0.07066666666666667,
+          "stability": 0.792814371257485
+        },
+        {
+          "frame": 149,
+          "iou": 0.23759580475998388,
+          "leak_rate": 0.06787878787878789,
+          "stability": 0.6754158964879852
+        }
+      ]
+    },
+    {
+      "variant": "base_plus",
+      "model": {
+        "name": "SAM 2.1 Base+",
+        "config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "checkpoint_sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5",
+        "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+        "device": "mps",
+        "image_size": 512,
+        "torch": "2.7.1",
+        "precision": "float32"
+      },
+      "sampled_frames": 31,
+      "indices": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        149
+      ],
+      "load_seconds": 16.177885374985635,
+      "tracking_seconds": 183.17815549997613,
+      "mean_sparse_iou": 0.7687514303969935,
+      "mean_sparse_leak": 0.00969106350114797,
+      "per_frame": [
+        {
+          "frame": 0,
+          "iou": 0.8674959437533802,
+          "leak_rate": 0.002277904328018223,
+          "stability": 0.882877858337981
+        },
+        {
+          "frame": 30,
+          "iou": 0.8821942446043165,
+          "leak_rate": 0.0024142926122646064,
+          "stability": 0.8687224669603524
+        },
+        {
+          "frame": 60,
+          "iou": 0.7918321043675554,
+          "leak_rate": 0.00333555703802535,
+          "stability": 0.845225027442371
+        },
+        {
+          "frame": 90,
+          "iou": 0.7466874512860483,
+          "leak_rate": 0.013270142180094787,
+          "stability": 0.8918058870326173
+        },
+        {
+          "frame": 120,
+          "iou": 0.6116774791473587,
+          "leak_rate": 0.032,
+          "stability": 0.7914438502673797
+        },
+        {
+          "frame": 149,
+          "iou": 0.7126213592233009,
+          "leak_rate": 0.0048484848484848485,
+          "stability": 0.7831558567279767
+        }
+      ]
+    },
+    {
+      "variant": "base_plus",
+      "model": {
+        "name": "SAM 2.1 Base+",
+        "config": "configs/sam2.1/sam2.1_hiera_b+.yaml",
+        "checkpoint_sha256": "a2345aede8715ab1d5d31b4a509fb160c5a4af1970f199d9054ccfb746c004c5",
+        "source_revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+        "device": "mps",
+        "image_size": 512,
+        "precision": "float16",
+        "torch": "2.7.1"
+      },
+      "sampled_frames": 31,
+      "indices": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        149
+      ],
+      "load_seconds": 16.425904791802168,
+      "tracking_seconds": 119.33471104223281,
+      "mean_sparse_iou": 0.7604278675823853,
+      "mean_sparse_leak": 0.013501345914475466,
+      "per_frame": [
+        {
+          "frame": 0,
+          "iou": 0.8675675675675676,
+          "leak_rate": 0.0017084282460136675,
+          "stability": 0.882877858337981
+        },
+        {
+          "frame": 30,
+          "iou": 0.8662280701754386,
+          "leak_rate": 0.0028971511347175277,
+          "stability": 0.8666382616105667
+        },
+        {
+          "frame": 60,
+          "iou": 0.7969018932874354,
+          "leak_rate": 0.004002668445630421,
+          "stability": 0.8613636363636363
+        },
+        {
+          "frame": 90,
+          "iou": 0.7418856259659969,
+          "leak_rate": 0.014218009478672985,
+          "stability": 0.8922345483359746
+        },
+        {
+          "frame": 120,
+          "iou": 0.5450041288191577,
+          "leak_rate": 0.05333333333333334,
+          "stability": 0.8902027027027027
+        },
+        {
+          "frame": 149,
+          "iou": 0.7449799196787149,
+          "leak_rate": 0.0048484848484848485,
+          "stability": 0.7960199004975125
+        }
+      ]
+    }
+  ],
+  "complete": true
+}

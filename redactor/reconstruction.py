@@ -1,10 +1,19 @@
 """Recover masked pixels from observed backgrounds in other video frames."""
 
 from dataclasses import dataclass
+import os
 import warnings
 
 import cv2
 import numpy as np
+
+
+def configure_threads():
+    backend = next(line.split(":", 1)[1].strip() for line in cv2.getBuildInformation().splitlines()
+                   if "Parallel framework:" in line)
+    requested = -1 if backend == "GCD" else min(4, os.cpu_count() or 1)
+    cv2.setNumThreads(requested)
+    return {"backend": backend, "requested": requested, "reported": cv2.getNumThreads()}
 
 
 @dataclass
@@ -30,6 +39,7 @@ class BackgroundReconstructor:
         self.masks = [np.where(mask > 0, 255, 0).astype(np.uint8) for mask in masks]
         orb = cv2.ORB_create(nfeatures=1800, fastThreshold=10)
         self.features = []
+        self.visible = [cv2.erode(255-mask, np.ones((3, 3), np.uint8)) for mask in self.masks]
         for frame, mask in zip(frames, self.masks):
             safe = cv2.dilate(mask, np.ones((9, 9), np.uint8))
             self.features.append(orb.detectAndCompute(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), 255-safe))
@@ -56,7 +66,7 @@ class BackgroundReconstructor:
             return None
         return matrix
 
-    def reconstruct(self, target, method="aligned", candidates=16):
+    def reconstruct(self, target, method="aligned", candidates=8):
         if method not in ("spatial", "unaligned", "aligned"):
             raise ValueError("Unknown reconstruction method")
         frame, mask = self.frames[target], self.masks[target]
@@ -69,7 +79,7 @@ class BackgroundReconstructor:
             return Reconstruction(filled, np.zeros(self.shape, bool), count, 0)
         # Spread candidates across the whole shot so a slowly moving target can
         # reveal background outside a short local window. No target frame copy.
-        indices = np.unique(np.linspace(0, len(self.frames)-1, min(candidates+1, len(self.frames))).round().astype(int))
+        indices = np.unique(np.linspace(0, len(self.frames)-1, min(candidates, len(self.frames))).round().astype(int))
         indices = [int(i) for i in indices if i != target]
         height, width = self.shape
         ys, xs = np.nonzero(missing)
@@ -79,7 +89,7 @@ class BackgroundReconstructor:
             if matrix is None:
                 continue
             image = cv2.warpPerspective(self.frames[source], matrix, (width, height), flags=cv2.INTER_LINEAR)
-            safe = cv2.erode(255-self.masks[source], np.ones((3, 3), np.uint8))
+            safe = self.visible[source]
             valid = cv2.warpPerspective(safe, matrix, (width, height), flags=cv2.INTER_LINEAR) == 255
             observation = image[ys, xs].astype(np.float32)
             observation[~valid[ys, xs]] = np.nan

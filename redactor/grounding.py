@@ -1,11 +1,13 @@
 """Text selects a box; a separate video model supplies temporal masks."""
 import cv2
+import os
 from PIL import Image
 
 
 def ground_target(frame, text):
     if not text.strip():
         raise ValueError("Describe the object to remove")
+    os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
     try:
         import torch
         from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
@@ -13,9 +15,15 @@ def ground_target(frame, text):
         raise RuntimeError('Install text selection with pip install -e .') from error
     name = 'IDEA-Research/grounding-dino-tiny'
     revision = 'a2bb814dd30d776dcf7e30523b00659f4f141c71'
+    torch.set_num_threads(min(4, os.cpu_count() or 1))
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    processor = AutoProcessor.from_pretrained(name, revision=revision)
-    model = AutoModelForZeroShotObjectDetection.from_pretrained(name, revision=revision).to(device).eval()
+    def load(factory):
+        try:
+            return factory.from_pretrained(name, revision=revision, local_files_only=True)
+        except OSError:
+            return factory.from_pretrained(name, revision=revision)
+    processor = load(AutoProcessor)
+    model = load(AutoModelForZeroShotObjectDetection).to(device).eval()
     query = text.strip().lower().rstrip('.')+'.'
     image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
     inputs = processor(images=image, text=query, return_tensors='pt').to(device)

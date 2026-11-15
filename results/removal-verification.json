@@ -4,20 +4,23 @@
   "gpu_tests": "9 passed on cleaned project, including 3 actual-model tests",
   "local_tests": "6 passed, 3 optional actual-model tests skipped",
   "source_files_byte_identical_to_gpu": {
+    ".github/workflows/tests.yml": "1e6d495b284e3513f0d322349dab6ffd991eb2c5f2bf3572127a9c73306565da",
+    "README.md": "0fda9a647691850aac5cc5d804928a27d665ec81bbbadd55a296bbe807803a4f",
+    "pyproject.toml": "6b424100b6d2558f43a6ff86480c108b5a7fc231e0cf793772704dbdfa7b5ce1",
+    "pytest.ini": "75a37a3e92707b72c0be4499d638aac83a2bf15fcbd9b6f83c09f8f4f517b500",
     "redactor/__init__.py": "a8ead888cc73a133a0744714361c24a8ec2bc4331283e6740642debc62118eec",
     "redactor/grounding.py": "3c620e6deb7b59e935ab41aa1ab2d875b37854b94d49f27f3d7a1df7e0271edd",
     "redactor/reconstruction.py": "d6fb5d7434ed5223488a750838bc8fb138b239938c32f6f0c7aadd23922d6ca3",
     "redactor/sam_backend.py": "daad59f63382b164f4de4e0adcc0b0d6d81536e622dc16c6d8b41c724f987c4f",
     "redactor/types.py": "7a71b8f944b8961f690992ea43e0e19ad0e19bd9c8785b621a3fafe814e80f72",
     "redactor/video.py": "e0c7a2ab34b4b056c17346b54fc54eb226e00577e3c3a8e672d8ef6de5837c7a",
-    "scripts/benchmark_removal.py": "42a05601da31015931d33cdd90392401b84c0f8c2e945fb53a35784b06dc6d32",
+    "requirements-lock.txt": "daddb9458443f4bb85bd6fb8d0f8f9efe4bfb08b4414c3e2c54eb5980cb921fc",
+    "scripts/benchmark_removal.py": "f13095ebf972d4e0015cece8c44042051a09953f7e070e3abef88ec56450236e",
     "scripts/remove_object.py": "d0770f32c505ebe1b1972dac06510f3fbed952b05b5b665eba72fb9bc0eed6b5",
     "scripts/setup_models.py": "009da188742372a05d22b0bc5d9a04a8c60d6b8afd57f8ac53831ff8dadb26c4",
     "tests/test_reconstruction.py": "ebccb61a7dba1f01025aea4d929fb88f6721c33c41922d4fc6a46ac5566ba0ad",
     "tests/test_sam_backend.py": "4e1e274978a0806cdf899ba852e8d5feb66b596b62ccb9ad8bdc4dfc6a4e42ef",
-    "tests/tracking_fixtures.py": "608515414d2e957e519e9f0394180edb1c69b5674dce1b74ccfacb49ce731d94",
-    "pyproject.toml": "6b424100b6d2558f43a6ff86480c108b5a7fc231e0cf793772704dbdfa7b5ce1",
-    "pytest.ini": "75a37a3e92707b72c0be4499d638aac83a2bf15fcbd9b6f83c09f8f4f517b500"
+    "tests/tracking_fixtures.py": "608515414d2e957e519e9f0394180edb1c69b5674dce1b74ccfacb49ce731d94"
   },
   "benchmark_method_runs": 30,
   "benchmark_cases": 10,
@@ -31,34 +34,44 @@
   },
   "videos": [
     {
-      "path": "output/removal/white-skirt-text.mp4",
-      "decoded_frames": 150,
-      "sha256": "dc0d17658c6e80d9770a56ff7f2858681a2a8acd4f4f1663f2e48945895e9b87"
+      "path": "output/benchmarks/camera-pan-581.mp4",
+      "decoded_frames": 36,
+      "sha256": "2947604954bf3734827655d8db38e2cd7e99c237123c73ffc9a38bebe08a407a"
     },
     {
-      "path": "output/removal/white-skirt-text-assets/comparison.mp4",
+      "path": "output/benchmarks/natural-crosswalk-artificial-hole.mp4",
+      "decoded_frames": 36,
+      "sha256": "994efd7acdcb8a6b83c4a24e792a4fb6ba3712d8ab76b3d6d35f36a3e9f1bba2"
+    },
+    {
+      "path": "output/benchmarks/never-visible-581.mp4",
+      "decoded_frames": 36,
+      "sha256": "4ffcf95471d69eecf021dbc85c446b4f9e13e150587ce5b6502046405c807214"
+    },
+    {
+      "path": "output/benchmarks/stationary-581.mp4",
+      "decoded_frames": 36,
+      "sha256": "f800596ae5c13156052c14b36e3910ea19b51160bf214d73f1db52c934ac5a46"
+    },
+    {
+      "path": "output/demos/crosswalk-comparison.mp4",
       "decoded_frames": 150,
       "sha256": "3967e52fb7e0057b6010c4caf0c4225c137f3beebb26a02898113366fb3bd233"
     },
     {
-      "path": "output/removal/dog-text.mp4",
-      "decoded_frames": 37,
-      "sha256": "65e36a44938c2e86c9465b14dcd76330d6b41efe502e6ad1c4d39fe9e2123909"
+      "path": "output/demos/crosswalk.mp4",
+      "decoded_frames": 150,
+      "sha256": "dc0d17658c6e80d9770a56ff7f2858681a2a8acd4f4f1663f2e48945895e9b87"
     },
     {
-      "path": "output/removal/dog-text-assets/comparison.mp4",
+      "path": "output/demos/dog-comparison.mp4",
       "decoded_frames": 37,
       "sha256": "a255457e91792407f7dcf0705c98ccf667f84370dc8fe08a2c3e6bf401285f23"
     },
     {
-      "path": "output/removal/light-jacket.mp4",
-      "decoded_frames": 150,
-      "sha256": "6d2520ab05b7ec848ebab6f28e86372f13f90d92760b29110805c9ee5d32045e"
-    },
-    {
-      "path": "output/removal/light-jacket-assets/comparison.mp4",
-      "decoded_frames": 150,
-      "sha256": "f67df5d9db7d6ad3d3b27601cdc6842b7837d78d4209b795ddf45cd56d6cdf86"
+      "path": "output/demos/dog.mp4",
+      "decoded_frames": 37,
+      "sha256": "65e36a44938c2e86c9465b14dcd76330d6b41efe502e6ad1c4d39fe9e2123909"
     }
   ],
   "known_failures": [
@@ -71,5 +84,9 @@
   "pre_cleanup_gpu_tests": "30 passed, 1 existing dependency deprecation warning",
   "cleanup_notes": "Removed old app, UI, dataset framework, stale reports, obsolete evaluation scripts and composition project. Proposal/reference PDFs preserved; old generated artifacts moved to output/legacy. Numerical reconstruction algorithm unchanged.",
   "cleanup_benchmark_rerun": "All 30 method runs completed; all per-frame accuracy metrics match the pre-cleanup results exactly",
-  "cleanup_text_demo": "Documented examples/dog.mp4 --text dog command completed on Allegro with the cleaned source"
+  "cleanup_text_demo": "Documented examples/dog.mp4 --text dog command completed on Allegro with the cleaned source",
+  "gpu_directory": "/home/ksong37/redactor-rewrite-20261101.4HtL4i/clean-removal",
+  "retained_outputs": "Only output/demos and output/benchmarks; superseded runs, partial CPU run, and intermediates removed",
+  "recorded_before_runtime_changes": true,
+  "current_verification_report": "runtime-verification.json"
 }
