@@ -1,126 +1,287 @@
-\documentclass[11pt,letterpaper]{article}
+\documentclass[10pt,letterpaper]{article}
 \usepackage[margin=0.7in]{geometry}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern,graphicx,xcolor,booktabs,tabularx,tikz,hyperref,fancyhdr}
-\usetikzlibrary{arrows.meta,positioning}
-\definecolor{green}{HTML}{267563}
-\definecolor{graytext}{HTML}{52606B}
-\hypersetup{colorlinks=true,urlcolor=green,linkcolor=green,pdftitle={Redactor: Midterm Report}}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[font=small,labelfont=bf,skip=4pt]{caption}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+\usepackage[colorlinks=true,urlcolor=blue,linkcolor=black,citecolor=black]{hyperref}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.4em}{}
+\titlespacing*{\section}{0pt}{7pt}{3pt}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.4em}{}
+\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+\setlist{nosep,leftmargin=1.3em}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{7pt}
-\renewcommand{\arraystretch}{1.25}
-\setlength{\emergencystretch}{2em}
-\pagestyle{fancy}\fancyhf{}\fancyfoot[L]{\small Redactor / CIS 5810}\fancyfoot[R]{\small\thepage}
-\renewcommand{\headrulewidth}{0pt}
-\newcommand{\heading}[1]{\vspace{5pt}{\large\bfseries #1}\par}
-\newcommand{\captiontext}[1]{\par\vspace{3pt}{\small\color{graytext}#1\par}}
+\setlength{\parskip}{4pt}
+\setlength{\textfloatsep}{8pt}
+\setlength{\floatsep}{6pt}
+\pagestyle{plain}
+
 \begin{document}
-{\LARGE\bfseries Redactor}\hfill Midterm report\\[4pt]
-{\large Select an object once. Keep it covered as it moves.}\\[3pt]
-{\small Draft revised November 19, 2026. Experiments run October 11, 2026.}
 
-We built a tool that tracks a selected object and covers it throughout a video.
-The hard part is keeping the whole object covered when it changes size, turns,
-or passes behind something. SAM 2 works best on our real videos, but it still misses pixels.
-
-\heading{How it works}
 \begin{center}
-\begin{tikzpicture}[node distance=0.35cm,box/.style={draw=green,rounded corners,align=center,text width=3.1cm,minimum height=1.2cm,font=\small},arr/.style={-{Stealth},thick,green}]
-\node[box] (a) {\textbf{Select}\\Draw a box or outline\\or enter a text prompt};
-\node[box,right=of a] (b) {\textbf{Track}\\Classical tracker\\or pretrained SAM 2};
-\node[box,right=of b] (c) {\textbf{Cover}\\Expand the mask\\and hide the object};
-\node[box,right=of c] (d) {\textbf{Review}\\Check the video\\and correct misses};
-\draw[arr] (a)--(b);\draw[arr] (b)--(c);\draw[arr] (c)--(d);
-\draw[arr] (d.south)--++(0,-.35)-| (b.south);
+{\Large\bfseries Redactor: Select-Once Object Redaction for Video}\\[4pt]
+CIS 5810 Final Project Midterm Report \textbullet{} Group 34 \textbullet{} Option 1\\[3pt]
+\small
+\begin{tabular}{ccc}
+Kevin Song & AJ Boyle & Dhruv Gupta \\
+\texttt{ksong37@engineering.upenn.edu} & \texttt{ajboyle@seas.upenn.edu} & \texttt{dhruvgup@engineering.upenn.edu}
+\end{tabular}
+\end{center}
+
+\textbf{Summary.} Redactor lets you pick an object once, by outlining it, drawing a box, or typing
+a description, and then keeps it hidden for the rest of the video. At the proposal, our classical
+tracker (GrabCut plus optical flow) broke as soon as the target shrank, went behind something, or
+the shot cut. Since then we've done four more iterations. We fixed scale with a similarity-transform
+tracker and added appearance-based recovery. Then we switched to SAM~2 for real footage, and
+when SAM~2 couldn't find a target again after a long occlusion, we put our recovery back inside it.
+On our DAVIS subset, the share of the target left uncovered dropped from 54\% with the original
+tracker to 2.2\% with SAM~2. Most recently we tried removing the target outright and filling in
+the background from other frames of the shot. On a real crosswalk clip that cut reconstruction
+error by 60\% compared with single-frame inpainting. It still isn't perfect, so the workflow ends
+with a person reviewing the video.
+
+\section{Goals and audience}
+
+We're building this for people who post footage of public places, like journalists, researchers,
+and anyone filming a street or an event who needs to hide a bystander, a face, or a license plate.
+Right now that means keyframing a blur by hand, shot by shot. We want a tool where you say once
+what to hide and it stays hidden for the rest of the clip. Our priorities haven't changed since the
+proposal. The worst failure is a leak, where the object shows up even for a single frame. After
+that, we want the mask to stay tight, since blurring half the frame ruins the video too. We now
+measure both, as the share of the target left uncovered and the extra frame area covered.
+
+\section{Pipeline}
+
+We kept the design from the proposal. Everything goes through one shared data type, the target
+prompt, which is a rough region on some frame plus an instance id. The stages before the prompt
+decide what to hide, and the stages after it figure out where that thing is in each frame and hide
+it (Figure~\ref{fig:pipeline}). Most of what was planned in the proposal is now built.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  font=\footnotesize, >={Stealth[length=4pt]},
+  box/.style={draw, rounded corners=2pt, align=center, inner sep=3pt, minimum height=9mm},
+  built/.style={box, line width=0.7pt, fill=blue!6},
+  new/.style={box, line width=0.7pt, fill=orange!15},
+  lab/.style={font=\scriptsize, text=black!65, align=center},
+  flow/.style={->, line width=0.6pt},
+]
+% Stage 1: three interchangeable prompt sources
+\node[built, text width=30mm] (manual) {\textbf{Manual}\\outline or box};
+\node[new, text width=30mm, below=1.5mm of manual] (detect) {\textbf{Class detector}\\faces, license plates};
+\node[new, text width=30mm, below=1.5mm of detect] (text) {\textbf{Text description}\\Grounding DINO};
+\node[draw=black!45, rounded corners=3pt, inner sep=2.5mm, fit=(manual)(detect)(text)] (specify) {};
+\node[lab, anchor=south west, inner sep=1pt] at ($(specify.north west)+(0,0.4mm)$) {\textbf{1. Specify target}};
+
+% Stages 2-4
+\node[built, text width=25mm, right=16mm of detect] (segment) {\textbf{2. Segment}\\GrabCut};
+\node[new, text width=25mm, right=11mm of segment] (propagate) {\textbf{3. Propagate}\\similarity + RANSAC};
+\node[built, text width=22mm, right=11mm of propagate] (redact) {\textbf{4. Redact}\\dilate + cover};
+\node[new, text width=25mm, minimum height=6mm, below=1.5mm of segment] (sam) {SAM 2 (image)};
+\node[new, text width=25mm, minimum height=6mm, below=1.5mm of propagate] (samv) {SAM 2 (video)};
+\node[new, text width=22mm, minimum height=6mm, below=1.5mm of redact] (remove) {or remove and\\rebuild background};
+\node[new, text width=33mm, below=4mm of samv] (monitor) {\textbf{Monitor}\\lost target, scene cuts};
+
+% Video frames feeding each stage
+\coordinate (bar) at ($(specify.north)+(0,5mm)$);
+\node[lab, anchor=south] (video) at ($(segment.north |- bar)+(0,0.2mm)$) {input video};
+\draw[black!45, line width=0.6pt] ($(specify.north |- bar)+(10mm,0)$) -- ($(redact.north |- bar)$);
+\draw[flow, black!45] ($(specify.north |- bar)+(10mm,0)$) -- ($(specify.north)+(10mm,0)$);
+\draw[flow, black!45] ($(segment.north |- bar)$) -- (segment.north);
+\draw[flow, black!45] ($(propagate.north |- bar)$) -- (propagate.north);
+\draw[flow, black!45] ($(redact.north |- bar)$) -- (redact.north);
+
+% Main data flow
+\draw[flow] (specify.east |- segment) -- node[lab, above] {target\\prompt} (segment);
+\draw[flow] (segment) -- node[lab, above] {mask$_0$} (propagate);
+\draw[flow] (propagate) -- node[lab, above] {mask$_t$} (redact);
+\node[lab, right=6mm of redact] (out) {redacted\\video};
+\draw[flow] (redact) -- (out);
+
+% Feedback loop, now built
+\draw[flow] (samv) -- (monitor);
+\draw[flow] (monitor.west) -| node[lab, pos=0.25, below] {on failure, re-detect and re-prompt} ($(specify.south)+(8mm,0)$);
 \end{tikzpicture}
-\end{center}
+\caption{Our pipeline. Blue boxes were already built at the proposal. Orange boxes were planned in
+the proposal or are new, and we've built all of them since. Every target source produces the same
+kind of prompt.}
+\label{fig:pipeline}
+\end{figure}
 
-\heading{What we added}
-\begin{tabularx}{\linewidth}{@{}p{.25\linewidth}X@{}}\toprule
-\textbf{Started with} & GrabCut segmentation and optical flow that only moved the mask.\\
-\textbf{Built / changed} & Scale-aware motion, mask refinement, recovery search, cut checks, multiple targets, corrections, and the review/export UI.\\
-\textbf{Integrated} & Pretrained SAM 2 for segmentation and tracking; Grounding DINO for text, face, and plate prompts. We did not train these models.\\
-\textbf{Tested} & Original tracker vs. our classical changes vs. SAM 2; box vs. outline prompts; learned recovery; larger coverage margins.\\\bottomrule
-\end{tabularx}
+\begin{enumerate}
+\item \textbf{Specify target.} The user outlines or boxes the object on any frame and checks a
+mask preview before anything runs. Text descriptions go through Grounding DINO \cite{gdino}, which
+returns boxes for a free-form phrase, and faces and plates use the same path.
+\item \textbf{Segment.} GrabCut \cite{grabcut} or SAM~2 \cite{sam2} turns the rough prompt into a
+pixel mask.
+\item \textbf{Propagate.} This is either our classical tracker from Iteration~2 (similarity
+transform from optical flow, GrabCut refinement, and appearance recovery) or SAM~2's video model
+from Iterations~3 and 4.
+\item \textbf{Redact.} We dilate the mask as a safety margin and cover it. As of Iteration~5 we can
+also remove the object and fill the hole from other frames of the shot.
+\end{enumerate}
 
-\heading{Why the selection shape matters}
-\begin{center}
-% One unchanged row from the saved comparison: frame 30, 9-pixel slack.
-\includegraphics[width=.91\linewidth,trim=0 1420 0 356,clip]{figures/prompt-ablation.jpg}
-\end{center}
-\captiontext{Frame 30: approximate label, box, box with outline-style seeds, and outline.
-Green is the selected mask. The box can include the person next to the target.
-Across six labeled frames and three prompt sizes, mean IoU was 0.620 for the original box,
-0.537 for the seeded box, and 0.806 for the outline. Prompts came from the labels;
-this does not measure how much effort a user saves.}
+\textbf{Why this design.} We wanted to be able to swap out one stage and measure it on its own,
+and that works because the benchmark reads the mask between stages 3 and 4. It's how we compared
+the classical tracker and SAM~2 without changing anything else. We wrote the selection tools, the
+classical tracker, recovery and cut detection, multi-target support, corrections, coverage
+margins, background reconstruction, the review and export app, and the benchmark. SAM~2 and
+Grounding DINO are pretrained models we integrated, and we didn't train either one.
 
 \input{iterations.tex}
-\newpage
-{\LARGE\bfseries What worked}\par
-\heading{Three versions}
-\begin{tabularx}{\linewidth}{@{}p{.24\linewidth}X@{}}\toprule
-\textbf{1. Fix scale changes} & Fit rotation, translation, and scale from optical flow; refine the mask with GrabCut.\\
-\textbf{2. Try to recover} & Search for the original appearance when tracking fails. Flag cuts and uncertain frames.\\
-\textbf{3. Try SAM 2} & Use a pretrained video model for propagation; keep the same selection and review workflow.\\\bottomrule
+
+\section{Progress against the proposal}
+
+\begin{table}[h]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}p{.27\linewidth}p{.15\linewidth}X@{}}
+\toprule
+Proposal plan item & Status & What happened \\
+\midrule
+1. Real-video evaluation & Done & DAVIS 2017 subset (8 videos, 12 objects) and 6 labeled crosswalk frames. \\
+2. Scale-aware propagation & Done & Iteration 2. Shrinking-clip IoU went from 0.456 to 0.906. \\
+3. Occlusion recovery & Done, twice & Classical in Iteration 2, then inside SAM~2 in Iteration 4. Occlusion leak went from 48.9\% to 5.9\%. \\
+4. Scene cuts & Done & Histogram cut checks trigger re-detection or review. Cut IoU went from 0.456 to 0.911. \\
+5. SAM 2 & Done & Iteration 3. Best method on real video by a wide margin. \\
+6. Detector and text prompts & Integrated & Grounding DINO works in the app, but we don't have recall numbers yet. \\
+Lasso open question & Answered & Outlines do help in crowds, 0.620 to 0.806 IoU on the crosswalk (Section~\ref{sec:selection}). \\
+Not planned, object removal & First version & Iteration 5. Text-prompted removal with aligned background reconstruction. \\
+\bottomrule
 \end{tabularx}
+\caption{Where each item from the proposal's plan ended up.}
+\label{tab:progress}
+\end{table}
 
-\begin{center}\includegraphics[width=.88\linewidth]{figures/results.pdf}\end{center}
-\captiontext{Overlap is measured before expanding the mask. Uncovered pixels are measured after
-a 9$\times$9 expansion kernel (4 pixels per side). Full-frame safety covers are excluded.
-Means give each object sequence equal weight; synthetic means also average three prompt sizes.}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.88\linewidth]{figures/results.pdf}
+\caption{Original tracker vs.\ Iteration 2 vs.\ Iteration 3 on all three test sets. Iteration 4
+matches Iteration 3 exactly on DAVIS and the crosswalk, since recovery never triggered there. IoU
+is measured before dilation and uncovered pixels after the standard $9{\times}9$ dilation. Frames
+where the safety policy covered the whole frame are left out.}
+\label{fig:results}
+\end{figure}
 
-\textbf{Our classical changes helped the test scenes, but did not carry over well to real video.}
-On DAVIS, SAM 2 raised IoU from 0.298 to 0.835 and cut uncovered target pixels from 53.98\% to 2.21\%.
-The learned ResNet recovery experiment did not help: DAVIS IoU fell from 0.310 to 0.284.
+The biggest lesson so far is that our classical changes fixed the synthetic clips but didn't carry
+over to real video (Figure~\ref{fig:results}). DAVIS IoU only moved from 0.298 to 0.310. SAM~2 got
+to 0.835, but it had its own blind spot with long occlusions, and our classical recovery code ended
+up being exactly what fixed it.
 
-\heading{What we tested on}
-{\small\begin{tabularx}{\linewidth}{@{}p{.2\linewidth}Xp{.34\linewidth}@{}}\toprule
- & \textbf{Data} & \textbf{Limit}\\\midrule
-Test scenes & 4 scenes, 90 frames each; 3 prompt sizes & Rebuilt fixture; used during development.\\
-DAVIS & 8 videos, 12 objects & Chosen subset, not the full benchmark.\\
-Crosswalk & 150 frames tracked; 6 frames scored & Approximate labels; gaps can hide misses.\\\bottomrule
-\end{tabularx}}
-\captiontext{All real-video comparisons use 5-pixel initial prompt slack. Later ground-truth masks
-are never fed into tracking. The proposal's original synthetic script was missing, so our rebuilt
-test scenes are not a reproduction of its original table.}
+\textbf{What margins can't fix.} Figure~\ref{fig:margin} uses the same saved SAM~2 masks on DAVIS
+with bigger safety margins. A 16-pixel margin brings the average uncovered area down to 0.74\%,
+but the worst frame still leaves 25.15\% of the target uncovered. That frame is from
+\texttt{bmx-trees}, where SAM~2 is confidently tracking only part of the rider, and no margin fixes
+a mask in the wrong place. SAM~2 also didn't raise any warnings on the crosswalk even though we
+measured misses there, so its confidence alone can't tell us which frames need review.
 
-\newpage
-{\LARGE\bfseries What still needs work}\par
-\heading{More coverage helps, but costs background}
-\begin{center}\includegraphics[width=\linewidth]{figures/margin.pdf}\end{center}
-\captiontext{Same saved SAM 2 masks on DAVIS; only the added margin changes.
-The two percentages have different denominators: target area on the left, whole-frame area on the right.}
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figures/margin.pdf}
+\caption{Same SAM 2 masks on DAVIS with only the margin changed. The left plot shows the share of
+the target left uncovered, and the right plot shows the share of the whole frame covered beyond the
+target.}
+\label{fig:margin}
+\end{figure}
 
-At a 16-pixel margin, average uncovered target area drops to 0.74\%, but the worst frame
-still leaves \textbf{25.15\%} uncovered. A bigger mask cannot fix a lost target.
-SAM 2 also raised no warnings on the crosswalk despite measured misses.
+\section{Plan for the rest of the semester}
 
-\heading{The next three checks}
-\begin{tabularx}{\linewidth}{@{}p{.23\linewidth}Xp{.27\linewidth}@{}}\toprule
-\textbf{Problem} & \textbf{Next step} & \textbf{What to measure}\\\midrule
-We only scored six crosswalk frames. & Label every frame, then have another person check the labels. & Worst miss and longest uncovered streak.\\
-The tracker can miss pixels without warning. & Compare warnings with actual misses on separate clips. & Missed warnings and unnecessary warnings.\\
-Recovery struggles after occlusion. & Test repeated exits, reappearances, and similar-looking people. & Wrong-person matches and corrections needed.\\\bottomrule
-\end{tabularx}
+\begin{enumerate}
+\item \textbf{Denser real labels.} We'll label every crosswalk frame instead of six, and have a
+second person check the labels. Then we can measure the worst miss and the longest uncovered
+streak.
+\item \textbf{Warning reliability.} We'll compare review warnings with actual misses on held-out
+clips and count both missed and unnecessary warnings.
+\item \textbf{Real occlusions.} Iteration~4 has only been tested on one synthetic occlusion. We'll
+try real clips with repeated exits, reappearances, and lookalikes, and count wrong-person matches.
+\item \textbf{Prompt evaluation.} We'll score text, face, and plate prompts on labeled frames by
+detection recall at a fixed threshold.
+\item \textbf{Removal quality.} We'll pick source frames more consistently over time and mask out
+other moving people, to cut down on ghosting and flicker.
+\item \textbf{Removal with recovery.} We'll run removal on top of Iteration~4's tracker and test it
+on occluded targets, counting frames where the removed person pops back in.
+\end{enumerate}
 
-\heading{Where we are now}
-\begin{tabularx}{\linewidth}{@{}p{.2\linewidth}X@{}}\toprule
-\textbf{Working} & Selection, mask preview, multiple targets, corrections, coverage margins, video export, and replay/review logs.\\
-\textbf{Still limited} & Identity recovery, warning reliability, face/plate detection recall, and complete coverage. Users still need to review the video.\\\bottomrule
-\end{tabularx}
+\section{Timeline, milestones, and member duties}
 
-\heading{Results and sources}
-{\small
-Numbers come from the saved October experiments, not a new run for this report.
-The repository contains the raw results and commands:\\
-\href{https://github.com/kevins4202/redactor/blob/main/docs/evaluation.md}{Evaluation steps}
-\quad\href{https://github.com/kevins4202/redactor/blob/main/docs/results.md}{Full result tables}
-\quad\href{https://github.com/kevins4202/redactor/blob/main/docs/proposal-followup.md}{Follow-up experiments}\\
-Models/data: \href{https://github.com/facebookresearch/sam2}{SAM 2},
-\href{https://github.com/IDEA-Research/GroundingDINO}{Grounding DINO},
-\href{https://davischallenge.org/davis2017/code.html}{DAVIS 2017},
-\href{https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.resnet18.html}{ResNet-18}.
+\begin{center}
+\small
+\begin{tabular}{llll}
+\toprule
+Dates & Milestone & Lead & Status \\
+\midrule
+by 10/9      & Baseline, lasso, flow gate (proposal) & All & Done \\
+10/12--10/25 & Real-video benchmark (DAVIS + annotated crosswalk frames) & Dhruv & Done \\
+10/19--11/1  & Scale-aware propagation (Iteration 2) & Kevin & Done \\
+10/26--11/8  & SAM 2 backend (Iteration 3) & AJ & Done \\
+11/2--11/15  & Occlusion and scene-cut recovery (Iterations 2 and 4) & Kevin, AJ & Done \\
+not planned  & Object removal (Iteration 5) & Kevin & First version done \\
+11/20        & Midterm report & All & Done \\
+11/21--11/30 & Full crosswalk labels and warning study & Dhruv & Next \\
+11/21--12/3  & Prompt evaluation and real occlusion clips & AJ & Next \\
+11/21--12/3  & Removal with occlusion recovery & Kevin & Next \\
+12/6         & Final Project Day demo & All & \\
+12/10        & Final report, demo video, code & All & \\
+\bottomrule
+\end{tabular}
+\end{center}
 
-Codex helped with code, experiments, analysis, and drafting. Team review is still needed.
+A lot of the implementation came together earlier than we planned in the proposal. That gave us
+time for the real-video evaluation, the failure analysis that led to Iteration~4, and the removal
+work in Iteration~5, which wasn't in the original plan at all.
+
+\textbf{Duties.} We split the work about evenly between the three of us. Most of it happened in
+shared VS Code Live Share sessions, so the commit history doesn't really show who wrote what. We
+each still had a main area from the proposal. Kevin led propagation, recovery, and the object
+removal work. AJ led target selection, segmentation, and SAM~2, including the SAM~2 occlusion
+recovery. Dhruv led the evaluation data, metrics, and benchmarks, along with the review app. All
+three of us worked on experiments, debugging, and the reports. For the rest of the semester we're
+keeping the same areas, so Dhruv will take the full labels and warning study, AJ will take prompt
+evaluation and real occlusion clips, and Kevin will take removal with recovery.
+
+\textbf{Results and code.} Every number here comes from result files saved in the repository,
+along with the commands to reproduce them. See the
+\href{https://github.com/kevins4202/redactor/blob/main/docs/evaluation.md}{evaluation steps},
+\href{https://github.com/kevins4202/redactor/blob/main/docs/results.md}{full result tables},
+\href{https://github.com/kevins4202/redactor/blob/main/docs/proposal-followup.md}{follow-up experiments},
+\href{https://github.com/kevins4202/redactor/blob/occlusion-recovery/docs/occlusion-recovery.md}{Iteration 4},
+and \href{https://github.com/kevins4202/redactor/blob/temporal-object-removal/results/README.md}{Iteration 5}.
+
+\textbf{Generative AI use.} We used AI coding assistants (Codex) to help with code,
+particularly to run experiments and create plotting scripts that look nice since we don't have as much experience with libraries like matplotlib when it comes to making graphics that look nice and are engaging. 
+We also used AI to create / update outlines that guided report writing after being edited by us. 
+
+{\footnotesize
+\begin{thebibliography}{99}
+\setlength{\itemsep}{0pt}
+\bibitem{grabcut} C. Rother, V. Kolmogorov, A. Blake. GrabCut: Interactive foreground extraction
+using iterated graph cuts. SIGGRAPH, 2004.
+\bibitem{shitomasi} J. Shi, C. Tomasi. Good features to track. CVPR, 1994.
+\bibitem{lk} B. Lucas, T. Kanade. An iterative image registration technique with an application to
+stereo vision. IJCAI, 1981.
+\bibitem{fb} Z. Kalal, K. Mikolajczyk, J. Matas. Forward-backward error: Automatic detection of
+tracking failures. ICPR, 2010.
+\bibitem{ransac} M. Fischler, R. Bolles. Random sample consensus: A paradigm for model fitting with
+applications to image analysis and automated cartography. Comm.\ ACM, 1981.
+\bibitem{davis} J. Pont-Tuset et al. The 2017 DAVIS challenge on video object segmentation.
+arXiv:1704.00675, 2017.
+\bibitem{sam2} N. Ravi et al. SAM 2: Segment anything in images and videos. arXiv:2408.00714, 2024.
+\bibitem{gdino} S. Liu et al. Grounding DINO: Marrying DINO with grounded pre-training for open-set
+object detection. arXiv:2303.05499, 2023.
+\bibitem{resnet} K. He, X. Zhang, S. Ren, J. Sun. Deep residual learning for image recognition.
+CVPR, 2016.
+\bibitem{orb} E. Rublee, V. Rabaud, K. Konolige, G. Bradski. ORB: An efficient alternative to SIFT
+or SURF. ICCV, 2011.
+\bibitem{telea} A. Telea. An image inpainting technique based on the fast marching method.
+Journal of Graphics Tools, 2004.
+\end{thebibliography}
 }
+
 \end{document}
