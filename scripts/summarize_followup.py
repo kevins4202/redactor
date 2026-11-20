@@ -70,7 +70,7 @@ def main():
              "| Reliable select-once coverage with a tight mask | Not achieved; measured exposure and false confidence remain |",
              "| Detect every face/plate, recover identity, infer permanent departure | Basic mechanisms exist; broad recall and identity reliability are not established; target ending remains manual |",
              "| TA meeting / midterm submission / final presentation / final submission | Not performed or verified; draft and runbook prepared |", "",
-             "The original proposal's synthetic script was absent from the starting repository. The reconstructed fixture remains a reconstruction, not a reproduction of Table 1. No report claims otherwise. [Reproduction commands](evaluation.md#proposal-follow-up-experiments), [midterm draft](midterm-report.md), [demo runbook](demo-runbook.md)."]
+             "The original proposal's synthetic script was absent from the starting repository. The reconstructed fixture remains a reconstruction, not a reproduction of Table 1. No report claims otherwise. [Reproduction commands](evaluation.md#proposal-follow-up-experiments), [midterm report](latex/midterm_report.pdf), [demo runbook](demo-runbook.md)."]
     (ROOT / "docs/proposal-followup.md").write_text("\n".join(text) + "\n", encoding="utf-8")
     fig, axes = plt.subplots(1, 3, figsize=(13, 4.3), layout="constrained")
     values = [prompts["summary"][method]["iou"] for method in ("box", "box_seeded", "lasso")]

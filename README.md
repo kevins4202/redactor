@@ -113,7 +113,7 @@ features. It is experimental: our paired real-video evaluation found worse
 average DAVIS tracking than the classical recovery method. SAM 2 remains the
 recommended real-footage backend. See the [proposal follow-up](docs/proposal-followup.md)
 for the learned-recovery comparison, crowded-frame prompt ablation, and coverage
-trade-off measurements. A [midterm report draft](docs/midterm-report.md) is also
+trade-off measurements. A [midterm report](docs/latex/midterm_report.pdf) is also
 available; it is not a record of a course submission.
 
 ## Evaluation

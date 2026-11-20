@@ -37,7 +37,7 @@ https://redactor-demo-production.up.railway.app and contains only the demo.
 
 ## Materials for the team
 
-- [Midterm draft](midterm-report.md)
+- [Midterm report](latex/midterm_report.pdf)
 - [Final report](final-report.md)
 - [Proposal status and follow-up results](proposal-followup.md)
 - [Reproduction commands](evaluation.md)

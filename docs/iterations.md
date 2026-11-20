@@ -31,5 +31,5 @@ aggregate DAVIS accuracy and remains experimental. Wider margins reduced
 boundary leakage while covering more surroundings; they did not eliminate
 worst-frame exposure. The [follow-up report](proposal-followup.md) preserves
 these negative results and distinguishes completed implementation from the
-open reliability objective. A [midterm draft](midterm-report.md) and
+open reliability objective. A [midterm report](latex/midterm_report.pdf) and
 [presentation runbook](demo-runbook.md) are ready for team review.

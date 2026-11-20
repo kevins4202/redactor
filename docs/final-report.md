@@ -13,7 +13,7 @@ The [proposal follow-up](proposal-followup.md) adds the previously missing
 learned-appearance recovery experiment, crowded-frame box/lasso ablation, and
 browser segmentation preview. It also measures configurable coverage margins.
 The learned recovery variant is a negative result on the DAVIS subset and is
-explicitly experimental. A [midterm draft](midterm-report.md) and
+explicitly experimental. A [midterm report](latex/midterm_report.pdf) and
 [presentation runbook](demo-runbook.md) are prepared; neither is a claim that a
 meeting, presentation, or submission has happened.
 

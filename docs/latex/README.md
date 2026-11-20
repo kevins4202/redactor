@@ -1,6 +1,6 @@
 # Visual midterm report
 
-`midterm-report.tex` is the main editable report; `iterations.tex` holds the Baseline and Iteration results sections (Iterations 2–5, plus selection and review). `midterm-report.pdf` is the compiled copy. The older Markdown draft remains in `../midterm-report.md` for reference. All required images are included in `figures/`, so this folder can be uploaded to Overleaf with `midterm-report.tex` as the main document.
+`midterm-report.tex` is the main editable report; `iterations.tex` holds the Baseline and Iteration results sections (Iterations 2–5, plus selection and review). `midterm_report.pdf` is the compiled copy. All required images are included in `figures/`, so this folder can be uploaded to Overleaf with `midterm-report.tex` as the main document.
 
 From the repository root:
 
