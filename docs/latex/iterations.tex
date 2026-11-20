@@ -1,0 +1,151 @@
+\newpage
+{\LARGE\bfseries First, get a baseline we could test}\par
+We started with GrabCut and optical flow. It could follow simple movement, but
+we needed to see where it broke before adding more code.
+
+\heading{Four ways to break the tracker}
+\begin{center}
+\begin{tikzpicture}[b/.style={draw=green,rounded corners,text width=3.3cm,minimum height=1.6cm,align=center,font=\small},node distance=.35cm]
+\node[b] (a) {\textbf{Move}\\Can the mask follow\\the same shape?};
+\node[b,right=of a] (b) {\textbf{Shrink}\\Can it resize as the\\target gets smaller?};
+\node[b,right=of b] (c) {\textbf{Occlude}\\Can it find the target\\after a pillar hides it?};
+\node[b,right=of c] (d) {\textbf{Cut}\\Can it recover when\\the scene jumps?};
+\end{tikzpicture}
+\end{center}
+Each scene has 90 frames. The shrinking target reaches 45\% of its initial size;
+the cut happens at frame 45. We tested initial prompt slack of 5, 9, and 13 pixels.
+The original proposal script was missing, so these are rebuilt tests.
+
+\heading{All six variants, on the same four tests}
+\begin{center}\includegraphics[width=\linewidth]{figures/iterations.pdf}\end{center}
+\captiontext{One slice of the 72-run synthetic comparison: 6 variants $\times$ 4 scenes
+$\times$ 3 prompt sizes. These cells show the 5-pixel setting. Darker means better overlap.
+The flow gate is the restored historical comparison; the scale and recovery rows add our changes.}
+
+\heading{What this told us}
+\begin{tabularx}{\linewidth}{@{}p{.25\linewidth}X@{}}\toprule
+\textbf{Movement was easy.} & The original outline tracker reached 0.881 IoU. There was less to gain here.\\
+\textbf{Scale was a problem.} & IoU fell to 0.456 when the target shrank. Moving an old mask was not enough.\\
+\textbf{Gating was not recovery.} & The flow gate still scored 0.317 on occlusion and 0.440 on cuts. Rejecting bad motion did not find the target again.\\\bottomrule
+\end{tabularx}
+\textbf{Next:} fix the motion model, then add a way to search for a lost target.
+
+\newpage
+{\LARGE\bfseries Then, fix motion and add recovery}\par
+\heading{Change 1: let the mask resize}
+\begin{center}
+\begin{tikzpicture}[b/.style={draw=green,rounded corners,align=center,text width=3.8cm,minimum height=1.15cm,font=\small},node distance=.65cm,arr/.style={-{Stealth},thick,green}]
+\node[b] (a) {Check optical flow\\forward and backward};
+\node[b,right=of a] (b) {Fit movement,\\rotation, and scale};
+\node[b,right=of b] (c) {Warp the mask, then\\refine with GrabCut};
+\draw[arr](a)--(b);\draw[arr](b)--(c);
+\end{tikzpicture}
+\end{center}
+The fit uses RANSAC to reject inconsistent motion points. This fixed the main scale
+failure: shrinking-scene IoU rose from \textbf{0.456 to 0.906} at 5-pixel slack.
+But occlusion IoU barely changed: \textbf{0.317 to 0.322}.
+
+\heading{Change 2: search when motion is unreliable}
+We kept the first target's color histogram and appearance template. When tracking
+became uncertain, the tracker searched at several scales instead of trusting the last mask.
+Similar competing matches were rejected. Scene-cut checks could also trigger review.
+
+\begin{tabularx}{\linewidth}{@{}Xrrr@{}}\toprule
+\textbf{Test / metric} & \textbf{Original} & \textbf{Scale fix} & \textbf{+ Recovery}\\\midrule
+Shrink: IoU & 0.456 & 0.906 & 0.906\\
+Occlusion: IoU & 0.317 & 0.322 & 0.589\\
+Occlusion: uncovered target & 50.0\% & 50.0\% & 18.3\%\\
+Cut: IoU & 0.440 & 0.456 & 0.911\\
+Cut: uncovered target & 49.8\% & 47.4\% & 0.0\%\\\bottomrule
+\end{tabularx}
+\captiontext{Same synthetic scenes, 5-pixel prompt slack. Overlap uses the raw mask;
+uncovered target is measured after the standard 4-pixel margin.}
+
+\heading{The real-video check changed the picture}
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}\toprule
+\textbf{Mean IoU} & \textbf{Original} & \textbf{Classical + recovery}\\\midrule
+Synthetic, all three prompt sizes & 0.495 & 0.812\\
+DAVIS subset & 0.298 & 0.310\\
+Crosswalk & 0.402 & 0.246\\\bottomrule
+\end{tabularx}
+The controlled tests looked much better. Real footage did not. A stored appearance
+could help after a clean cut, but changing poses and occlusion still broke tracking.
+On crosswalk, the added recovery was worse than the original tracker.
+
+\textbf{Next:} compare a video segmentation model, while keeping the classical version
+as a baseline. We also kept uncertain states visible in the review log instead of treating
+every returned mask as a successful track.
+
+\newpage
+{\LARGE\bfseries Try learned models, then check the misses}\par
+\heading{SAM 2: a much better real-video result}
+We added the official pretrained SAM 2.1 Tiny video model. It handles propagation;
+our code handles prompts, target IDs, corrections, rendering, and review.
+Frames and model state were offloaded to CPU memory to fit the 6 GB GPU.
+
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}\toprule
+\textbf{DAVIS subset} & \textbf{Classical + recovery} & \textbf{SAM 2}\\\midrule
+Mean IoU & 0.310 & 0.835\\
+Mean uncovered target & 47.67\% & 2.21\%\\
+Median propagation speed & 7.2 fps & 6.3 fps\\\bottomrule
+\end{tabularx}
+\captiontext{RTX 4050 Laptop GPU. Timing excludes loading and encoding; these are single local
+runs, not a controlled speed study. Both methods are slower than real-time 30 fps.}
+
+SAM 2 was not best everywhere. On the artificial pillar-occlusion test it left
+48.9\% of the visible target uncovered at 5-pixel slack. On DAVIS's
+\texttt{bmx-trees/1}, IoU was 0.443, much lower than its overall mean.
+
+\heading{ResNet recovery: an idea that did not help}
+We also replaced the classical appearance search with frozen ResNet-18 features.
+Motion and mask refinement stayed the same. This tested whether learned features
+would find the original target more reliably. No network was trained on these clips.
+\begin{center}\includegraphics[width=.94\linewidth]{figures/recovery.pdf}\end{center}
+\captiontext{DAVIS: 12 objects, two recovery variants. We also compared them on all four
+synthetic scenes at three prompt sizes and on crosswalk. The learned variant stayed experimental.}
+
+\heading{Covering the whole frame can hide a bad tracker}
+\begin{tabularx}{\linewidth}{@{}Xrr@{}}\toprule
+\textbf{Classical tracker on DAVIS} & \textbf{Raw mask} & \textbf{With safety cover}\\\midrule
+Uncovered target & 47.67\% & 9.29\%\\
+Extra frame area covered & 4.1\% & 58.3\%\\\bottomrule
+\end{tabularx}
+The safety policy covered whole uncertain frames. It reduced misses by hiding a lot
+more of the video. That is useful as a fallback, but it is not better tracking.
+\textbf{Next:} measure extra coverage as well as misses, and make corrections easy.
+
+\newpage
+{\LARGE\bfseries Make the tool easier to check and correct}\par
+\heading{Selection needed its own experiment}
+The box-versus-outline example on page 1 led to a more controlled comparison:
+six crosswalk labels, three prompt sizes, and three initialization methods.
+That gave 54 segmentations. Each method saw the same frame and prompt slack.
+
+\begin{tabularx}{\linewidth}{@{}Xrrr@{}}\toprule
+\textbf{Initialization} & \textbf{IoU} & \textbf{Missed target} & \textbf{Extra frame area}\\\midrule
+Original box & 0.620 & 14.92\% & 0.34\%\\
+Box with outline-style seeds & 0.537 & 0.06\% & 0.77\%\\
+Outline & 0.806 & 0.53\% & 0.24\%\\\bottomrule
+\end{tabularx}
+The seeded box missed the fewest pixels because it covered more background.
+The outline fit the target better. We kept both choices rather than treating
+the lowest miss rate as the only goal.
+
+\heading{Show the mask before exporting}
+\begin{center}\includegraphics[width=.72\linewidth]{figures/segmentation-preview.jpg}\end{center}
+\captiontext{Saved browser check: real SAM 2 preview with a 16-pixel margin.
+Green shows the selected person. Preview segments the current frame fresh;
+it does not replay the earlier tracking history.}
+
+\heading{Problems found while using it}
+{\small\begin{tabularx}{\linewidth}{@{}p{.38\linewidth}X@{}}\toprule
+\textbf{Problem} & \textbf{Change}\\\midrule
+Drawing after a fast seek could use the old frame. & Require the loaded image to match the selected frame.\\
+Focusing the canvas could scroll it during drawing. & Focus without scrolling; check that coordinates stay aligned.\\
+A target could leave but keep being tracked. & Add an explicit end-target action.\\
+Saved outlines could depend on missing image files. & Store the polygon coordinates in the replay download.\\
+A new selection could show an old preview. & Invalidate previews after edits and discard stale responses.\\\bottomrule
+\end{tabularx}}
+\captiontext{The saved review includes desktop/mobile checks and 26 passing local tests with
+optional model tests enabled. Browser file-chooser automation was blocked; the upload endpoint
+was tested separately. These are implementation checks, not a study of user effort.}

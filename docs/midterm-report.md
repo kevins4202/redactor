@@ -1,5 +1,7 @@
 # Redactor: midterm report draft
 
+The expanded visual draft is now available as [LaTeX](latex/midterm-report.tex) and [PDF](latex/midterm-report.pdf), revised November 19, 2026. The text below preserves the earlier draft.
+
 Prepared 11 October 2026 for the proposal's 20 November milestone. This is a
 working submission draft based on completed experiments, not a record that the
 midterm was submitted or that a TA meeting occurred. No course-specific length

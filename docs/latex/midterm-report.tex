@@ -1,0 +1,126 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.7in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,graphicx,xcolor,booktabs,tabularx,tikz,hyperref,fancyhdr}
+\usetikzlibrary{arrows.meta,positioning}
+\definecolor{green}{HTML}{267563}
+\definecolor{graytext}{HTML}{52606B}
+\hypersetup{colorlinks=true,urlcolor=green,linkcolor=green,pdftitle={Redactor: Midterm Report}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{7pt}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\emergencystretch}{2em}
+\pagestyle{fancy}\fancyhf{}\fancyfoot[L]{\small Redactor / CIS 5810}\fancyfoot[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\newcommand{\heading}[1]{\vspace{5pt}{\large\bfseries #1}\par}
+\newcommand{\captiontext}[1]{\par\vspace{3pt}{\small\color{graytext}#1\par}}
+\begin{document}
+{\LARGE\bfseries Redactor}\hfill Midterm report\\[4pt]
+{\large Select an object once. Keep it covered as it moves.}\\[3pt]
+{\small Draft revised November 19, 2026. Experiments run October 11, 2026.}
+
+We built a tool that tracks a selected object and covers it throughout a video.
+The hard part is keeping the whole object covered when it changes size, turns,
+or passes behind something. SAM 2 works best on our real videos, but it still misses pixels.
+
+\heading{How it works}
+\begin{center}
+\begin{tikzpicture}[node distance=0.35cm,box/.style={draw=green,rounded corners,align=center,text width=3.1cm,minimum height=1.2cm,font=\small},arr/.style={-{Stealth},thick,green}]
+\node[box] (a) {\textbf{Select}\\Draw a box or outline\\or enter a text prompt};
+\node[box,right=of a] (b) {\textbf{Track}\\Classical tracker\\or pretrained SAM 2};
+\node[box,right=of b] (c) {\textbf{Cover}\\Expand the mask\\and hide the object};
+\node[box,right=of c] (d) {\textbf{Review}\\Check the video\\and correct misses};
+\draw[arr] (a)--(b);\draw[arr] (b)--(c);\draw[arr] (c)--(d);
+\draw[arr] (d.south)--++(0,-.35)-| (b.south);
+\end{tikzpicture}
+\end{center}
+
+\heading{What we added}
+\begin{tabularx}{\linewidth}{@{}p{.25\linewidth}X@{}}\toprule
+\textbf{Started with} & GrabCut segmentation and optical flow that only moved the mask.\\
+\textbf{Built / changed} & Scale-aware motion, mask refinement, recovery search, cut checks, multiple targets, corrections, and the review/export UI.\\
+\textbf{Integrated} & Pretrained SAM 2 for segmentation and tracking; Grounding DINO for text, face, and plate prompts. We did not train these models.\\
+\textbf{Tested} & Original tracker vs. our classical changes vs. SAM 2; box vs. outline prompts; learned recovery; larger coverage margins.\\\bottomrule
+\end{tabularx}
+
+\heading{Why the selection shape matters}
+\begin{center}
+% One unchanged row from the saved comparison: frame 30, 9-pixel slack.
+\includegraphics[width=.91\linewidth,trim=0 1420 0 356,clip]{figures/prompt-ablation.jpg}
+\end{center}
+\captiontext{Frame 30: approximate label, box, box with outline-style seeds, and outline.
+Green is the selected mask. The box can include the person next to the target.
+Across six labeled frames and three prompt sizes, mean IoU was 0.620 for the original box,
+0.537 for the seeded box, and 0.806 for the outline. Prompts came from the labels;
+this does not measure how much effort a user saves.}
+
+\input{iterations.tex}
+\newpage
+{\LARGE\bfseries What worked}\par
+\heading{Three versions}
+\begin{tabularx}{\linewidth}{@{}p{.24\linewidth}X@{}}\toprule
+\textbf{1. Fix scale changes} & Fit rotation, translation, and scale from optical flow; refine the mask with GrabCut.\\
+\textbf{2. Try to recover} & Search for the original appearance when tracking fails. Flag cuts and uncertain frames.\\
+\textbf{3. Try SAM 2} & Use a pretrained video model for propagation; keep the same selection and review workflow.\\\bottomrule
+\end{tabularx}
+
+\begin{center}\includegraphics[width=.88\linewidth]{figures/results.pdf}\end{center}
+\captiontext{Overlap is measured before expanding the mask. Uncovered pixels are measured after
+a 9$\times$9 expansion kernel (4 pixels per side). Full-frame safety covers are excluded.
+Means give each object sequence equal weight; synthetic means also average three prompt sizes.}
+
+\textbf{Our classical changes helped the test scenes, but did not carry over well to real video.}
+On DAVIS, SAM 2 raised IoU from 0.298 to 0.835 and cut uncovered target pixels from 53.98\% to 2.21\%.
+The learned ResNet recovery experiment did not help: DAVIS IoU fell from 0.310 to 0.284.
+
+\heading{What we tested on}
+{\small\begin{tabularx}{\linewidth}{@{}p{.2\linewidth}Xp{.34\linewidth}@{}}\toprule
+ & \textbf{Data} & \textbf{Limit}\\\midrule
+Test scenes & 4 scenes, 90 frames each; 3 prompt sizes & Rebuilt fixture; used during development.\\
+DAVIS & 8 videos, 12 objects & Chosen subset, not the full benchmark.\\
+Crosswalk & 150 frames tracked; 6 frames scored & Approximate labels; gaps can hide misses.\\\bottomrule
+\end{tabularx}}
+\captiontext{All real-video comparisons use 5-pixel initial prompt slack. Later ground-truth masks
+are never fed into tracking. The proposal's original synthetic script was missing, so our rebuilt
+test scenes are not a reproduction of its original table.}
+
+\newpage
+{\LARGE\bfseries What still needs work}\par
+\heading{More coverage helps, but costs background}
+\begin{center}\includegraphics[width=\linewidth]{figures/margin.pdf}\end{center}
+\captiontext{Same saved SAM 2 masks on DAVIS; only the added margin changes.
+The two percentages have different denominators: target area on the left, whole-frame area on the right.}
+
+At a 16-pixel margin, average uncovered target area drops to 0.74\%, but the worst frame
+still leaves \textbf{25.15\%} uncovered. A bigger mask cannot fix a lost target.
+SAM 2 also raised no warnings on the crosswalk despite measured misses.
+
+\heading{The next three checks}
+\begin{tabularx}{\linewidth}{@{}p{.23\linewidth}Xp{.27\linewidth}@{}}\toprule
+\textbf{Problem} & \textbf{Next step} & \textbf{What to measure}\\\midrule
+We only scored six crosswalk frames. & Label every frame, then have another person check the labels. & Worst miss and longest uncovered streak.\\
+The tracker can miss pixels without warning. & Compare warnings with actual misses on separate clips. & Missed warnings and unnecessary warnings.\\
+Recovery struggles after occlusion. & Test repeated exits, reappearances, and similar-looking people. & Wrong-person matches and corrections needed.\\\bottomrule
+\end{tabularx}
+
+\heading{Where we are now}
+\begin{tabularx}{\linewidth}{@{}p{.2\linewidth}X@{}}\toprule
+\textbf{Working} & Selection, mask preview, multiple targets, corrections, coverage margins, video export, and replay/review logs.\\
+\textbf{Still limited} & Identity recovery, warning reliability, face/plate detection recall, and complete coverage. Users still need to review the video.\\\bottomrule
+\end{tabularx}
+
+\heading{Results and sources}
+{\small
+Numbers come from the saved October experiments, not a new run for this report.
+The repository contains the raw results and commands:\\
+\href{https://github.com/kevins4202/redactor/blob/main/docs/evaluation.md}{Evaluation steps}
+\quad\href{https://github.com/kevins4202/redactor/blob/main/docs/results.md}{Full result tables}
+\quad\href{https://github.com/kevins4202/redactor/blob/main/docs/proposal-followup.md}{Follow-up experiments}\\
+Models/data: \href{https://github.com/facebookresearch/sam2}{SAM 2},
+\href{https://github.com/IDEA-Research/GroundingDINO}{Grounding DINO},
+\href{https://davischallenge.org/davis2017/code.html}{DAVIS 2017},
+\href{https://docs.pytorch.org/vision/stable/models/generated/torchvision.models.resnet18.html}{ResNet-18}.
+
+Codex helped with code, experiments, analysis, and drafting. Team review is still needed.
+}
+\end{document}
